@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { supabase } from '@/lib/supabase'
+import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { Task, TaskWhen, TaskStatus } from '@/lib/types'
 import { Plus, Trash2, Pencil, Check, X } from 'lucide-react'
 
@@ -39,7 +39,7 @@ function sortTasks(tasks: Task[]): Task[] {
 export default function GestorPage() {
   const { user } = useAuth()
   const [tasks, setTasks] = useState<Task[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
   const [showForm, setShowForm] = useState(false)
 
   // New task state
@@ -57,7 +57,7 @@ export default function GestorPage() {
   const [editEstado, setEditEstado] = useState<TaskStatus>('por_hacer')
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !IS_SUPABASE_CONFIGURED) { setLoading(false); return }
     fetchTasks()
   }, [user])
 

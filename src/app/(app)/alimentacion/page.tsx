@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { supabase } from '@/lib/supabase'
+import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { FoodEntry, MealSection } from '@/lib/types'
 import { MEAL_LABELS } from '@/lib/types'
 import { Plus, Trash2, Search, X, ChevronDown, ChevronUp, Flame } from 'lucide-react'
@@ -18,12 +18,12 @@ export default function AlimentacionPage() {
   const { user } = useAuth()
   const today = new Date().toISOString().split('T')[0]
   const [entries, setEntries] = useState<FoodEntry[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
   const [openSection, setOpenSection] = useState<MealSection | null>('desayuno')
   const [addingTo, setAddingTo] = useState<MealSection | null>(null)
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !IS_SUPABASE_CONFIGURED) { setLoading(false); return }
     fetchEntries()
   }, [user])
 

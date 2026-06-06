@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
-import { supabase } from '@/lib/supabase'
+import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { Task, FoodEntry, Workout } from '@/lib/types'
 import { ArrowRight, Flame, Zap, TrendingUp } from 'lucide-react'
 
@@ -27,7 +27,7 @@ export default function HomePage() {
   const today = new Date().toISOString().split('T')[0]
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !IS_SUPABASE_CONFIGURED) return
     fetchTodayData()
   }, [user])
 

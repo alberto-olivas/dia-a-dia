@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { supabase } from '@/lib/supabase'
+import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { WorkoutType, Workout } from '@/lib/types'
 import { WORKOUT_TYPES } from '@/lib/types'
 import { Zap, Clock, Save, Trash2 } from 'lucide-react'
@@ -11,14 +11,14 @@ export default function EntrenoPage() {
   const { user } = useAuth()
   const today = new Date().toISOString().split('T')[0]
   const [workout, setWorkout] = useState<Workout | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
   const [saving, setSaving] = useState(false)
 
   const [selectedType, setSelectedType] = useState<WorkoutType>('boxeo_tecnica')
   const [duracion, setDuracion] = useState<number>(60)
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !IS_SUPABASE_CONFIGURED) return
     fetchWorkout()
   }, [user])
 
