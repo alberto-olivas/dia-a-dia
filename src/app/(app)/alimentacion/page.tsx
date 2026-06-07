@@ -454,7 +454,7 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Salmón crudo', nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
   { product_name: 'Atún lata al natural escurrido', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 26, carbohydrates_100g: 0, fat_100g: 1 } },
   { product_name: 'Huevo entero', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 12.6, carbohydrates_100g: 0.7, fat_100g: 9.5 } },
-  { product_name: 'Proteína whey', nutriments: { 'energy-kcal_100g': 400, proteins_100g: 80, carbohydrates_100g: 7, fat_100g: 6 } },
+  { product_name: 'Batido proteína HSN Evolate 2.0 Whey Isolate CFM', nutriments: { 'energy-kcal_100g': 383, proteins_100g: 90, carbohydrates_100g: 3.3, fat_100g: 1.7 } },
   { product_name: 'Arroz blanco cocido', nutriments: { 'energy-kcal_100g': 130, proteins_100g: 2.7, carbohydrates_100g: 28.2, fat_100g: 0.3 } },
   { product_name: 'Arroz integral cocido', nutriments: { 'energy-kcal_100g': 112, proteins_100g: 2.6, carbohydrates_100g: 23.5, fat_100g: 0.9 } },
   { product_name: 'Pasta cocida', nutriments: { 'energy-kcal_100g': 157, proteins_100g: 5.8, carbohydrates_100g: 30.9, fat_100g: 0.9 } },
