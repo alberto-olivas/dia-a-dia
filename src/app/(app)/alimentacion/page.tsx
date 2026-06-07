@@ -40,6 +40,7 @@ interface OFFProduct {
   product_name_es?: string
   nutriments: {
     'energy-kcal_100g'?: number
+    'energy-kj_100g'?: number
     proteins_100g?: number
     carbohydrates_100g?: number
     fat_100g?: number
@@ -446,9 +447,50 @@ interface FoodSearchPanelProps {
 
 const PORTION_PRESETS = [100, 150, 200, 250]
 
+// Common Spanish foods as instant offline fallback
+const LOCAL_FOODS: OFFProduct[] = [
+  { product_name: 'Pechuga de pollo', nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
+  { product_name: 'Muslo de pollo', nutriments: { 'energy-kcal_100g': 177, proteins_100g: 18, carbohydrates_100g: 0, fat_100g: 11 } },
+  { product_name: 'Pollo asado', nutriments: { 'energy-kcal_100g': 195, proteins_100g: 27, carbohydrates_100g: 0, fat_100g: 10 } },
+  { product_name: 'Arroz blanco', nutriments: { 'energy-kcal_100g': 360, proteins_100g: 7, carbohydrates_100g: 79, fat_100g: 0.6 } },
+  { product_name: 'Arroz integral', nutriments: { 'energy-kcal_100g': 349, proteins_100g: 7.5, carbohydrates_100g: 73, fat_100g: 2.7 } },
+  { product_name: 'Huevo entero', nutriments: { 'energy-kcal_100g': 147, proteins_100g: 13, carbohydrates_100g: 1.1, fat_100g: 10 } },
+  { product_name: 'Clara de huevo', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 11, carbohydrates_100g: 0.7, fat_100g: 0.2 } },
+  { product_name: 'Plátano', nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 23, fat_100g: 0.3 } },
+  { product_name: 'Manzana', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 14, fat_100g: 0.2 } },
+  { product_name: 'Naranja', nutriments: { 'energy-kcal_100g': 43, proteins_100g: 0.9, carbohydrates_100g: 10, fat_100g: 0.1 } },
+  { product_name: 'Pasta espagueti', nutriments: { 'energy-kcal_100g': 352, proteins_100g: 12, carbohydrates_100g: 70, fat_100g: 1.5 } },
+  { product_name: 'Pan de trigo', nutriments: { 'energy-kcal_100g': 265, proteins_100g: 8, carbohydrates_100g: 50, fat_100g: 3.2 } },
+  { product_name: 'Leche entera', nutriments: { 'energy-kcal_100g': 61, proteins_100g: 3.2, carbohydrates_100g: 4.7, fat_100g: 3.3 } },
+  { product_name: 'Yogur natural', nutriments: { 'energy-kcal_100g': 59, proteins_100g: 3.5, carbohydrates_100g: 4.7, fat_100g: 3.3 } },
+  { product_name: 'Queso fresco', nutriments: { 'energy-kcal_100g': 110, proteins_100g: 14, carbohydrates_100g: 3.5, fat_100g: 4.5 } },
+  { product_name: 'Ternera magra', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 6.5 } },
+  { product_name: 'Salmón', nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
+  { product_name: 'Atún en agua', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 25, carbohydrates_100g: 0, fat_100g: 1.0 } },
+  { product_name: 'Lentejas cocidas', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 9, carbohydrates_100g: 20, fat_100g: 0.4 } },
+  { product_name: 'Garbanzos cocidos', nutriments: { 'energy-kcal_100g': 164, proteins_100g: 9, carbohydrates_100g: 27, fat_100g: 2.6 } },
+  { product_name: 'Aceite de oliva', nutriments: { 'energy-kcal_100g': 884, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 100 } },
+  { product_name: 'Aguacate', nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 9, fat_100g: 15 } },
+  { product_name: 'Patata', nutriments: { 'energy-kcal_100g': 77, proteins_100g: 2, carbohydrates_100g: 17, fat_100g: 0.1 } },
+  { product_name: 'Tomate', nutriments: { 'energy-kcal_100g': 18, proteins_100g: 0.9, carbohydrates_100g: 3.9, fat_100g: 0.2 } },
+  { product_name: 'Lechuga', nutriments: { 'energy-kcal_100g': 15, proteins_100g: 1.4, carbohydrates_100g: 2.8, fat_100g: 0.2 } },
+  { product_name: 'Almendras', nutriments: { 'energy-kcal_100g': 579, proteins_100g: 21, carbohydrates_100g: 22, fat_100g: 49 } },
+  { product_name: 'Avena', nutriments: { 'energy-kcal_100g': 389, proteins_100g: 17, carbohydrates_100g: 66, fat_100g: 7 } },
+  { product_name: 'Jamón serrano', nutriments: { 'energy-kcal_100g': 241, proteins_100g: 30, carbohydrates_100g: 0.5, fat_100g: 13 } },
+  { product_name: 'Chorizo', nutriments: { 'energy-kcal_100g': 455, proteins_100g: 25, carbohydrates_100g: 2, fat_100g: 40 } },
+  { product_name: 'Tortilla española', nutriments: { 'energy-kcal_100g': 185, proteins_100g: 10, carbohydrates_100g: 10, fat_100g: 12 } },
+]
+
+// Extracts kcal per 100g handling both kcal and kJ fields
+function extractKcal(n: OFFProduct['nutriments']): number {
+  if (n['energy-kcal_100g']) return Math.round(n['energy-kcal_100g'])
+  if (n['energy-kj_100g']) return Math.round(n['energy-kj_100g'] / 4.184)
+  return 0
+}
+
 function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<OFFProduct[]>([])
+  const [apiResults, setApiResults] = useState<OFFProduct[]>([])
   const [searching, setSearching] = useState(false)
   const [selected, setSelected] = useState<OFFProduct | null>(null)
   const [gramos, setGramos] = useState<number>(100)
@@ -457,6 +499,20 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
 
   useEffect(() => { inputRef.current?.focus() }, [])
 
+  // Local matches are instant (no debounce)
+  const localMatches = query.trim()
+    ? LOCAL_FOODS.filter((f) =>
+        f.product_name.toLowerCase().includes(query.toLowerCase())
+      )
+    : []
+
+  // Deduplicate: skip API results whose name is already in local matches
+  const localNames = new Set(localMatches.map((f) => f.product_name.toLowerCase()))
+  const uniqueApiResults = apiResults.filter(
+    (p) => !(localNames.has((p.product_name_es || p.product_name || '').toLowerCase()))
+  )
+  const results = [...localMatches, ...uniqueApiResults].slice(0, 8)
+
   function getDisplayName(p: OFFProduct) {
     return p.product_name_es || p.product_name || '—'
   }
@@ -464,30 +520,29 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   function handleQueryChange(q: string) {
     setQuery(q)
     setSelected(null)
+    setApiResults([])
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (!q.trim()) { setResults([]); return }
+    if (!q.trim()) return
 
     debounceRef.current = setTimeout(async () => {
       setSearching(true)
       try {
         const res = await fetch(
-          `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&lc=es&cc=es&json=1&page_size=10&fields=product_name,product_name_es,nutriments&search_simple=1&action=process`
+          `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&lc=es&json=1&page_size=12&fields=product_name,product_name_es,nutriments&search_simple=1&action=process`
         )
         const json = await res.json()
         const products = (json.products ?? []).filter(
-          (p: OFFProduct) =>
-            (p.product_name_es || p.product_name) &&
-            p.nutriments?.['energy-kcal_100g']
+          (p: OFFProduct) => (p.product_name_es || p.product_name) && extractKcal(p.nutriments) > 0
         )
-        setResults(products.slice(0, 8))
+        setApiResults(products.slice(0, 8))
       } catch {
-        setResults([])
+        setApiResults([])
       }
       setSearching(false)
-    }, 500)
+    }, 600)
   }
 
-  const kcalPer100 = selected?.nutriments?.['energy-kcal_100g'] ?? 0
+  const kcalPer100 = selected ? extractKcal(selected.nutriments) : 0
   const prot100 = selected?.nutriments?.proteins_100g ?? 0
   const carbs100 = selected?.nutriments?.carbohydrates_100g ?? 0
   const fat100 = selected?.nutriments?.fat_100g ?? 0
