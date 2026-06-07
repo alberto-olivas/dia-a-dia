@@ -23,8 +23,8 @@ export default function AuthPage() {
 
   function translateError(err: { message: string }): string {
     const msg = err.message.toLowerCase()
-    if (msg.includes('failed to fetch') || msg.includes('fetch')) {
-      return 'Error de conexión. Revisa que las credenciales de Supabase estén configuradas en .env.local'
+    if (msg.includes('failed to fetch') || msg.includes('load failed') || msg.includes('network')) {
+      return 'Error de red. Comprueba tu conexión e inténtalo de nuevo.'
     }
     if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
       return 'Email o contraseña incorrectos'
@@ -72,7 +72,7 @@ export default function AuthPage() {
         }
       }
     } catch (err) {
-      setError('Error de conexión. Asegúrate de que .env.local tiene las credenciales de Supabase correctas')
+      setError('Error de red. Comprueba tu conexión e inténtalo de nuevo.')
     }
 
     setSubmitting(false)
