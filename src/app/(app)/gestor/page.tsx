@@ -75,7 +75,15 @@ export default function GestorPage() {
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    if (!user || !IS_SUPABASE_CONFIGURED) { setLoading(false); return }
+    if (!user) return
+    if (!IS_SUPABASE_CONFIGURED) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('demo_tasks') ?? '[]')
+        setTasks(saved)
+      } catch {}
+      setLoading(false)
+      return
+    }
     fetchTasks()
     fetchWeeklyData()
   }, [user])
@@ -124,7 +132,9 @@ export default function GestorPage() {
         estado: newEstado,
         fecha_creacion: new Date().toISOString(),
       }
-      setTasks((t) => [newTask, ...t])
+      const saved = [newTask, ...tasks]
+      setTasks(saved)
+      localStorage.setItem('demo_tasks', JSON.stringify(saved))
       setNewNombre('')
       setNewCuando('hoy')
       setNewFechaObj('')
@@ -152,6 +162,12 @@ export default function GestorPage() {
   }
 
   async function deleteTask(id: string) {
+    if (!IS_SUPABASE_CONFIGURED) {
+      const saved = tasks.filter((x) => x.id !== id)
+      setTasks(saved)
+      localStorage.setItem('demo_tasks', JSON.stringify(saved))
+      return
+    }
     await supabase.from('tasks').delete().eq('id', id)
     setTasks((t) => t.filter((x) => x.id !== id))
   }
@@ -166,13 +182,15 @@ export default function GestorPage() {
 
   async function saveEdit(id: string) {
     if (!IS_SUPABASE_CONFIGURED) {
-      setTasks((t) => t.map((x) => x.id === id ? {
+      const saved = tasks.map((x) => x.id === id ? {
         ...x,
         nombre: editNombre,
         cuando: editCuando,
         fecha_objetivo: editCuando === 'fecha' ? editFechaObj || null : null,
         estado: editEstado,
-      } : x))
+      } : x)
+      setTasks(saved)
+      localStorage.setItem('demo_tasks', JSON.stringify(saved))
       setEditId(null)
       return
     }
@@ -188,7 +206,9 @@ export default function GestorPage() {
 
   async function quickStatusChange(task: Task, newStatus: TaskStatus) {
     if (!IS_SUPABASE_CONFIGURED) {
-      setTasks((t) => t.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x))
+      const saved = tasks.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x)
+      setTasks(saved)
+      localStorage.setItem('demo_tasks', JSON.stringify(saved))
       return
     }
     const { data } = await supabase.from('tasks').update({ estado: newStatus }).eq('id', task.id).select().single()

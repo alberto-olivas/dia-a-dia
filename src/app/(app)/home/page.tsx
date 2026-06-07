@@ -55,9 +55,37 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    if (!user || !IS_SUPABASE_CONFIGURED) return
+    if (!user) return
+    if (!IS_SUPABASE_CONFIGURED) { loadDemoData(); return }
     fetchTodayData()
   }, [user])
+
+  function loadDemoData() {
+    try {
+      const allTasks = JSON.parse(localStorage.getItem('demo_tasks') ?? '[]') as Task[]
+      setPendingTasks(allTasks.filter((t) => {
+        if (t.estado === 'terminada') return false
+        if (t.cuando === 'hoy') return true
+        if (t.cuando === 'fecha' && t.fecha_objetivo === today) return true
+        return false
+      }))
+      setDoneTasks(allTasks.filter((t) => {
+        if (t.estado !== 'terminada') return false
+        if (t.cuando === 'hoy') return true
+        if (t.cuando === 'fecha' && t.fecha_objetivo === today) return true
+        return false
+      }))
+    } catch {}
+    try {
+      const food = JSON.parse(localStorage.getItem(`demo_food_${today}`) ?? '[]') as Array<{ calorias: number }>
+      const w = JSON.parse(localStorage.getItem(`demo_workout_${today}`) ?? 'null')
+      setCalories({
+        consumed: food.reduce((s, f) => s + f.calorias, 0),
+        burned: w?.calorias_quemadas ?? 0,
+      })
+      setWorkout(w)
+    } catch {}
+  }
 
   async function fetchTodayData() {
     const [{ data: tasks }, { data: food }, { data: workouts }] = await Promise.all([

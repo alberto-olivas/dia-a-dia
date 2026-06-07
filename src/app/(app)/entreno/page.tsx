@@ -65,7 +65,19 @@ export default function EntrenoPage() {
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    if (!user || !IS_SUPABASE_CONFIGURED) return
+    if (!user) return
+    if (!IS_SUPABASE_CONFIGURED) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(`demo_workout_${today}`) ?? 'null')
+        if (saved) {
+          setWorkout(saved)
+          setSelectedType(saved.tipo as WorkoutType)
+          setDuracion(saved.duracion_minutos || 60)
+        }
+      } catch {}
+      setLoading(false)
+      return
+    }
     fetchWorkout()
     fetchWeeklyData()
   }, [user])
@@ -129,7 +141,9 @@ export default function EntrenoPage() {
     }
 
     if (!IS_SUPABASE_CONFIGURED) {
-      setWorkout({ id: workout?.id ?? crypto.randomUUID(), ...payload } as Workout)
+      const saved = { id: workout?.id ?? crypto.randomUUID(), ...payload } as Workout
+      setWorkout(saved)
+      localStorage.setItem(`demo_workout_${today}`, JSON.stringify(saved))
       setSaving(false)
       return
     }
@@ -146,6 +160,13 @@ export default function EntrenoPage() {
 
   async function deleteWorkout() {
     if (!workout) return
+    if (!IS_SUPABASE_CONFIGURED) {
+      localStorage.removeItem(`demo_workout_${today}`)
+      setWorkout(null)
+      setSelectedType('boxeo_tecnica')
+      setDuracion(60)
+      return
+    }
     await supabase.from('workouts').delete().eq('id', workout.id)
     setWorkout(null)
     setSelectedType('boxeo_tecnica')

@@ -37,7 +37,13 @@ function getLast7Days(): Array<{ date: string; label: string }> {
 
 interface OFFProduct {
   product_name: string
-  nutriments: { 'energy-kcal_100g'?: number }
+  product_name_es?: string
+  nutriments: {
+    'energy-kcal_100g'?: number
+    proteins_100g?: number
+    carbohydrates_100g?: number
+    fat_100g?: number
+  }
 }
 
 export default function AlimentacionPage() {
@@ -67,7 +73,15 @@ export default function AlimentacionPage() {
   }
 
   useEffect(() => {
-    if (!user || !IS_SUPABASE_CONFIGURED) { setLoading(false); return }
+    if (!user) return
+    if (!IS_SUPABASE_CONFIGURED) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(`demo_food_${today}`) ?? '[]')
+        setEntries(saved)
+      } catch {}
+      setLoading(false)
+      return
+    }
     fetchEntries()
     fetchWeeklyData()
   }, [user])
@@ -101,6 +115,12 @@ export default function AlimentacionPage() {
   }
 
   async function deleteEntry(id: string) {
+    if (!IS_SUPABASE_CONFIGURED) {
+      const saved = entries.filter((x) => x.id !== id)
+      setEntries(saved)
+      localStorage.setItem(`demo_food_${today}`, JSON.stringify(saved))
+      return
+    }
     await supabase.from('food_entries').delete().eq('id', id)
     setEntries((e) => e.filter((x) => x.id !== id))
   }
@@ -117,7 +137,9 @@ export default function AlimentacionPage() {
         calorias: kcal,
         timestamp: new Date().toISOString(),
       }
-      setEntries((e) => [...e, newEntry])
+      const saved = [...entries, newEntry]
+      setEntries(saved)
+      localStorage.setItem(`demo_food_${today}`, JSON.stringify(saved))
       setAddingTo(null)
       return
     }
@@ -422,16 +444,22 @@ interface FoodSearchPanelProps {
   onClose: () => void
 }
 
+const PORTION_PRESETS = [100, 150, 200, 250]
+
 function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<OFFProduct[]>([])
   const [searching, setSearching] = useState(false)
   const [selected, setSelected] = useState<OFFProduct | null>(null)
-  const [gramos, setGramos] = useState('100')
+  const [gramos, setGramos] = useState<number>(100)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { inputRef.current?.focus() }, [])
+
+  function getDisplayName(p: OFFProduct) {
+    return p.product_name_es || p.product_name || '—'
+  }
 
   function handleQueryChange(q: string) {
     setQuery(q)
@@ -443,11 +471,13 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
       setSearching(true)
       try {
         const res = await fetch(
-          `https://es.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&json=1&page_size=8&fields=product_name,nutriments&search_simple=1&action=process&lc=es&cc=es`
+          `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&lc=es&cc=es&json=1&page_size=10&fields=product_name,product_name_es,nutriments&search_simple=1&action=process`
         )
         const json = await res.json()
         const products = (json.products ?? []).filter(
-          (p: OFFProduct) => p.product_name && p.nutriments?.['energy-kcal_100g']
+          (p: OFFProduct) =>
+            (p.product_name_es || p.product_name) &&
+            p.nutriments?.['energy-kcal_100g']
         )
         setResults(products.slice(0, 8))
       } catch {
@@ -458,16 +488,23 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   }
 
   const kcalPer100 = selected?.nutriments?.['energy-kcal_100g'] ?? 0
-  const gramsNum = parseFloat(gramos) || 0
-  const totalKcal = Math.round((kcalPer100 * gramsNum) / 100)
+  const prot100 = selected?.nutriments?.proteins_100g ?? 0
+  const carbs100 = selected?.nutriments?.carbohydrates_100g ?? 0
+  const fat100 = selected?.nutriments?.fat_100g ?? 0
+  const factor = gramos / 100
+  const totalKcal = Math.round(kcalPer100 * factor)
+  const totalProt = (prot100 * factor).toFixed(1)
+  const totalCarbs = (carbs100 * factor).toFixed(1)
+  const totalFat = (fat100 * factor).toFixed(1)
 
   function handleAdd() {
-    if (!selected || gramsNum <= 0) return
-    onAdd(selected.product_name, gramsNum, totalKcal)
+    if (!selected || gramos <= 0) return
+    onAdd(getDisplayName(selected), gramos, totalKcal)
   }
 
   return (
     <div className="mt-3 p-4 rounded-2xl bg-gray-50">
+      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <span className="label-caps">Buscar alimento</span>
         <button onClick={onClose} className="text-gray-300 hover:text-gray-500">
@@ -475,13 +512,14 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
         </button>
       </div>
 
+      {/* Search input */}
       <div className="relative mb-3">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
         <input
           ref={inputRef}
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder="Ej: pollo pechuga, arroz, manzana..."
+          placeholder="Ej: pollo, arroz, huevo, plátano..."
           className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl"
         />
         {searching && (
@@ -489,53 +527,127 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
         )}
       </div>
 
+      {/* Results list */}
       {!selected && results.length > 0 && (
-        <div className="flex flex-col gap-1 mb-3 max-h-48 overflow-y-auto">
+        <div className="flex flex-col gap-1 mb-3 max-h-52 overflow-y-auto">
           {results.map((p, i) => (
             <button
               key={i}
-              onClick={() => setSelected(p)}
+              onClick={() => { setSelected(p); setGramos(100) }}
               className="text-left px-3 py-2.5 flex items-center justify-between rounded-xl bg-white"
             >
-              <span className="text-sm truncate pr-4 text-gray-700">{p.product_name}</span>
-              <span className="text-xs font-bold shrink-0" style={{ color: '#FF6B35' }}>
-                {Math.round(p.nutriments?.['energy-kcal_100g'] ?? 0)} kcal/100g
-              </span>
+              <div className="min-w-0 flex-1 pr-2">
+                <span className="text-sm font-semibold block truncate text-gray-800">
+                  {getDisplayName(p)}
+                </span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {p.nutriments.proteins_100g != null && (
+                    <span className="text-[10px] font-semibold" style={{ color: '#3B82F6' }}>
+                      P {p.nutriments.proteins_100g.toFixed(1)}g
+                    </span>
+                  )}
+                  {p.nutriments.carbohydrates_100g != null && (
+                    <span className="text-[10px] font-semibold" style={{ color: '#D97706' }}>
+                      HC {p.nutriments.carbohydrates_100g.toFixed(1)}g
+                    </span>
+                  )}
+                  {p.nutriments.fat_100g != null && (
+                    <span className="text-[10px] font-semibold" style={{ color: '#EF4444' }}>
+                      G {p.nutriments.fat_100g.toFixed(1)}g
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="text-sm font-black block" style={{ color: '#FF6B35' }}>
+                  {Math.round(p.nutriments?.['energy-kcal_100g'] ?? 0)}
+                </span>
+                <span className="text-[10px] text-gray-400">kcal/100g</span>
+              </div>
             </button>
           ))}
         </div>
       )}
 
+      {/* Selected product + portion picker */}
       {selected && (
         <div>
-          <div className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-white border-2" style={{ borderColor: '#FF6B35' }}>
-            <span className="text-sm font-semibold truncate pr-4 text-gray-800">{selected.product_name}</span>
-            <button onClick={() => { setSelected(null); setGramos('100') }} className="text-gray-300">
+          {/* Selected product chip */}
+          <div
+            className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-white border-2"
+            style={{ borderColor: '#FF6B35' }}
+          >
+            <span className="text-sm font-semibold truncate pr-4 text-gray-800">
+              {getDisplayName(selected)}
+            </span>
+            <button
+              onClick={() => { setSelected(null); setGramos(100) }}
+              className="text-gray-300 shrink-0"
+            >
               <X size={12} />
             </button>
           </div>
 
+          {/* Quick portion presets */}
+          <span className="label-caps block mb-2">Porción rápida</span>
+          <div className="flex gap-1.5 mb-3">
+            {PORTION_PRESETS.map((p) => (
+              <button
+                key={p}
+                onClick={() => setGramos(p)}
+                className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
+                style={{
+                  background: gramos === p ? '#1A1A1A' : '#FFFFFF',
+                  color: gramos === p ? '#FF6B35' : '#9CA3AF',
+                  border: gramos === p ? 'none' : '1.5px solid #E5E7EB',
+                }}
+              >
+                {p}g
+              </button>
+            ))}
+          </div>
+
+          {/* Custom amount + live kcal */}
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1">
               <label className="label-caps block mb-1">Cantidad (g)</label>
               <input
                 type="number"
-                value={gramos}
-                onChange={(e) => setGramos(e.target.value)}
+                value={gramos || ''}
+                onChange={(e) => setGramos(Math.max(0, parseInt(e.target.value) || 0))}
                 min="1"
-                className="w-full px-3 py-2.5 text-sm rounded-xl"
+                className="w-full px-3 py-2.5 text-sm rounded-xl text-center font-black"
+                style={{ color: '#FF6B35' }}
               />
             </div>
-            <div className="text-center">
-              <div className="label-caps mb-1">Calorías</div>
-              <div className="font-black text-2xl leading-none" style={{ color: '#FF6B35' }}>{totalKcal}</div>
+            <div className="text-center shrink-0">
+              <div className="label-caps mb-0.5">Calorías</div>
+              <div className="font-black text-3xl leading-none" style={{ color: '#FF6B35' }}>
+                {totalKcal}
+              </div>
               <div className="label-caps">kcal</div>
+            </div>
+          </div>
+
+          {/* Macro breakdown */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="text-center p-2 rounded-xl" style={{ background: '#EFF6FF' }}>
+              <div className="font-bold text-sm" style={{ color: '#3B82F6' }}>{totalProt}g</div>
+              <div className="label-caps mt-0.5">proteína</div>
+            </div>
+            <div className="text-center p-2 rounded-xl" style={{ background: '#FFFBEB' }}>
+              <div className="font-bold text-sm" style={{ color: '#D97706' }}>{totalCarbs}g</div>
+              <div className="label-caps mt-0.5">hidratos</div>
+            </div>
+            <div className="text-center p-2 rounded-xl" style={{ background: '#FEF2F2' }}>
+              <div className="font-bold text-sm" style={{ color: '#EF4444' }}>{totalFat}g</div>
+              <div className="label-caps mt-0.5">grasas</div>
             </div>
           </div>
 
           <button
             onClick={handleAdd}
-            disabled={gramsNum <= 0}
+            disabled={gramos <= 0}
             className="w-full py-3 rounded-xl text-xs font-bold tracking-widest uppercase disabled:opacity-40"
             style={{ background: '#FF6B35', color: '#fff' }}
           >
@@ -545,7 +657,9 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
       )}
 
       {query && !searching && results.length === 0 && !selected && (
-        <p className="text-xs py-3 text-center text-gray-400">Sin resultados para &quot;{query}&quot;</p>
+        <p className="text-xs py-3 text-center text-gray-400">
+          Sin resultados para &quot;{query}&quot;
+        </p>
       )}
     </div>
   )
