@@ -5,7 +5,12 @@ import { useAuth } from '@/lib/auth-context'
 import { useProfile } from '@/lib/profile-context'
 import { useTheme } from '@/lib/theme-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
-import { User, Cake, Weight, Ruler, Mail, Lock, Sun, Moon, Save, CheckCircle, AlertCircle } from 'lucide-react'
+import { User, Cake, Weight, Ruler, Mail, Lock, Sun, Moon, Save, CheckCircle, AlertCircle, Download, Smartphone, MonitorSmartphone } from 'lucide-react'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
 
 function calcAge(fechaNacimiento: string | null): string {
   if (!fechaNacimiento) return '—'
@@ -19,6 +24,12 @@ export default function AjustesPage() {
   const { user } = useAuth()
   const { profile, updateProfile } = useProfile()
   const { theme, toggleTheme } = useTheme()
+
+  // ── PWA install ───────────────────────────────────
+  const [isStandalone, setIsStandalone] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [installDone, setInstallDone] = useState(false)
 
   // ── Perfil fields ─────────────────────────────────
   const [nombre, setNombre] = useState('')
@@ -36,6 +47,24 @@ export default function AjustesPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordMsg, setPasswordMsg] = useState<Msg | null>(null)
   const [passwordSaving, setPasswordSaving] = useState(false)
+
+  useEffect(() => {
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches)
+    setIsIOS(/iPad|iPhone|iPod/i.test(navigator.userAgent))
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  async function handleInstall() {
+    if (!deferredPrompt) return
+    await deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    if (outcome === 'accepted') { setInstallDone(true); setDeferredPrompt(null) }
+  }
 
   // Sync profile values when loaded
   useEffect(() => {
@@ -290,6 +319,71 @@ export default function AjustesPage() {
               {passwordSaving ? 'Guardando...' : 'Cambiar contraseña'}
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* ── Sección: Instalar app ───────────────── */}
+      <section className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <MonitorSmartphone size={14} style={{ color: '#FF6B35' }} />
+          <span className="label-caps">Instalar app</span>
+        </div>
+        <div className="card p-5">
+          {isStandalone || installDone ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#F0FDF4' }}>
+                <CheckCircle size={18} style={{ color: '#16A34A' }} />
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color: 'var(--app-color)' }}>App instalada</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ya estás usando la versión instalada</p>
+              </div>
+            </div>
+          ) : isIOS ? (
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#FFF4EF' }}>
+                <Smartphone size={18} style={{ color: '#FF6B35' }} />
+              </div>
+              <div>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--app-color)' }}>Añadir a pantalla de inicio</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  En Safari pulsa el botón <span className="font-bold" style={{ color: 'var(--app-color)' }}>Compartir</span> →{' '}
+                  <span className="font-bold" style={{ color: 'var(--app-color)' }}>Añadir a pantalla de inicio</span>
+                </p>
+              </div>
+            </div>
+          ) : deferredPrompt ? (
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#FFF4EF' }}>
+                  <Download size={18} style={{ color: '#FF6B35' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: 'var(--app-color)' }}>Instalar en este dispositivo</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Acceso rápido, sin navegador</p>
+                </div>
+              </div>
+              <button
+                onClick={handleInstall}
+                className="shrink-0 px-4 py-2 rounded-xl font-bold text-xs tracking-widest uppercase"
+                style={{ background: '#FF6B35', color: '#ffffff' }}
+              >
+                Instalar
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--input-bg)' }}>
+                <Download size={18} style={{ color: 'var(--text-muted)' }} />
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color: 'var(--app-color)' }}>Instalar app</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  Abre esta página en Chrome o Edge y el botón de instalación aparecerá aquí
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
