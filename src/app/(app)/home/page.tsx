@@ -7,6 +7,7 @@ import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { Task, Workout } from '@/lib/types'
 import { WORKOUT_TYPES } from '@/lib/types'
 import { ArrowRight, Flame, Zap, CheckSquare, Dumbbell } from 'lucide-react'
+import { useProfile } from '@/lib/profile-context'
 
 const DAY_NAMES_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 const DAY_NAMES_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -42,6 +43,7 @@ function getUserName(email: string): string {
 
 export default function HomePage() {
   const { user } = useAuth()
+  const { profile } = useProfile()
   const [now, setNow] = useState(new Date())
   const [pendingTasks, setPendingTasks] = useState<Task[]>([])
   const [doneTasks, setDoneTasks] = useState<Task[]>([])
@@ -115,7 +117,7 @@ export default function HomePage() {
 
   const weekDays = getWeekDays(now)
   const greeting = getGreeting(now)
-  const userName = user ? getUserName(user.email ?? 'usuario') : 'Usuario'
+  const userName = profile?.nombre ?? (user ? getUserName(user.email ?? 'usuario') : 'Usuario')
   const totalTasks = pendingTasks.length + doneTasks.length
   const completionPct = totalTasks > 0 ? Math.round((doneTasks.length / totalTasks) * 100) : 0
 

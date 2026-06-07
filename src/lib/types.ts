@@ -33,6 +33,15 @@ export interface Workout {
   calorias_quemadas: number
 }
 
+export interface UserProfile {
+  id: string
+  user_id: string
+  nombre: string
+  fecha_nacimiento: string | null
+  peso: number | null
+  altura: number | null
+}
+
 export interface OpenFoodFactsProduct {
   product_name: string
   nutriments: {

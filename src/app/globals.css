@@ -10,16 +10,53 @@
   --color-muted-2: #6B7280;
 }
 
+/* ── Light / Dark mode CSS variables ─────────────── */
+html {
+  --app-bg: #EEEEF5;
+  --app-color: #1A1A1A;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #F3F4F6;
+  --nav-active-bg: #FFF4EF;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --card-border: rgba(255, 255, 255, 0.7);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
+  --input-bg: #FFFFFF;
+  --input-border: #E5E7EB;
+  --divider: #E5E7EB;
+  --text-muted: #9CA3AF;
+  --text-muted-2: #6B7280;
+  --scrollbar-track: #EEEEF5;
+  --scrollbar-thumb: #D1D5DB;
+}
+
+html[data-theme="dark"] {
+  --app-bg: #0F0F12;
+  --app-color: #F0F0F3;
+  --sidebar-bg: #111116;
+  --sidebar-border: #232329;
+  --nav-active-bg: #2A1A12;
+  --card-bg: rgba(26, 26, 31, 0.92);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255,255,255,0.04);
+  --input-bg: #1C1C21;
+  --input-border: #2E2E35;
+  --divider: #2A2A2F;
+  --text-muted: #6B7280;
+  --text-muted-2: #4B5563;
+  --scrollbar-track: #0F0F12;
+  --scrollbar-thumb: #2E2E35;
+}
+
 @layer base {
   html {
-    background-color: #EEEEF5;
-    color: #1A1A1A;
+    background-color: var(--app-bg);
+    color: var(--app-color);
     height: 100%;
   }
 
   body {
-    background-color: #EEEEF5;
-    color: #1A1A1A;
+    background-color: var(--app-bg);
+    color: var(--app-color);
     font-family: 'Barlow', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -28,25 +65,25 @@
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #EEEEF5; }
-  ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
   input, select, textarea {
-    background: #FFFFFF;
-    border: 1.5px solid #E5E7EB;
-    color: #1A1A1A;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    color: var(--app-color);
     font-family: inherit;
     transition: border-color 150ms ease;
   }
-  input::placeholder, textarea::placeholder { color: #9CA3AF; }
+  input::placeholder, textarea::placeholder { color: var(--text-muted); }
   input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #FF6B35;
   }
   select option {
-    background: #FFFFFF;
-    color: #1A1A1A;
+    background: var(--input-bg);
+    color: var(--app-color);
   }
 }
 
@@ -56,20 +93,20 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #9CA3AF;
+    color: var(--text-muted);
   }
 
   .card {
-    background-color: rgba(255, 255, 255, 0.88);
+    background-color: var(--card-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
   }
 
   .divider {
-    border-top: 1px solid #E5E7EB;
+    border-top: 1px solid var(--divider);
   }
 
   .pb-safe {

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Barlow } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
+import { ThemeProvider } from '@/lib/theme-context'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 
 const barlow = Barlow({
@@ -31,12 +32,25 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={barlow.variable}>
-      <body style={{ fontFamily: 'var(--font-barlow), Barlow, system-ui, sans-serif' }}>
-        <AuthProvider>
-          {children}
-          <ServiceWorkerRegistration />
-        </AuthProvider>
+    <html lang="es" className={barlow.variable} suppressHydrationWarning>
+      <head>
+        {/* Applies saved theme before first paint to avoid flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}`
+          }}
+        />
+      </head>
+      <body
+        style={{ fontFamily: 'var(--font-barlow), Barlow, system-ui, sans-serif' }}
+        suppressHydrationWarning
+      >
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <ServiceWorkerRegistration />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
