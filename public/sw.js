@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dia-a-dia-v2'
+const CACHE_NAME = 'dia-a-dia-v4'
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -19,7 +19,7 @@ self.addEventListener('activate', (event) => {
       )
     )
   )
-  // No clients.claim() — evita tomar control de páginas que están cargando
+  self.clients.claim()
 })
 
 self.addEventListener('fetch', (event) => {
