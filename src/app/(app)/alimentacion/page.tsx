@@ -166,7 +166,7 @@ export default function AlimentacionPage() {
       </header>
 
       {/* ── Calorie progress card ──────────────────── */}
-      <div className="card p-5 mb-4">
+      <div className="card p-5 mb-4" style={{ backgroundImage: 'radial-gradient(ellipse at 14% 16%, rgba(255,212,148,0.55) 0%, transparent 42%), radial-gradient(ellipse at 28% 52%, rgba(255,150,175,0.48) 0%, transparent 42%), radial-gradient(ellipse at 66% 65%, rgba(192,174,242,0.42) 0%, transparent 42%), radial-gradient(ellipse at 86% 86%, rgba(148,206,244,0.48) 0%, transparent 36%)' }}>
         <div className="flex items-end justify-between mb-3">
           <div>
             <span className="label-caps block mb-1">Total consumido</span>

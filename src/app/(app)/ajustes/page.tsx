@@ -141,7 +141,7 @@ export default function AjustesPage() {
           <User size={14} style={{ color: '#FF6B35' }} />
           <span className="label-caps">Tu perfil</span>
         </div>
-        <div className="card p-5 flex flex-col gap-4">
+        <div className="card p-5 flex flex-col gap-4" style={{ backgroundImage: 'radial-gradient(ellipse at 78% 16%, rgba(76,134,228,0.36) 0%, transparent 38%), radial-gradient(ellipse at 38% 48%, rgba(136,170,238,0.24) 0%, transparent 48%)' }}>
 
           {/* Nombre */}
           <div>
@@ -328,7 +328,7 @@ export default function AjustesPage() {
           <MonitorSmartphone size={14} style={{ color: '#FF6B35' }} />
           <span className="label-caps">Instalar app</span>
         </div>
-        <div className="card p-5">
+        <div className="card p-5" style={{ backgroundImage: 'radial-gradient(ellipse at 48% 42%, rgba(38,94,215,0.42) 0%, rgba(62,122,230,0.26) 28%, transparent 55%), radial-gradient(ellipse at 58% 28%, rgba(38,90,215,0.24) 0%, transparent 36%)' }}>
           {isStandalone || installDone ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#F0FDF4' }}>

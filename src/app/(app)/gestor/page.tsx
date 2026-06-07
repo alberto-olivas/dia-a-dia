@@ -245,7 +245,7 @@ export default function GestorPage() {
       </header>
 
       {/* ── Progress card ──────────────────────────── */}
-      <div className="card p-5 mb-4">
+      <div className="card p-5 mb-4" style={{ backgroundImage: 'radial-gradient(ellipse at 84% 6%, rgba(255,150,120,0.36) 0%, transparent 32%), radial-gradient(ellipse at 6% 22%, rgba(190,150,242,0.30) 0%, transparent 36%), radial-gradient(ellipse at 32% 82%, rgba(170,120,218,0.40) 0%, transparent 46%), radial-gradient(ellipse at 80% 92%, rgba(220,140,200,0.30) 0%, transparent 36%)' }}>
         <div className="flex items-center justify-between mb-3">
           <div>
             <span className="label-caps block mb-1">Progreso total</span>

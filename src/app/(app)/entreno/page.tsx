@@ -214,7 +214,7 @@ export default function EntrenoPage() {
         <>
           {/* ── Today's workout summary ─────────────── */}
           {workout && (
-            <div className="card p-5 mb-4">
+            <div className="card p-5 mb-4" style={{ backgroundImage: 'radial-gradient(ellipse at 6% 40%, rgba(255,175,140,0.44) 0%, transparent 36%), radial-gradient(ellipse at 44% 34%, rgba(170,150,232,0.50) 0%, rgba(255,130,190,0.35) 34%, transparent 58%), radial-gradient(ellipse at 88% 65%, rgba(130,156,244,0.44) 0%, rgba(150,196,244,0.35) 34%, transparent 55%)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center"

@@ -172,7 +172,7 @@ export default function HomePage() {
         {(() => {
           const net = calories.consumed - calories.workout - calories.steps - calories.sleep
           return (
-            <Link href="/alimentacion" className="card p-4 block">
+            <Link href="/alimentacion" className="card p-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 22% 28%, rgba(255,107,53,0.42) 0%, rgba(255,155,100,0.26) 42%, transparent 65%), radial-gradient(ellipse at 70% 75%, rgba(255,130,65,0.26) 0%, transparent 42%)' }}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
                   <Flame size={15} style={{ color: '#FF6B35' }} />
@@ -218,7 +218,7 @@ export default function HomePage() {
         })()}
 
         {/* Tareas */}
-        <Link href="/gestor" className="card p-4 block">
+        <Link href="/gestor" className="card p-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 72% 14%, rgba(95,215,188,0.48) 0%, rgba(48,198,165,0.32) 32%, transparent 58%), radial-gradient(ellipse at 38% 55%, rgba(55,190,165,0.28) 0%, transparent 48%), radial-gradient(ellipse at 12% 88%, rgba(118,162,222,0.26) 0%, transparent 36%)' }}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#F0FDF4' }}>
               <CheckSquare size={15} style={{ color: '#22C55E' }} />
@@ -239,7 +239,7 @@ export default function HomePage() {
       </div>
 
       {/* ── Workout card ─────────────────────────── */}
-      <Link href="/entreno" className="card p-4 flex items-center justify-between mb-4 block">
+      <Link href="/entreno" className="card p-4 flex items-center justify-between mb-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 18% 62%, rgba(255,100,28,0.36) 0%, rgba(255,148,58,0.22) 38%, transparent 65%), radial-gradient(ellipse at 82% 18%, rgba(98,82,212,0.30) 0%, rgba(48,120,212,0.20) 52%, transparent 72%), radial-gradient(ellipse at 88% 85%, rgba(0,196,175,0.22) 0%, transparent 42%)' }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
             <Dumbbell size={18} style={{ color: '#FF6B35' }} />
