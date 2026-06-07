@@ -23,16 +23,10 @@ export default function AuthPage() {
   }, [user, loading, router])
 
   useEffect(() => {
-    // Test direct connectivity to Supabase on mount
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    if (!url || url.includes('placeholder')) {
-      setConnStatus('error')
-      return
-    }
-    fetch(`${url}/auth/v1/settings`, {
-      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '' },
-    })
-      .then((r) => setConnStatus(r.ok ? 'ok' : 'error'))
+    // Test server-side connectivity (browser → /api/health → Supabase)
+    fetch('/api/health')
+      .then((r) => r.json())
+      .then((d) => setConnStatus(d.ok ? 'ok' : 'error'))
       .catch(() => setConnStatus('error'))
   }, [])
 
