@@ -4,73 +4,75 @@
   --color-accent: #FF6B35;
   --color-accent-hover: #e55a24;
   --color-surface: #FFFFFF;
-  --color-surface-2: #F5F5F7;
+  --color-surface-2: #EEEEF5;
   --color-border: #E8E8EE;
   --color-muted: #9CA3AF;
   --color-muted-2: #6B7280;
 }
 
-/* ─── Base ─────────────────────────────────────── */
+@layer base {
+  html {
+    background-color: #EEEEF5;
+    color: #1A1A1A;
+    height: 100%;
+  }
 
-html {
-  background-color: #F5F5F7;
-  color: #1A1A1A;
-  height: 100%;
+  body {
+    background-color: #EEEEF5;
+    color: #1A1A1A;
+    font-family: 'Barlow', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100%;
+    overscroll-behavior: none;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #EEEEF5; }
+  ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+  input, select, textarea {
+    background: #FFFFFF;
+    border: 1.5px solid #E5E7EB;
+    color: #1A1A1A;
+    font-family: inherit;
+    transition: border-color 150ms ease;
+  }
+  input::placeholder, textarea::placeholder { color: #9CA3AF; }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #FF6B35;
+  }
+  select option {
+    background: #FFFFFF;
+    color: #1A1A1A;
+  }
 }
 
-body {
-  background-color: #F5F5F7;
-  color: #1A1A1A;
-  font-family: 'Barlow', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100%;
-  overscroll-behavior: none;
-}
+@layer components {
+  .label-caps {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9CA3AF;
+  }
 
-/* ─── Scrollbar ─────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #F5F5F7; }
-::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+  .card {
+    background-color: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
+  }
 
-/* ─── Form elements ─────────────────────────────── */
-input, select, textarea {
-  background: #FFFFFF;
-  border: 1.5px solid #E5E7EB;
-  color: #1A1A1A;
-  font-family: inherit;
-  transition: border-color 150ms ease;
-}
-input::placeholder, textarea::placeholder { color: #9CA3AF; }
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #FF6B35;
-}
-select option {
-  background: #FFFFFF;
-  color: #1A1A1A;
-}
+  .divider {
+    border-top: 1px solid #E5E7EB;
+  }
 
-/* ─── Utility classes ───────────────────────────── */
-.label-caps {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #9CA3AF;
-}
-
-.card {
-  background: #FFFFFF;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
-}
-
-.divider {
-  border-top: 1px solid #E5E7EB;
-}
-
-.pb-safe {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }

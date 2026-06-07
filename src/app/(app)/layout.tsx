@@ -18,7 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F5F7' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#EEEEF5' }}>
         <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -27,12 +27,42 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F5F5F7' }}>
+    <div className="flex min-h-screen relative" style={{ background: '#EEEEF5' }}>
+      {/* Decorative gradient blobs */}
+      <div
+        aria-hidden
+        style={{
+          position: 'fixed', top: '-15%', right: '-15%',
+          width: '55vw', height: '55vw',
+          background: 'radial-gradient(circle, rgba(255,107,53,0.14) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          pointerEvents: 'none', zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: 'fixed', bottom: '5%', left: '-15%',
+          width: '45vw', height: '45vw',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          pointerEvents: 'none', zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: 'fixed', top: '40%', right: '10%',
+          width: '30vw', height: '30vw',
+          background: 'radial-gradient(circle, rgba(34,197,94,0.07) 0%, transparent 70%)',
+          filter: 'blur(50px)',
+          pointerEvents: 'none', zIndex: 0,
+        }}
+      />
+
       <Navigation />
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col min-h-screen">
-        {/* Content area with bottom padding for floating mobile nav */}
+      <main className="flex-1 flex flex-col min-h-screen relative" style={{ zIndex: 1 }}>
         <div className="flex-1 pb-28 md:pb-0">
           {children}
         </div>

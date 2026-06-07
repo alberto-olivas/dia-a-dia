@@ -113,6 +113,27 @@ export default function GestorPage() {
     e.preventDefault()
     if (!newNombre.trim()) return
     setSaving(true)
+
+    if (!IS_SUPABASE_CONFIGURED) {
+      const newTask: Task = {
+        id: crypto.randomUUID(),
+        user_id: user!.id,
+        nombre: newNombre.trim(),
+        cuando: newCuando,
+        fecha_objetivo: newCuando === 'fecha' ? newFechaObj || null : null,
+        estado: newEstado,
+        fecha_creacion: new Date().toISOString(),
+      }
+      setTasks((t) => [newTask, ...t])
+      setNewNombre('')
+      setNewCuando('hoy')
+      setNewFechaObj('')
+      setNewEstado('por_hacer')
+      setShowForm(false)
+      setSaving(false)
+      return
+    }
+
     const { data } = await supabase.from('tasks').insert({
       user_id: user!.id,
       nombre: newNombre.trim(),
@@ -144,6 +165,17 @@ export default function GestorPage() {
   }
 
   async function saveEdit(id: string) {
+    if (!IS_SUPABASE_CONFIGURED) {
+      setTasks((t) => t.map((x) => x.id === id ? {
+        ...x,
+        nombre: editNombre,
+        cuando: editCuando,
+        fecha_objetivo: editCuando === 'fecha' ? editFechaObj || null : null,
+        estado: editEstado,
+      } : x))
+      setEditId(null)
+      return
+    }
     const { data } = await supabase.from('tasks').update({
       nombre: editNombre,
       cuando: editCuando,
@@ -155,6 +187,10 @@ export default function GestorPage() {
   }
 
   async function quickStatusChange(task: Task, newStatus: TaskStatus) {
+    if (!IS_SUPABASE_CONFIGURED) {
+      setTasks((t) => t.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x))
+      return
+    }
     const { data } = await supabase.from('tasks').update({ estado: newStatus }).eq('id', task.id).select().single()
     if (data) setTasks((t) => t.map((x) => x.id === task.id ? data : x))
   }

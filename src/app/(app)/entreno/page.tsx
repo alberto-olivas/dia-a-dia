@@ -128,6 +128,12 @@ export default function EntrenoPage() {
       calorias_quemadas: isDescanso ? 0 : previewKcal,
     }
 
+    if (!IS_SUPABASE_CONFIGURED) {
+      setWorkout({ id: workout?.id ?? crypto.randomUUID(), ...payload } as Workout)
+      setSaving(false)
+      return
+    }
+
     if (workout) {
       const { data } = await supabase.from('workouts').update(payload).eq('id', workout.id).select().single()
       if (data) setWorkout(data)

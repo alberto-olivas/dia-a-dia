@@ -106,6 +106,21 @@ export default function AlimentacionPage() {
   }
 
   async function addEntry(section: MealSection, nombre: string, gramos: number, kcal: number) {
+    if (!IS_SUPABASE_CONFIGURED) {
+      const newEntry: FoodEntry = {
+        id: crypto.randomUUID(),
+        user_id: user!.id,
+        fecha: today,
+        apartado: section,
+        nombre_alimento: nombre,
+        cantidad_gramos: gramos,
+        calorias: kcal,
+        timestamp: new Date().toISOString(),
+      }
+      setEntries((e) => [...e, newEntry])
+      setAddingTo(null)
+      return
+    }
     const { data } = await supabase.from('food_entries').insert({
       user_id: user!.id,
       fecha: today,
@@ -217,7 +232,7 @@ export default function AlimentacionPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-2">
           <input
             type="number"
             value={steps || ''}
@@ -228,6 +243,20 @@ export default function AlimentacionPage() {
             style={{ color: '#3B82F6' }}
           />
           <span className="text-sm font-bold text-gray-400">pasos</span>
+        </div>
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-gray-300">0</span>
+          <input
+            type="range"
+            min="0"
+            max="25000"
+            step="500"
+            value={steps}
+            onChange={(e) => saveSteps(parseInt(e.target.value))}
+            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+            style={{ accentColor: '#3B82F6' }}
+          />
+          <span className="text-xs text-gray-300">25k</span>
         </div>
 
         {steps > 0 && (
@@ -414,7 +443,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
       setSearching(true)
       try {
         const res = await fetch(
-          `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&json=1&page_size=8&fields=product_name,nutriments&search_simple=1&action=process&lc=es`
+          `https://es.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&json=1&page_size=8&fields=product_name,nutriments&search_simple=1&action=process&lc=es&cc=es`
         )
         const json = await res.json()
         const products = (json.products ?? []).filter(
