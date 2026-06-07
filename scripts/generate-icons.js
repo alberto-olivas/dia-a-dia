@@ -4,6 +4,7 @@
 // Run: node scripts/generate-icons.js
 
 const { chromium } = require('playwright')
+const sharp = require('sharp')
 const path = require('path')
 const fs = require('fs')
 
@@ -132,10 +133,11 @@ async function main() {
 
   await browser.close()
 
-  // Write ICO (PNG-in-ICO, supported by all modern browsers)
+  // Next.js requires RGBA PNG inside the ICO container — convert with sharp
+  const rgbaPng = await sharp(faviconPng).ensureAlpha().png().toBuffer()
   const icoPath = path.join(APP_DIR, 'favicon.ico')
-  fs.writeFileSync(icoPath, wrapInIco(faviconPng, 32))
-  console.log(`✓  src/app/favicon.ico  (32×32)`)
+  fs.writeFileSync(icoPath, wrapInIco(rgbaPng, 32))
+  console.log(`✓  src/app/favicon.ico  (32×32, RGBA)`)
 
   console.log('\n✅ All icons generated successfully!\n')
 }
