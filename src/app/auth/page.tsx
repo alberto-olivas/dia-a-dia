@@ -14,6 +14,7 @@ export default function AuthPage() {
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [connStatus, setConnStatus] = useState<'checking' | 'ok' | 'error'>('checking')
 
   useEffect(() => {
     if (!loading && user) {
@@ -21,10 +22,24 @@ export default function AuthPage() {
     }
   }, [user, loading, router])
 
-  function translateError(err: { message: string }): string {
+  useEffect(() => {
+    // Test direct connectivity to Supabase on mount
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!url || url.includes('placeholder')) {
+      setConnStatus('error')
+      return
+    }
+    fetch(`${url}/auth/v1/settings`, {
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '' },
+    })
+      .then((r) => setConnStatus(r.ok ? 'ok' : 'error'))
+      .catch(() => setConnStatus('error'))
+  }, [])
+
+  function translateError(err: { message: string; status?: number }): string {
     const msg = err.message.toLowerCase()
-    if (msg.includes('failed to fetch') || msg.includes('load failed') || msg.includes('network')) {
-      return 'Error de red. Comprueba tu conexión e inténtalo de nuevo.'
+    if (msg.includes('failed to fetch') || msg.includes('load failed') || msg.includes('networkerror') || msg.includes('network request failed')) {
+      return `Error de red: tu navegador no puede conectar con el servidor (${err.message}). Prueba desde otra red o desactiva extensiones del navegador.`
     }
     if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
       return 'Email o contraseña incorrectos'
@@ -41,7 +56,7 @@ export default function AuthPage() {
     if (msg.includes('unable to validate email address')) {
       return 'El formato del email no es válido'
     }
-    return err.message
+    return `${err.message}${err.status ? ` (${err.status})` : ''}`
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,16 +78,15 @@ export default function AuthPage() {
         if (error) {
           setError(translateError(error))
         } else if (data.user && !data.session) {
-          // Email confirmation required
           setInfo('✓ Cuenta creada. Revisa tu email para confirmar tu cuenta y luego inicia sesión.')
           setMode('login')
         } else if (data.session) {
-          // Auto-confirmed (email confirmation disabled in Supabase)
           router.replace('/home')
         }
       }
-    } catch (err) {
-      setError('Error de red. Comprueba tu conexión e inténtalo de nuevo.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(`Error: ${msg}. Prueba desde otra red o desactiva extensiones del navegador.`)
     }
 
     setSubmitting(false)
@@ -141,6 +155,13 @@ export default function AuthPage() {
           </h1>
           <div className="w-8 h-1 mt-3" style={{ background: '#FF2D00' }} />
         </div>
+
+        {/* Connection status indicator */}
+        {connStatus === 'error' && (
+          <div className="mb-6 py-3 px-4 text-sm" style={{ background: 'rgba(255,45,0,0.1)', border: '1px solid #FF2D00', color: '#FF2D00' }}>
+            ⚠ Sin conexión al servidor. Comprueba tu red o prueba desde otro dispositivo/red.
+          </div>
+        )}
 
         {/* Form header */}
         <div className="mb-8">
