@@ -447,38 +447,44 @@ interface FoodSearchPanelProps {
 
 const PORTION_PRESETS = [100, 150, 200, 250]
 
-// Common Spanish foods as instant offline fallback
+// Base de datos personal de Alberto — máxima prioridad en búsquedas
 const LOCAL_FOODS: OFFProduct[] = [
-  { product_name: 'Pechuga de pollo', nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
-  { product_name: 'Muslo de pollo', nutriments: { 'energy-kcal_100g': 177, proteins_100g: 18, carbohydrates_100g: 0, fat_100g: 11 } },
-  { product_name: 'Pollo asado', nutriments: { 'energy-kcal_100g': 195, proteins_100g: 27, carbohydrates_100g: 0, fat_100g: 10 } },
-  { product_name: 'Arroz blanco', nutriments: { 'energy-kcal_100g': 360, proteins_100g: 7, carbohydrates_100g: 79, fat_100g: 0.6 } },
-  { product_name: 'Arroz integral', nutriments: { 'energy-kcal_100g': 349, proteins_100g: 7.5, carbohydrates_100g: 73, fat_100g: 2.7 } },
-  { product_name: 'Huevo entero', nutriments: { 'energy-kcal_100g': 147, proteins_100g: 13, carbohydrates_100g: 1.1, fat_100g: 10 } },
-  { product_name: 'Clara de huevo', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 11, carbohydrates_100g: 0.7, fat_100g: 0.2 } },
-  { product_name: 'Plátano', nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 23, fat_100g: 0.3 } },
-  { product_name: 'Manzana', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 14, fat_100g: 0.2 } },
-  { product_name: 'Naranja', nutriments: { 'energy-kcal_100g': 43, proteins_100g: 0.9, carbohydrates_100g: 10, fat_100g: 0.1 } },
-  { product_name: 'Pasta espagueti', nutriments: { 'energy-kcal_100g': 352, proteins_100g: 12, carbohydrates_100g: 70, fat_100g: 1.5 } },
-  { product_name: 'Pan de trigo', nutriments: { 'energy-kcal_100g': 265, proteins_100g: 8, carbohydrates_100g: 50, fat_100g: 3.2 } },
-  { product_name: 'Leche entera', nutriments: { 'energy-kcal_100g': 61, proteins_100g: 3.2, carbohydrates_100g: 4.7, fat_100g: 3.3 } },
-  { product_name: 'Yogur natural', nutriments: { 'energy-kcal_100g': 59, proteins_100g: 3.5, carbohydrates_100g: 4.7, fat_100g: 3.3 } },
-  { product_name: 'Queso fresco', nutriments: { 'energy-kcal_100g': 110, proteins_100g: 14, carbohydrates_100g: 3.5, fat_100g: 4.5 } },
-  { product_name: 'Ternera magra', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 6.5 } },
-  { product_name: 'Salmón', nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
-  { product_name: 'Atún en agua', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 25, carbohydrates_100g: 0, fat_100g: 1.0 } },
-  { product_name: 'Lentejas cocidas', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 9, carbohydrates_100g: 20, fat_100g: 0.4 } },
-  { product_name: 'Garbanzos cocidos', nutriments: { 'energy-kcal_100g': 164, proteins_100g: 9, carbohydrates_100g: 27, fat_100g: 2.6 } },
-  { product_name: 'Aceite de oliva', nutriments: { 'energy-kcal_100g': 884, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 100 } },
-  { product_name: 'Aguacate', nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 9, fat_100g: 15 } },
-  { product_name: 'Patata', nutriments: { 'energy-kcal_100g': 77, proteins_100g: 2, carbohydrates_100g: 17, fat_100g: 0.1 } },
+  { product_name: 'Pechuga de pollo cocinada', nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
+  { product_name: 'Ternera picada 10% grasa', nutriments: { 'energy-kcal_100g': 176, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 10 } },
+  { product_name: 'Salmón crudo', nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
+  { product_name: 'Atún lata al natural escurrido', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 26, carbohydrates_100g: 0, fat_100g: 1 } },
+  { product_name: 'Huevo entero', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 12.6, carbohydrates_100g: 0.7, fat_100g: 9.5 } },
+  { product_name: 'Proteína whey', nutriments: { 'energy-kcal_100g': 400, proteins_100g: 80, carbohydrates_100g: 7, fat_100g: 6 } },
+  { product_name: 'Arroz blanco cocido', nutriments: { 'energy-kcal_100g': 130, proteins_100g: 2.7, carbohydrates_100g: 28.2, fat_100g: 0.3 } },
+  { product_name: 'Arroz integral cocido', nutriments: { 'energy-kcal_100g': 112, proteins_100g: 2.6, carbohydrates_100g: 23.5, fat_100g: 0.9 } },
+  { product_name: 'Pasta cocida', nutriments: { 'energy-kcal_100g': 157, proteins_100g: 5.8, carbohydrates_100g: 30.9, fat_100g: 0.9 } },
+  { product_name: 'Copos de avena', nutriments: { 'energy-kcal_100g': 389, proteins_100g: 16.9, carbohydrates_100g: 66.3, fat_100g: 6.9 } },
+  { product_name: 'Tortita de arroz', nutriments: { 'energy-kcal_100g': 387, proteins_100g: 8, carbohydrates_100g: 81, fat_100g: 3 } },
+  { product_name: 'Tortilla de trigo / fajita', nutriments: { 'energy-kcal_100g': 310, proteins_100g: 8, carbohydrates_100g: 50, fat_100g: 8 } },
+  { product_name: 'Plátano', nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 22.8, fat_100g: 0.3 } },
+  { product_name: 'Manzana', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 13.8, fat_100g: 0.2 } },
+  { product_name: 'Yogur griego natural 0%', nutriments: { 'energy-kcal_100g': 59, proteins_100g: 10, carbohydrates_100g: 3.6, fat_100g: 0.4 } },
+  { product_name: 'Yogur griego natural entero', nutriments: { 'energy-kcal_100g': 97, proteins_100g: 9, carbohydrates_100g: 3.9, fat_100g: 5 } },
+  { product_name: 'Queso mozzarella rallado', nutriments: { 'energy-kcal_100g': 280, proteins_100g: 22, carbohydrates_100g: 3, fat_100g: 20 } },
+  { product_name: 'Bebida de soja sin azúcar', nutriments: { 'energy-kcal_100g': 33, proteins_100g: 3.3, carbohydrates_100g: 0.6, fat_100g: 1.8 } },
+  { product_name: 'Aceite de oliva virgen extra', nutriments: { 'energy-kcal_100g': 884, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 100 } },
+  { product_name: 'Aguacate', nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8.5, fat_100g: 14.7 } },
+  { product_name: 'Frutos secos variados', nutriments: { 'energy-kcal_100g': 607, proteins_100g: 20, carbohydrates_100g: 21, fat_100g: 54 } },
+  { product_name: 'Miel', nutriments: { 'energy-kcal_100g': 304, proteins_100g: 0.3, carbohydrates_100g: 82.4, fat_100g: 0 } },
   { product_name: 'Tomate', nutriments: { 'energy-kcal_100g': 18, proteins_100g: 0.9, carbohydrates_100g: 3.9, fat_100g: 0.2 } },
-  { product_name: 'Lechuga', nutriments: { 'energy-kcal_100g': 15, proteins_100g: 1.4, carbohydrates_100g: 2.8, fat_100g: 0.2 } },
-  { product_name: 'Almendras', nutriments: { 'energy-kcal_100g': 579, proteins_100g: 21, carbohydrates_100g: 22, fat_100g: 49 } },
-  { product_name: 'Avena', nutriments: { 'energy-kcal_100g': 389, proteins_100g: 17, carbohydrates_100g: 66, fat_100g: 7 } },
-  { product_name: 'Jamón serrano', nutriments: { 'energy-kcal_100g': 241, proteins_100g: 30, carbohydrates_100g: 0.5, fat_100g: 13 } },
-  { product_name: 'Chorizo', nutriments: { 'energy-kcal_100g': 455, proteins_100g: 25, carbohydrates_100g: 2, fat_100g: 40 } },
-  { product_name: 'Tortilla española', nutriments: { 'energy-kcal_100g': 185, proteins_100g: 10, carbohydrates_100g: 10, fat_100g: 12 } },
+  { product_name: 'Pepino', nutriments: { 'energy-kcal_100g': 15, proteins_100g: 0.7, carbohydrates_100g: 3.6, fat_100g: 0.1 } },
+  { product_name: 'Pepinillos encurtidos', nutriments: { 'energy-kcal_100g': 12, proteins_100g: 0.5, carbohydrates_100g: 2.4, fat_100g: 0.2 } },
+  { product_name: 'Aceitunas verdes', nutriments: { 'energy-kcal_100g': 145, proteins_100g: 1, carbohydrates_100g: 3.8, fat_100g: 15.3 } },
+  { product_name: 'Cebolla', nutriments: { 'energy-kcal_100g': 40, proteins_100g: 1.1, carbohydrates_100g: 9.3, fat_100g: 0.1 } },
+  { product_name: 'Pimiento', nutriments: { 'energy-kcal_100g': 31, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.3 } },
+  { product_name: 'Zumo de limón', nutriments: { 'energy-kcal_100g': 22, proteins_100g: 0.4, carbohydrates_100g: 6.9, fat_100g: 0.2 } },
+  { product_name: 'Jengibre en polvo', nutriments: { 'energy-kcal_100g': 335, proteins_100g: 9, carbohydrates_100g: 72, fat_100g: 4.2 } },
+  { product_name: 'Verduras para caldo', nutriments: { 'energy-kcal_100g': 35, proteins_100g: 1.5, carbohydrates_100g: 7, fat_100g: 0.2 } },
+  { product_name: 'Salmorejo casero', nutriments: { 'energy-kcal_100g': 95, proteins_100g: 2, carbohydrates_100g: 8, fat_100g: 6 } },
+  { product_name: 'Base pizza yogur + huevo', nutriments: { 'energy-kcal_100g': 130, proteins_100g: 10, carbohydrates_100g: 10, fat_100g: 5 } },
+  { product_name: 'Creatina monohidrato', nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
+  { product_name: 'Citrulina malato', nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
+  { product_name: 'Café solo', nutriments: { 'energy-kcal_100g': 1, proteins_100g: 0.1, carbohydrates_100g: 0, fat_100g: 0 } },
 ]
 
 // Extracts kcal per 100g handling both kcal and kJ fields
@@ -505,6 +511,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
         f.product_name.toLowerCase().includes(query.toLowerCase())
       )
     : []
+  const localMatchNames = new Set(localMatches.map((f) => f.product_name.toLowerCase()))
 
   // Deduplicate: skip API results whose name is already in local matches
   const localNames = new Set(localMatches.map((f) => f.product_name.toLowerCase()))
@@ -592,10 +599,15 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
               className="text-left px-3 py-2.5 flex items-center justify-between rounded-xl bg-white"
             >
               <div className="min-w-0 flex-1 pr-2">
-                <span className="text-sm font-semibold block truncate text-gray-800">
-                  {getDisplayName(p)}
-                </span>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-sm font-semibold truncate text-gray-800">
+                    {getDisplayName(p)}
+                  </span>
+                  {localMatchNames.has(p.product_name.toLowerCase()) && (
+                    <span className="shrink-0 text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: '#FFF5F0', color: '#FF6B35' }}>★ mi base</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
                   {p.nutriments.proteins_100g != null && (
                     <span className="text-[10px] font-semibold" style={{ color: '#3B82F6' }}>
                       P {p.nutriments.proteins_100g.toFixed(1)}g
