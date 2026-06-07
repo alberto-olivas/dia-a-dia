@@ -662,26 +662,45 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
             ))}
           </div>
 
-          {/* Custom amount + live kcal */}
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1">
-              <label className="label-caps block mb-1">Cantidad (g)</label>
-              <input
-                type="number"
-                value={gramos || ''}
-                onChange={(e) => setGramos(Math.max(0, parseInt(e.target.value) || 0))}
-                min="1"
-                className="w-full px-3 py-2.5 text-sm rounded-xl text-center font-black"
-                style={{ color: '#FF6B35' }}
-              />
-            </div>
-            <div className="text-center shrink-0">
-              <div className="label-caps mb-0.5">Calorías</div>
-              <div className="font-black text-3xl leading-none" style={{ color: '#FF6B35' }}>
-                {totalKcal}
+          {/* Gramos slider + input sincronizados */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="label-caps">Cantidad manual</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  value={gramos || ''}
+                  onChange={(e) => setGramos(Math.min(500, Math.max(0, parseInt(e.target.value) || 0)))}
+                  min="0"
+                  max="500"
+                  className="w-16 px-2 py-1 text-sm rounded-lg text-center font-black"
+                  style={{ color: '#FF6B35' }}
+                />
+                <span className="text-xs text-gray-400 font-semibold">g</span>
               </div>
-              <div className="label-caps">kcal</div>
             </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-gray-300">0</span>
+              <input
+                type="range"
+                min="0"
+                max="500"
+                step="5"
+                value={gramos}
+                onChange={(e) => setGramos(parseInt(e.target.value))}
+                className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                style={{ accentColor: '#FF6B35' }}
+              />
+              <span className="text-[10px] text-gray-300">500g</span>
+            </div>
+          </div>
+
+          {/* Live kcal */}
+          <div className="flex items-center justify-center gap-2 mb-3 py-2.5 rounded-xl" style={{ background: '#FFF5F0' }}>
+            <div className="font-black text-3xl leading-none" style={{ color: '#FF6B35' }}>
+              {totalKcal}
+            </div>
+            <div className="label-caps">kcal</div>
           </div>
 
           {/* Macro breakdown */}
