@@ -60,11 +60,18 @@ export default function AuthPage() {
     setSubmitting(true)
 
     try {
-      // Use server-side proxy to avoid browser fetch restrictions
+      // Use server-side proxy — browser provides the public Supabase URL/key
+      // so the server doesn't depend on potentially-corrupted env vars
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: mode === 'login' ? 'signin' : 'signup', email, password }),
+        body: JSON.stringify({
+          action: mode === 'login' ? 'signin' : 'signup',
+          email,
+          password,
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+          supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        }),
       })
 
       const data = await res.json()
