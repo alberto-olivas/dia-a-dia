@@ -66,27 +66,35 @@ export default function AuthPage() {
     setSubmitting(true)
 
     try {
-      if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) {
-          setError(translateError(error))
-        } else {
-          router.replace('/home')
-        }
+      // Use server-side proxy to avoid browser fetch restrictions
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: mode === 'login' ? 'signin' : 'signup', email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || data.error || data.error_code || data.msg) {
+        const errMsg = data.msg || data.error?.message || data.error || 'Error desconocido'
+        setError(translateError({ message: errMsg, status: res.status }))
+      } else if (data.access_token) {
+        // Session returned — set it in the Supabase client
+        await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        })
+        router.replace('/home')
+      } else if (mode === 'register' && data.id) {
+        // Signup without immediate session (email confirmation needed)
+        setInfo('✓ Cuenta creada. Revisa tu email para confirmar tu cuenta y luego inicia sesión.')
+        setMode('login')
       } else {
-        const { data, error } = await supabase.auth.signUp({ email, password })
-        if (error) {
-          setError(translateError(error))
-        } else if (data.user && !data.session) {
-          setInfo('✓ Cuenta creada. Revisa tu email para confirmar tu cuenta y luego inicia sesión.')
-          setMode('login')
-        } else if (data.session) {
-          router.replace('/home')
-        }
+        setError('Respuesta inesperada del servidor. Inténtalo de nuevo.')
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      setError(`Error: ${msg}. Prueba desde otra red o desactiva extensiones del navegador.`)
+      setError(`Error de conexión: ${msg}`)
     }
 
     setSubmitting(false)
