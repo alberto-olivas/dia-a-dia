@@ -15,6 +15,10 @@ const barlow = Barlow({
 export const metadata: Metadata = {
   title: 'Día a Día',
   description: 'Tu compañero de seguimiento diario',
+  icons: {
+    icon: [{ url: '/icon-192x192.png', type: 'image/png' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
