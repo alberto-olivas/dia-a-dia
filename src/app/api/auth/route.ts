@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import https from 'node:https'
 
+// Strip UTF-8 BOM and whitespace that Vercel CLI sometimes adds to env var values
+function clean(s: string | undefined): string {
+  return (s ?? '').replace(/^﻿/, '').trim()
+}
+
 function httpsPost(
   url: string,
   body: string,
@@ -33,15 +38,22 @@ function httpsPost(
 }
 
 export async function POST(req: NextRequest) {
-  const { action, email, password, supabaseUrl, supabaseKey } = await req.json()
+  const body = await req.json()
+  const { action, email, password } = body
+
+  // Accept URL/key from request body (browser bundle) or fall back to env vars
+  const supabaseUrl = clean(body.supabaseUrl ?? process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const supabaseKey = clean(body.supabaseKey ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
   if (!email || !password) {
     return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
   }
 
-  // Validate that the URL is a legitimate Supabase endpoint
-  if (!supabaseUrl || !supabaseUrl.match(/^https:\/\/[a-z]+\.supabase\.co$/)) {
-    return NextResponse.json({ error: 'URL de Supabase inválida' }, { status: 400 })
+  if (!supabaseUrl || !supabaseUrl.includes('.supabase.co')) {
+    return NextResponse.json(
+      { error: `URL de Supabase inválida: "${supabaseUrl}"` },
+      { status: 400 }
+    )
   }
 
   const endpoint = action === 'signup'
@@ -49,12 +61,12 @@ export async function POST(req: NextRequest) {
     : `${supabaseUrl}/auth/v1/token?grant_type=password`
 
   try {
-    const { status, body } = await httpsPost(
+    const { status, body: respBody } = await httpsPost(
       endpoint,
       JSON.stringify({ email, password }),
       { apikey: supabaseKey }
     )
-    const data = JSON.parse(body)
+    const data = JSON.parse(respBody)
     return NextResponse.json(data, { status })
   } catch (err) {
     return NextResponse.json(

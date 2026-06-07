@@ -69,8 +69,9 @@ export default function AuthPage() {
           action: mode === 'login' ? 'signin' : 'signup',
           email,
           password,
-          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-          supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          // Strip BOM that Vercel CLI can add to env var values
+          supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/^﻿/, '').trim(),
+          supabaseKey: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').replace(/^﻿/, '').trim(),
         }),
       })
 

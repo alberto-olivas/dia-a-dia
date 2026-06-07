@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import https from 'node:https'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+function clean(s: string | undefined): string {
+  return (s ?? '').replace(/^﻿/, '').trim()
+}
 
 function httpsGet(url: string, apikey: string): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -21,10 +22,20 @@ function httpsGet(url: string, apikey: string): Promise<number> {
 }
 
 export async function GET() {
+  const supabaseUrl = clean(process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const supabaseKey = clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+
+  if (!supabaseUrl || !supabaseUrl.includes('.supabase.co')) {
+    return NextResponse.json({ ok: false, reason: 'env var missing or invalid' }, { status: 503 })
+  }
+
   try {
-    const status = await httpsGet(`${SUPABASE_URL}/auth/v1/settings`, SUPABASE_KEY)
+    const status = await httpsGet(`${supabaseUrl}/auth/v1/settings`, supabaseKey)
     return NextResponse.json({ ok: status >= 200 && status < 400 })
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 502 })
+  } catch (err) {
+    return NextResponse.json(
+      { ok: false, reason: err instanceof Error ? err.message : String(err) },
+      { status: 502 }
+    )
   }
 }
