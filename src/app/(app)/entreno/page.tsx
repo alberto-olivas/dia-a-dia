@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { WorkoutType, Workout } from '@/lib/types'
 import { WORKOUT_TYPES } from '@/lib/types'
-import { Zap, Clock, Save, Trash2, Flame, Shield, Dumbbell, Activity, Moon } from 'lucide-react'
+import { Zap, Clock, Save, Trash2, Flame, Shield, Dumbbell, Activity, Moon, Footprints, BedDouble } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
@@ -74,8 +74,14 @@ export default function EntrenoPage() {
   const [intensidad, setIntensidad] = useState<IntensityLevel>('medio')
   const [condicion, setCondicion] = useState<ConditionId>('normal')
   const [duracion, setDuracion] = useState<number>(60)
+  const [steps, setSteps] = useState(0)
+  const [sleepHours, setSleepHours] = useState(0)
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    setSteps(parseInt(localStorage.getItem(`steps_${today}`) ?? '0') || 0)
+    setSleepHours(parseFloat(localStorage.getItem(`sleep_${today}`) ?? '0') || 0)
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -164,6 +170,22 @@ export default function EntrenoPage() {
     setWorkout(null); setSelectedType('boxeo_tecnica')
     setIntensidad('medio'); setCondicion('normal'); setDuracion(60)
   }
+
+  function saveSteps(n: number) {
+    const val = Math.max(0, n)
+    setSteps(val)
+    localStorage.setItem(`steps_${today}`, String(val))
+  }
+
+  function saveSleep(h: number) {
+    const val = Math.max(0, Math.round(h * 2) / 2)
+    setSleepHours(val)
+    localStorage.setItem(`sleep_${today}`, String(val))
+  }
+
+  const kmEstimated = (steps * 0.00075).toFixed(1)
+  const kcalWalking = Math.round(steps * 0.04)
+  const kcalSleep = Math.round(sleepHours * 55)
 
   return (
     <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
@@ -410,6 +432,115 @@ export default function EntrenoPage() {
             <Save size={16} />
             {saving ? 'Guardando...' : workout ? 'Actualizar entreno' : 'Registrar entreno'}
           </button>
+
+          {/* ── Pasos ──────────────────────────────── */}
+          <div className="card p-5 mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#EFF6FF' }}>
+                <Footprints size={17} style={{ color: '#3B82F6' }} />
+              </div>
+              <div>
+                <span className="label-caps block">Pasos de hoy</span>
+                <span className="text-xs text-gray-400">Caminar ~0.04 kcal / paso</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="number"
+                value={steps || ''}
+                onChange={(e) => saveSteps(parseInt(e.target.value) || 0)}
+                placeholder="0"
+                min="0"
+                className="flex-1 px-4 py-3 text-lg font-black rounded-xl text-center"
+                style={{ color: '#3B82F6' }}
+              />
+              <span className="text-sm font-bold text-gray-400">pasos</span>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs text-gray-300">0</span>
+              <input
+                type="range"
+                min="0"
+                max="25000"
+                step="500"
+                value={steps}
+                onChange={(e) => saveSteps(parseInt(e.target.value))}
+                className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                style={{ accentColor: '#3B82F6' }}
+              />
+              <span className="text-xs text-gray-300">25k</span>
+            </div>
+            {steps > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-2 rounded-xl bg-gray-50">
+                  <div className="font-black text-lg leading-none text-gray-900">{steps.toLocaleString()}</div>
+                  <div className="label-caps mt-1">pasos</div>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-gray-50">
+                  <div className="font-black text-lg leading-none" style={{ color: '#3B82F6' }}>{kmEstimated}</div>
+                  <div className="label-caps mt-1">km</div>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-gray-50">
+                  <div className="font-black text-lg leading-none" style={{ color: '#FF6B35' }}>{kcalWalking}</div>
+                  <div className="label-caps mt-1">kcal</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Sueño ──────────────────────────────── */}
+          <div className="card p-5 mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#F5F3FF' }}>
+                <BedDouble size={17} style={{ color: '#8B5CF6' }} />
+              </div>
+              <div>
+                <span className="label-caps block">Sueño de hoy</span>
+                <span className="text-xs text-gray-400">~55 kcal quemadas por hora</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="number"
+                value={sleepHours || ''}
+                onChange={(e) => saveSleep(parseFloat(e.target.value) || 0)}
+                placeholder="0"
+                min="0"
+                max="12"
+                step="0.5"
+                className="flex-1 px-4 py-3 text-lg font-black rounded-xl text-center"
+                style={{ color: '#8B5CF6' }}
+              />
+              <span className="text-sm font-bold text-gray-400">horas</span>
+            </div>
+            <div className="flex gap-1.5 mb-4">
+              {[5, 6, 7, 7.5, 8, 9].map((h) => (
+                <button
+                  key={h}
+                  onClick={() => saveSleep(h)}
+                  className="flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all"
+                  style={{
+                    background: sleepHours === h ? '#8B5CF6' : '#F5F5F7',
+                    color: sleepHours === h ? '#fff' : '#9CA3AF',
+                  }}
+                >
+                  {h}h
+                </button>
+              ))}
+            </div>
+            {sleepHours > 0 && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-2 rounded-xl bg-gray-50">
+                  <div className="font-black text-lg leading-none" style={{ color: '#8B5CF6' }}>{sleepHours}h</div>
+                  <div className="label-caps mt-1">dormidas</div>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-gray-50">
+                  <div className="font-black text-lg leading-none" style={{ color: '#FF6B35' }}>{kcalSleep}</div>
+                  <div className="label-caps mt-1">kcal</div>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* ── Weekly kcal chart ───────────────────── */}
           {mounted && (

@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { Task, Workout } from '@/lib/types'
 import { WORKOUT_TYPES } from '@/lib/types'
-import { ArrowRight, Flame, Zap, CheckSquare, Dumbbell } from 'lucide-react'
+import { ArrowRight, Flame, CheckSquare, Dumbbell } from 'lucide-react'
 import { useProfile } from '@/lib/profile-context'
 
 const DAY_NAMES_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
@@ -47,7 +47,7 @@ export default function HomePage() {
   const [now, setNow] = useState(new Date())
   const [pendingTasks, setPendingTasks] = useState<Task[]>([])
   const [doneTasks, setDoneTasks] = useState<Task[]>([])
-  const [calories, setCalories] = useState({ consumed: 0, burned: 0 })
+  const [calories, setCalories] = useState({ consumed: 0, workout: 0, steps: 0, sleep: 0 })
   const [workout, setWorkout] = useState<Workout | null>(null)
   const today = new Date().toISOString().split('T')[0]
 
@@ -81,9 +81,13 @@ export default function HomePage() {
     try {
       const food = JSON.parse(localStorage.getItem(`demo_food_${today}`) ?? '[]') as Array<{ calorias: number }>
       const w = JSON.parse(localStorage.getItem(`demo_workout_${today}`) ?? 'null')
+      const stepsVal = parseInt(localStorage.getItem(`steps_${today}`) ?? '0') || 0
+      const sleepVal = parseFloat(localStorage.getItem(`sleep_${today}`) ?? '0') || 0
       setCalories({
         consumed: food.reduce((s, f) => s + f.calorias, 0),
-        burned: w?.calorias_quemadas ?? 0,
+        workout: w?.calorias_quemadas ?? 0,
+        steps: Math.round(stepsVal * 0.04),
+        sleep: Math.round(sleepVal * 55),
       })
       setWorkout(w)
     } catch {}
@@ -111,7 +115,14 @@ export default function HomePage() {
     }))
 
     const consumed = (food ?? []).reduce((s: number, f: { calorias: number }) => s + f.calorias, 0)
-    setCalories({ consumed, burned: workouts?.[0]?.calorias_quemadas ?? 0 })
+    const stepsVal = parseInt(localStorage.getItem(`steps_${today}`) ?? '0') || 0
+    const sleepVal = parseFloat(localStorage.getItem(`sleep_${today}`) ?? '0') || 0
+    setCalories({
+      consumed,
+      workout: workouts?.[0]?.calorias_quemadas ?? 0,
+      steps: Math.round(stepsVal * 0.04),
+      sleep: Math.round(sleepVal * 55),
+    })
     setWorkout(workouts?.[0] ?? null)
   }
 
@@ -158,32 +169,53 @@ export default function HomePage() {
       <div className="grid grid-cols-2 gap-4 mb-4">
 
         {/* Calorías */}
-        <Link href="/alimentacion" className="card p-4 block">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
-              <Flame size={15} style={{ color: '#FF6B35' }} />
-            </div>
-            <span className="label-caps">Calorías</span>
-          </div>
-          <div className="font-black text-2xl text-gray-900 leading-none">
-            {calories.consumed.toLocaleString()}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">kcal ingeridas</div>
-          {calories.burned > 0 && (
-            <div className="mt-2 flex items-center gap-1">
-              <Zap size={10} style={{ color: '#FF6B35' }} />
-              <span className="text-xs font-semibold" style={{ color: '#FF6B35' }}>
-                -{calories.burned} quemadas
-              </span>
-            </div>
-          )}
-          <div className="mt-3 h-1 rounded-full bg-gray-100">
-            <div
-              className="h-1 rounded-full"
-              style={{ width: `${Math.min(100, (calories.consumed / 2500) * 100)}%`, background: '#FF6B35' }}
-            />
-          </div>
-        </Link>
+        {(() => {
+          const net = calories.consumed - calories.workout - calories.steps - calories.sleep
+          return (
+            <Link href="/alimentacion" className="card p-4 block">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
+                  <Flame size={15} style={{ color: '#FF6B35' }} />
+                </div>
+                <span className="label-caps">Calorías</span>
+              </div>
+              <div className="font-black text-2xl text-gray-900 leading-none">
+                {net.toLocaleString()}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">kcal netas</div>
+              <div className="mt-2 flex flex-col gap-0.5">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold" style={{ color: '#22C55E' }}>+{calories.consumed.toLocaleString()}</span>
+                  <span className="text-[10px] text-gray-400">consumidas</span>
+                </div>
+                {calories.workout > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-bold" style={{ color: '#FF6B35' }}>-{calories.workout}</span>
+                    <span className="text-[10px] text-gray-400">entreno</span>
+                  </div>
+                )}
+                {calories.steps > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-bold" style={{ color: '#3B82F6' }}>-{calories.steps}</span>
+                    <span className="text-[10px] text-gray-400">pasos</span>
+                  </div>
+                )}
+                {calories.sleep > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-bold" style={{ color: '#8B5CF6' }}>-{calories.sleep}</span>
+                    <span className="text-[10px] text-gray-400">dormir</span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-3 h-1 rounded-full bg-gray-100">
+                <div
+                  className="h-1 rounded-full"
+                  style={{ width: `${Math.min(100, (calories.consumed / 2500) * 100)}%`, background: '#FF6B35' }}
+                />
+              </div>
+            </Link>
+          )
+        })()}
 
         {/* Tareas */}
         <Link href="/gestor" className="card p-4 block">

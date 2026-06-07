@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { FoodEntry, MealSection } from '@/lib/types'
 import { MEAL_LABELS } from '@/lib/types'
-import { Plus, Trash2, Search, X, ChevronDown, ChevronUp, Flame, Footprints } from 'lucide-react'
+import { Plus, Trash2, Search, X, ChevronDown, ChevronUp, Flame } from 'lucide-react'
 import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid,
@@ -59,21 +59,9 @@ export default function AlimentacionPage() {
   const [weeklyData, setWeeklyData] = useState<Array<{ day: string; kcal: number }>>([])
   const [mounted, setMounted] = useState(false)
 
-  // Steps — stored locally, no DB needed
-  const stepsKey = `steps_${today}`
-  const [steps, setSteps] = useState(0)
-
   useEffect(() => {
     setMounted(true)
-    const saved = parseInt(localStorage.getItem(stepsKey) ?? '0') || 0
-    setSteps(saved)
   }, [])
-
-  function saveSteps(n: number) {
-    const val = Math.max(0, n)
-    setSteps(val)
-    localStorage.setItem(stepsKey, String(val))
-  }
 
   useEffect(() => {
     if (!user) return
@@ -168,9 +156,6 @@ export default function AlimentacionPage() {
     fill: MEAL_COLORS[section],
   }))
 
-  const kmEstimated = (steps * 0.00075).toFixed(1)
-  const kcalWalking = Math.round(steps * 0.04)
-
   return (
     <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
 
@@ -246,62 +231,6 @@ export default function AlimentacionPage() {
       )}
 
       {/* ── Steps card ─────────────────────────────── */}
-      <div className="card p-5 mb-4">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#EFF6FF' }}>
-            <Footprints size={17} style={{ color: '#3B82F6' }} />
-          </div>
-          <div>
-            <span className="label-caps block">Pasos de hoy</span>
-            <span className="text-xs text-gray-400">Introduce los pasos del día</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 mb-2">
-          <input
-            type="number"
-            value={steps || ''}
-            onChange={(e) => saveSteps(parseInt(e.target.value) || 0)}
-            placeholder="0"
-            min="0"
-            className="flex-1 px-4 py-3 text-lg font-black rounded-xl text-center"
-            style={{ color: '#3B82F6' }}
-          />
-          <span className="text-sm font-bold text-gray-400">pasos</span>
-        </div>
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xs text-gray-300">0</span>
-          <input
-            type="range"
-            min="0"
-            max="25000"
-            step="500"
-            value={steps}
-            onChange={(e) => saveSteps(parseInt(e.target.value))}
-            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-            style={{ accentColor: '#3B82F6' }}
-          />
-          <span className="text-xs text-gray-300">25k</span>
-        </div>
-
-        {steps > 0 && (
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-2 rounded-xl bg-gray-50">
-              <div className="font-black text-lg leading-none text-gray-900">{steps.toLocaleString()}</div>
-              <div className="label-caps mt-1">pasos</div>
-            </div>
-            <div className="text-center p-2 rounded-xl bg-gray-50">
-              <div className="font-black text-lg leading-none" style={{ color: '#3B82F6' }}>{kmEstimated}</div>
-              <div className="label-caps mt-1">km</div>
-            </div>
-            <div className="text-center p-2 rounded-xl bg-gray-50">
-              <div className="font-black text-lg leading-none" style={{ color: '#FF6B35' }}>{kcalWalking}</div>
-              <div className="label-caps mt-1">kcal</div>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* ── Meal sections accordion ────────────────── */}
       {loading ? (
         <div className="flex justify-center py-12">
