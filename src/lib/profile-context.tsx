@@ -10,14 +10,14 @@ const DEMO_PROFILE_KEY = 'demo_profile'
 interface ProfileContextType {
   profile: UserProfile | null
   loadingProfile: boolean
-  createProfile: (data: Omit<UserProfile, 'id' | 'user_id'>) => Promise<void>
+  createProfile: (data: Omit<UserProfile, 'id' | 'user_id'>) => Promise<string | null>
   updateProfile: (data: Partial<Omit<UserProfile, 'id' | 'user_id'>>) => Promise<void>
 }
 
 const ProfileContext = createContext<ProfileContextType>({
   profile: null,
   loadingProfile: true,
-  createProfile: async () => {},
+  createProfile: async () => null,
   updateProfile: async () => {},
 })
 
@@ -42,17 +42,19 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     })
   }, [user])
 
-  async function createProfile(data: Omit<UserProfile, 'id' | 'user_id'>) {
-    if (!user) return
+  async function createProfile(data: Omit<UserProfile, 'id' | 'user_id'>): Promise<string | null> {
+    if (!user) return 'No hay sesión activa'
     if (!IS_SUPABASE_CONFIGURED) {
       const p: UserProfile = { id: crypto.randomUUID(), user_id: user.id, ...data }
       setProfile(p)
       localStorage.setItem(DEMO_PROFILE_KEY, JSON.stringify(p))
-      return
+      return null
     }
-    const { data: saved } = await supabase
+    const { data: saved, error } = await supabase
       .from('profiles').insert({ ...data, user_id: user.id }).select().single()
+    if (error) return error.message
     if (saved) setProfile(saved as UserProfile)
+    return null
   }
 
   async function updateProfile(data: Partial<Omit<UserProfile, 'id' | 'user_id'>>) {

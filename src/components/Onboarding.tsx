@@ -51,6 +51,7 @@ export default function Onboarding() {
   const { createProfile } = useProfile()
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [values, setValues] = useState({
     nombre: '',
     fecha_nacimiento: '',
@@ -68,13 +69,15 @@ export default function Onboarding() {
     if (!canContinue) return
     if (!isLast) { setStep(step + 1); return }
     setSaving(true)
-    await createProfile({
+    setSaveError('')
+    const err = await createProfile({
       nombre: values.nombre.trim(),
       fecha_nacimiento: values.fecha_nacimiento || null,
       peso: values.peso ? parseFloat(values.peso) : null,
       altura: values.altura ? parseInt(values.altura) : null,
     })
     setSaving(false)
+    if (err) setSaveError(err)
   }
 
   return (
@@ -140,6 +143,12 @@ export default function Onboarding() {
             </span>
           )}
         </div>
+
+        {saveError && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(255,107,53,0.12)', border: '1px solid #FF6B35', color: '#FF6B35' }}>
+            Error al guardar: {saveError}
+          </div>
+        )}
 
         <button
           onClick={handleNext}
