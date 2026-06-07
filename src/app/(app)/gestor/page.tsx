@@ -4,13 +4,16 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { Task, TaskWhen, TaskStatus } from '@/lib/types'
-import { Plus, Trash2, Pencil, Check, X } from 'lucide-react'
+import { Plus, Trash2, Pencil, Check, X, ChevronDown } from 'lucide-react'
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from 'recharts'
 
 const WHEN_LABELS: Record<TaskWhen, string> = {
   hoy: 'Hoy',
   manana: 'Mañana',
   semana: 'Esta semana',
-  fecha: 'Antes de fecha',
+  fecha: 'Fecha concreta',
   sin_fecha: 'Sin fecha',
 }
 
@@ -21,15 +24,28 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
 }
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
-  por_hacer: '#555555',
-  en_proceso: '#FF2D00',
-  terminada: '#333333',
+  por_hacer: '#E5E7EB',
+  en_proceso: '#FF6B35',
+  terminada: '#22C55E',
+}
+
+const WHEN_OPTIONS: TaskWhen[] = ['hoy', 'manana', 'semana', 'fecha', 'sin_fecha']
+
+function getLast7Days(): Array<{ date: string; label: string }> {
+  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    return {
+      date: d.toISOString().split('T')[0],
+      label: i === 6 ? 'Hoy' : days[d.getDay()],
+    }
+  })
 }
 
 function sortTasks(tasks: Task[]): Task[] {
   const order: Record<TaskWhen, number> = { hoy: 0, manana: 1, semana: 2, fecha: 3, sin_fecha: 4 }
   return [...tasks].sort((a, b) => {
-    // Terminadas al final
     if (a.estado === 'terminada' && b.estado !== 'terminada') return 1
     if (b.estado === 'terminada' && a.estado !== 'terminada') return -1
     return (order[a.cuando] ?? 4) - (order[b.cuando] ?? 4)
@@ -41,24 +57,27 @@ export default function GestorPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
   const [showForm, setShowForm] = useState(false)
+  const [weeklyData, setWeeklyData] = useState<Array<{ day: string; completadas: number; pendientes: number }>>([])
+  const [mounted, setMounted] = useState(false)
 
-  // New task state
   const [newNombre, setNewNombre] = useState('')
   const [newCuando, setNewCuando] = useState<TaskWhen>('hoy')
   const [newFechaObj, setNewFechaObj] = useState('')
   const [newEstado, setNewEstado] = useState<TaskStatus>('por_hacer')
   const [saving, setSaving] = useState(false)
 
-  // Edit state
   const [editId, setEditId] = useState<string | null>(null)
   const [editNombre, setEditNombre] = useState('')
   const [editCuando, setEditCuando] = useState<TaskWhen>('hoy')
   const [editFechaObj, setEditFechaObj] = useState('')
   const [editEstado, setEditEstado] = useState<TaskStatus>('por_hacer')
 
+  useEffect(() => { setMounted(true) }, [])
+
   useEffect(() => {
     if (!user || !IS_SUPABASE_CONFIGURED) { setLoading(false); return }
     fetchTasks()
+    fetchWeeklyData()
   }, [user])
 
   async function fetchTasks() {
@@ -70,6 +89,24 @@ export default function GestorPage() {
       .order('fecha_creacion', { ascending: false })
     setTasks(data ?? [])
     setLoading(false)
+  }
+
+  async function fetchWeeklyData() {
+    const last7 = getLast7Days()
+    const { data } = await supabase
+      .from('tasks')
+      .select('estado, fecha_creacion')
+      .eq('user_id', user!.id)
+      .gte('fecha_creacion', `${last7[0].date}T00:00:00`)
+
+    setWeeklyData(last7.map(({ date, label }) => {
+      const day = (data ?? []).filter((t: { estado: string; fecha_creacion: string }) => t.fecha_creacion.startsWith(date))
+      return {
+        day: label,
+        completadas: day.filter((t: { estado: string }) => t.estado === 'terminada').length,
+        pendientes: day.filter((t: { estado: string }) => t.estado !== 'terminada').length,
+      }
+    }))
   }
 
   async function createTask(e: React.FormEvent) {
@@ -125,112 +162,150 @@ export default function GestorPage() {
   const sorted = sortTasks(tasks)
   const pending = sorted.filter((t) => t.estado !== 'terminada')
   const done = sorted.filter((t) => t.estado === 'terminada')
+  const totalToday = tasks.length
+  const completedCount = done.length
+  const pct = totalToday > 0 ? Math.round((completedCount / totalToday) * 100) : 0
 
   return (
-    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10">
+    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
 
       {/* ── Header ─────────────────────────────────── */}
-      <header className="mb-8">
+      <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 01</span>
-        <div className="flex items-end justify-between">
-          <h1 className="font-black" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', color: '#ffffff', lineHeight: 1 }}>
-            GESTOR
-          </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-black text-3xl text-gray-900">GESTOR</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-3 text-xs font-bold tracking-widest uppercase"
-            style={{ background: showForm ? '#1a1a1a' : '#FF2D00', color: '#ffffff', border: showForm ? '1px solid #2a2a2a' : 'none' }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all"
+            style={{
+              background: showForm ? '#F5F5F7' : '#1A1A1A',
+              color: showForm ? '#9CA3AF' : '#FFFFFF',
+            }}
           >
             {showForm ? <X size={14} /> : <Plus size={14} />}
             {showForm ? 'Cancelar' : 'Nueva tarea'}
           </button>
         </div>
-        <div className="w-8 h-0.5 mt-3" style={{ background: '#FF2D00' }} />
       </header>
+
+      {/* ── Progress card ──────────────────────────── */}
+      <div className="card p-5 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <span className="label-caps block mb-1">Progreso total</span>
+            <span className="font-black text-3xl text-gray-900">{pct}%</span>
+          </div>
+          <div className="text-right">
+            <div className="font-black text-2xl leading-none" style={{ color: '#22C55E' }}>{completedCount}</div>
+            <div className="label-caps">completadas</div>
+            <div className="font-bold text-lg leading-none text-gray-400 mt-1">{pending.length}</div>
+            <div className="label-caps">pendientes</div>
+          </div>
+        </div>
+        <div className="h-2 rounded-full bg-gray-100">
+          <div
+            className="h-2 rounded-full transition-all"
+            style={{ width: `${pct}%`, background: pct === 100 ? '#22C55E' : '#FF6B35' }}
+          />
+        </div>
+      </div>
 
       {/* ── New task form ───────────────────────────── */}
       {showForm && (
-        <form onSubmit={createTask} className="mb-8 p-5 card">
+        <form onSubmit={createTask} className="card p-5 mb-4">
           <span className="label-caps block mb-4">Nueva tarea</span>
 
-          <div className="flex flex-col gap-4">
-            <input
-              value={newNombre}
-              onChange={(e) => setNewNombre(e.target.value)}
-              placeholder="Nombre de la tarea..."
-              required
-              className="px-4 py-3 text-sm rounded-none"
-            />
+          <input
+            value={newNombre}
+            onChange={(e) => setNewNombre(e.target.value)}
+            placeholder="¿Qué tienes que hacer?"
+            required
+            className="w-full px-4 py-3 text-sm rounded-xl mb-4"
+          />
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="label-caps">Cuándo</label>
-                <select
-                  value={newCuando}
-                  onChange={(e) => setNewCuando(e.target.value as TaskWhen)}
-                  className="px-3 py-3 text-sm rounded-none"
+          {/* Cuando — pill buttons */}
+          <div className="mb-4">
+            <span className="label-caps block mb-2">¿Cuándo?</span>
+            <div className="flex flex-wrap gap-2">
+              {WHEN_OPTIONS.map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  onClick={() => setNewCuando(w)}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                  style={{
+                    background: newCuando === w ? '#1A1A1A' : '#F5F5F7',
+                    color: newCuando === w ? '#FF6B35' : '#9CA3AF',
+                  }}
                 >
-                  {(Object.keys(WHEN_LABELS) as TaskWhen[]).map((k) => (
-                    <option key={k} value={k}>{WHEN_LABELS[k]}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="label-caps">Estado</label>
-                <select
-                  value={newEstado}
-                  onChange={(e) => setNewEstado(e.target.value as TaskStatus)}
-                  className="px-3 py-3 text-sm rounded-none"
-                >
-                  {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((k) => (
-                    <option key={k} value={k}>{STATUS_LABELS[k]}</option>
-                  ))}
-                </select>
-              </div>
+                  {WHEN_LABELS[w]}
+                </button>
+              ))}
             </div>
-
-            {newCuando === 'fecha' && (
-              <input
-                type="date"
-                value={newFechaObj}
-                onChange={(e) => setNewFechaObj(e.target.value)}
-                className="px-3 py-3 text-sm rounded-none"
-              />
-            )}
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="py-3 text-xs font-bold tracking-widest uppercase disabled:opacity-50"
-              style={{ background: '#FF2D00', color: '#ffffff' }}
-            >
-              Crear tarea
-            </button>
           </div>
+
+          {newCuando === 'fecha' && (
+            <input
+              type="date"
+              value={newFechaObj}
+              onChange={(e) => setNewFechaObj(e.target.value)}
+              className="w-full px-4 py-3 text-sm rounded-xl mb-4"
+            />
+          )}
+
+          {/* Estado — pill buttons */}
+          <div className="mb-4">
+            <span className="label-caps block mb-2">Estado inicial</span>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setNewEstado(s)}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                  style={{
+                    background: newEstado === s ? '#1A1A1A' : '#F5F5F7',
+                    color: newEstado === s ? '#FF6B35' : '#9CA3AF',
+                  }}
+                >
+                  {STATUS_LABELS[s]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full py-3 rounded-xl text-xs font-bold tracking-widest uppercase disabled:opacity-50"
+            style={{ background: '#FF6B35', color: '#ffffff' }}
+          >
+            {saving ? 'Guardando...' : 'Crear tarea'}
+          </button>
         </form>
       )}
 
+      {/* ── Task list ──────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-6 h-6 border-2 border-[#FF2D00] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <>
-          {/* ── Pending tasks ──────────────────────── */}
           {pending.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center gap-3 mb-3">
+            <section className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="label-caps">Pendientes</span>
                 <span
-                  className="text-xs font-bold px-2 py-0.5"
-                  style={{ background: '#FF2D00', color: '#fff' }}
+                  className="text-xs font-black px-2 py-0.5 rounded-full"
+                  style={{ background: '#FF6B35', color: '#fff' }}
                 >
                   {pending.length}
                 </span>
               </div>
               <div className="flex flex-col gap-2">
                 {pending.map((task) => (
-                  <TaskRow
+                  <TaskCard
                     key={task.id}
                     task={task}
                     isEditing={editId === task.id}
@@ -253,14 +328,13 @@ export default function GestorPage() {
             </section>
           )}
 
-          {/* ── Completed tasks ────────────────────── */}
           {done.length > 0 && (
-            <section>
+            <section className="mb-6">
               <div className="divider mb-4" />
               <span className="label-caps block mb-3">Terminadas ({done.length})</span>
               <div className="flex flex-col gap-2">
                 {done.map((task) => (
-                  <TaskRow
+                  <TaskCard
                     key={task.id}
                     task={task}
                     isEditing={editId === task.id}
@@ -285,17 +359,44 @@ export default function GestorPage() {
 
           {tasks.length === 0 && (
             <div className="card p-8 text-center">
-              <p className="text-sm mb-1" style={{ color: '#555555' }}>Sin tareas todavía</p>
-              <p className="text-xs" style={{ color: '#333333' }}>Crea tu primera tarea arriba</p>
+              <p className="text-sm font-semibold text-gray-400 mb-1">Sin tareas todavía</p>
+              <p className="text-xs text-gray-300">Crea tu primera tarea arriba</p>
             </div>
           )}
         </>
+      )}
+
+      {/* ── Weekly stats chart ─────────────────────── */}
+      {mounted && (
+        <div className="card p-5 mt-2">
+          <span className="label-caps block mb-4">Tareas esta semana</span>
+          <ResponsiveContainer width="100%" height={120}>
+            <BarChart data={weeklyData} barGap={2} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+              <XAxis
+                dataKey="day"
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis hide />
+              <Tooltip
+                contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12 }}
+                cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+              />
+              <Bar dataKey="completadas" name="Completadas" fill="#22C55E" radius={[4, 4, 0, 0]} stackId="a" />
+              <Bar dataKey="pendientes" name="Pendientes" fill="#FEE2E2" radius={[4, 4, 0, 0]} stackId="a" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   )
 }
 
-interface TaskRowProps {
+/* ── TaskCard component ─────────────────────────── */
+
+interface TaskCardProps {
   task: Task
   isEditing: boolean
   editNombre: string
@@ -313,12 +414,13 @@ interface TaskRowProps {
   setEditEstado: (v: TaskStatus) => void
 }
 
-function TaskRow({
+function TaskCard({
   task, isEditing, editNombre, editCuando, editFechaObj, editEstado,
   onEdit, onSaveEdit, onCancelEdit, onDelete, onStatusChange,
-  setEditNombre, setEditCuando, setEditFechaObj, setEditEstado
-}: TaskRowProps) {
+  setEditNombre, setEditCuando, setEditFechaObj, setEditEstado,
+}: TaskCardProps) {
   const done = task.estado === 'terminada'
+  const [showStatusMenu, setShowStatusMenu] = useState(false)
 
   if (isEditing) {
     return (
@@ -326,48 +428,65 @@ function TaskRow({
         <input
           value={editNombre}
           onChange={(e) => setEditNombre(e.target.value)}
-          className="px-3 py-2 text-sm rounded-none"
+          className="w-full px-3 py-2.5 text-sm rounded-xl"
         />
-        <div className="grid grid-cols-2 gap-2">
-          <select
-            value={editCuando}
-            onChange={(e) => setEditCuando(e.target.value as TaskWhen)}
-            className="px-3 py-2 text-sm rounded-none"
-          >
-            {(Object.keys(WHEN_LABELS) as TaskWhen[]).map((k) => (
-              <option key={k} value={k}>{WHEN_LABELS[k]}</option>
+        <div>
+          <span className="label-caps block mb-2">¿Cuándo?</span>
+          <div className="flex flex-wrap gap-2">
+            {WHEN_OPTIONS.map((w) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => setEditCuando(w)}
+                className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{
+                  background: editCuando === w ? '#1A1A1A' : '#F5F5F7',
+                  color: editCuando === w ? '#FF6B35' : '#9CA3AF',
+                }}
+              >
+                {WHEN_LABELS[w]}
+              </button>
             ))}
-          </select>
-          <select
-            value={editEstado}
-            onChange={(e) => setEditEstado(e.target.value as TaskStatus)}
-            className="px-3 py-2 text-sm rounded-none"
-          >
-            {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((k) => (
-              <option key={k} value={k}>{STATUS_LABELS[k]}</option>
-            ))}
-          </select>
+          </div>
         </div>
         {editCuando === 'fecha' && (
           <input
             type="date"
             value={editFechaObj}
             onChange={(e) => setEditFechaObj(e.target.value)}
-            className="px-3 py-2 text-sm rounded-none"
+            className="px-3 py-2.5 text-sm rounded-xl"
           />
         )}
+        <div>
+          <span className="label-caps block mb-2">Estado</span>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setEditEstado(s)}
+                className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{
+                  background: editEstado === s ? '#1A1A1A' : '#F5F5F7',
+                  color: editEstado === s ? '#FF6B35' : '#9CA3AF',
+                }}
+              >
+                {STATUS_LABELS[s]}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={onSaveEdit}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold tracking-widest uppercase"
-            style={{ background: '#FF2D00', color: '#fff' }}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase"
+            style={{ background: '#FF6B35', color: '#fff' }}
           >
             <Check size={12} /> Guardar
           </button>
           <button
             onClick={onCancelEdit}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold tracking-widest uppercase"
-            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#888' }}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-gray-100 text-gray-500"
           >
             <X size={12} /> Cancelar
           </button>
@@ -378,62 +497,85 @@ function TaskRow({
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3"
-      style={{
-        background: '#111111',
-        borderLeft: `2px solid ${done ? '#2a2a2a' : STATUS_COLORS[task.estado]}`,
-        opacity: done ? 0.6 : 1,
-      }}
+      className="card flex items-center gap-3 px-4 py-3.5"
+      style={{ opacity: done ? 0.7 : 1 }}
     >
-      {/* Status toggle */}
+      {/* Checkbox */}
       <button
         onClick={() => onStatusChange(done ? 'por_hacer' : 'terminada')}
-        className="shrink-0 w-5 h-5 flex items-center justify-center border"
-        style={{ borderColor: done ? '#3a3a3a' : '#FF2D00', background: done ? '#2a2a2a' : 'transparent' }}
+        className="w-5 h-5 rounded-md flex items-center justify-center border-2 flex-shrink-0 transition-all"
+        style={{
+          borderColor: done ? '#22C55E' : '#E5E7EB',
+          background: done ? '#22C55E' : 'transparent',
+        }}
       >
-        {done && <Check size={10} style={{ color: '#555' }} />}
+        {done && <Check size={10} color="white" />}
       </button>
 
       {/* Task info */}
       <div className="flex-1 min-w-0">
         <p
-          className="text-sm font-semibold truncate"
+          className="text-sm font-semibold"
           style={{
-            color: done ? '#444' : '#ffffff',
+            color: done ? '#9CA3AF' : '#1A1A1A',
             textDecoration: done ? 'line-through' : 'none',
           }}
         >
           {task.nombre}
         </p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          <span
+            className="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full"
+            style={{
+              background: task.estado === 'en_proceso' ? '#FFF4EF' : '#F5F5F7',
+              color: STATUS_COLORS[task.estado],
+            }}
+          >
+            {STATUS_LABELS[task.estado]}
+          </span>
           <span className="label-caps">{WHEN_LABELS[task.cuando]}</span>
           {task.fecha_objetivo && (
             <span className="label-caps">{task.fecha_objetivo}</span>
           )}
-          <span
-            className="text-[9px] font-bold tracking-widest uppercase px-1.5 py-0.5"
-            style={{ background: 'rgba(255,45,0,0.1)', color: STATUS_COLORS[task.estado] }}
-          >
-            {STATUS_LABELS[task.estado]}
-          </span>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          onClick={onEdit}
-          className="w-7 h-7 flex items-center justify-center"
-          style={{ color: '#444' }}
-        >
-          <Pencil size={12} />
+      {/* Quick status cycle */}
+      {!done && (
+        <div className="relative">
+          <button
+            onClick={() => setShowStatusMenu(!showStatusMenu)}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-50 text-gray-400"
+          >
+            <ChevronDown size={12} />
+          </button>
+          {showStatusMenu && (
+            <div
+              className="absolute right-0 top-8 z-10 rounded-xl overflow-hidden"
+              style={{ background: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 140 }}
+            >
+              {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => { onStatusChange(s); setShowStatusMenu(false) }}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-gray-50 transition-colors"
+                  style={{ color: STATUS_COLORS[s] || '#1A1A1A' }}
+                >
+                  {STATUS_LABELS[s]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Edit & delete */}
+      <div className="flex items-center gap-0.5">
+        <button onClick={onEdit} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-300">
+          <Pencil size={13} />
         </button>
-        <button
-          onClick={onDelete}
-          className="w-7 h-7 flex items-center justify-center"
-          style={{ color: '#444' }}
-        >
-          <Trash2 size={12} />
+        <button onClick={onDelete} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-300">
+          <Trash2 size={13} />
         </button>
       </div>
     </div>

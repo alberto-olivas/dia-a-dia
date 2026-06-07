@@ -52,40 +52,36 @@ export default function PWABanner() {
 
   return (
     <div
-      className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 p-4 flex items-start gap-4"
-      style={{ background: '#111111', border: '1px solid #2a2a2a' }}
+      className="fixed bottom-24 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 p-4 flex items-start gap-4 rounded-2xl"
+      style={{ background: '#FFFFFF', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
     >
       <div
-        className="shrink-0 w-10 h-10 flex items-center justify-center"
-        style={{ background: 'rgba(255,45,0,0.1)', border: '1px solid rgba(255,45,0,0.3)' }}
+        className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: '#FFF4EF' }}
       >
         {isMobile
-          ? <Smartphone size={18} style={{ color: '#FF2D00' }} />
-          : <Download size={18} style={{ color: '#FF2D00' }} />
+          ? <Smartphone size={18} style={{ color: '#FF6B35' }} />
+          : <Download size={18} style={{ color: '#FF6B35' }} />
         }
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-sm" style={{ color: '#ffffff' }}>
+        <p className="font-bold text-sm text-gray-900">
           {isMobile ? 'Añadir a pantalla de inicio' : 'Instalar app en tu escritorio'}
         </p>
-        <p className="text-xs mt-0.5" style={{ color: '#555555' }}>
+        <p className="text-xs mt-0.5 text-gray-400">
           Acceso rápido, sin navegador
         </p>
         <button
           onClick={handleInstall}
-          className="mt-3 px-4 py-2 text-xs font-bold tracking-widest uppercase"
-          style={{ background: '#FF2D00', color: '#ffffff' }}
+          className="mt-3 px-4 py-2 text-xs font-bold tracking-widest uppercase rounded-lg"
+          style={{ background: '#FF6B35', color: '#ffffff' }}
         >
           {isMobile ? 'Añadir' : 'Instalar'}
         </button>
       </div>
 
-      <button
-        onClick={dismiss}
-        className="shrink-0 p-1 transition-colors"
-        style={{ color: '#555555' }}
-      >
+      <button onClick={dismiss} className="shrink-0 p-1 text-gray-300 hover:text-gray-500 transition-colors">
         <X size={14} />
       </button>
     </div>

@@ -4,27 +4,55 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
-import type { Task, FoodEntry, Workout } from '@/lib/types'
-import { ArrowRight, Flame, Zap, TrendingUp } from 'lucide-react'
+import type { Task, Workout } from '@/lib/types'
+import { WORKOUT_TYPES } from '@/lib/types'
+import { ArrowRight, Flame, Zap, CheckSquare, Dumbbell } from 'lucide-react'
 
-function useClock() {
-  const [now, setNow] = useState(new Date())
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(id)
-  }, [])
-  return now
+const DAY_NAMES_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const DAY_NAMES_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+function getGreeting(date: Date): string {
+  const h = date.getHours()
+  if (h < 12) return 'Buenos días'
+  if (h < 20) return 'Buenas tardes'
+  return 'Buenas noches'
 }
 
-const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+function getWeekDays(today: Date) {
+  const dow = today.getDay()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - ((dow + 6) % 7))
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return {
+      key: d.toISOString(),
+      label: DAY_NAMES_SHORT[d.getDay()],
+      num: d.getDate(),
+      isToday: d.toDateString() === today.toDateString(),
+    }
+  })
+}
+
+function getUserName(email: string): string {
+  const part = email.split('@')[0]
+  return part.charAt(0).toUpperCase() + part.slice(1).replace(/[._-]/g, ' ')
+}
 
 export default function HomePage() {
   const { user } = useAuth()
-  const now = useClock()
-  const [todayTasks, setTodayTasks] = useState<Task[]>([])
+  const [now, setNow] = useState(new Date())
+  const [pendingTasks, setPendingTasks] = useState<Task[]>([])
+  const [doneTasks, setDoneTasks] = useState<Task[]>([])
   const [calories, setCalories] = useState({ consumed: 0, burned: 0 })
+  const [workout, setWorkout] = useState<Workout | null>(null)
   const today = new Date().toISOString().split('T')[0]
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60000)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     if (!user || !IS_SUPABASE_CONFIGURED) return
@@ -32,186 +60,172 @@ export default function HomePage() {
   }, [user])
 
   async function fetchTodayData() {
-    const [{ data: tasks }, { data: food }, { data: workout }] = await Promise.all([
-      supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user!.id)
-        .in('cuando', ['hoy', 'fecha'])
-        .neq('estado', 'terminada'),
-      supabase
-        .from('food_entries')
-        .select('calorias')
-        .eq('user_id', user!.id)
-        .eq('fecha', today),
-      supabase
-        .from('workouts')
-        .select('calorias_quemadas')
-        .eq('user_id', user!.id)
-        .eq('fecha', today),
+    const [{ data: tasks }, { data: food }, { data: workouts }] = await Promise.all([
+      supabase.from('tasks').select('*').eq('user_id', user!.id).in('cuando', ['hoy', 'fecha']),
+      supabase.from('food_entries').select('calorias').eq('user_id', user!.id).eq('fecha', today),
+      supabase.from('workouts').select('*').eq('user_id', user!.id).eq('fecha', today),
     ])
 
-    // Filter tasks for today
-    const todayDate = today
-    const filtered = (tasks ?? []).filter((t: Task) => {
+    const all = tasks ?? []
+    setPendingTasks(all.filter((t: Task) => {
+      if (t.estado === 'terminada') return false
       if (t.cuando === 'hoy') return true
-      if (t.cuando === 'fecha' && t.fecha_objetivo === todayDate) return true
+      if (t.cuando === 'fecha' && t.fecha_objetivo === today) return true
       return false
-    })
-    setTodayTasks(filtered)
+    }))
+    setDoneTasks(all.filter((t: Task) => {
+      if (t.estado !== 'terminada') return false
+      if (t.cuando === 'hoy') return true
+      if (t.cuando === 'fecha' && t.fecha_objetivo === today) return true
+      return false
+    }))
 
     const consumed = (food ?? []).reduce((s: number, f: { calorias: number }) => s + f.calorias, 0)
-    const burned = (workout ?? []).reduce((s: number, w: { calorias_quemadas: number }) => s + w.calorias_quemadas, 0)
-    setCalories({ consumed, burned })
+    setCalories({ consumed, burned: workouts?.[0]?.calorias_quemadas ?? 0 })
+    setWorkout(workouts?.[0] ?? null)
   }
 
-  const dayName = DAY_NAMES[now.getDay()]
-  const dayNum = now.getDate()
-  const hours = String(now.getHours()).padStart(2, '0')
-  const minutes = String(now.getMinutes()).padStart(2, '0')
-  const netCalories = calories.consumed - calories.burned
+  const weekDays = getWeekDays(now)
+  const greeting = getGreeting(now)
+  const userName = user ? getUserName(user.email ?? 'usuario') : 'Usuario'
+  const totalTasks = pendingTasks.length + doneTasks.length
+  const completionPct = totalTasks > 0 ? Math.round((doneTasks.length / totalTasks) * 100) : 0
 
   return (
-    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10">
+    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
 
-      {/* ── Header ─────────────────────────────────── */}
-      <header className="mb-10">
-        <div className="flex items-start justify-between">
-          <div>
-            <span className="label-caps block mb-2">Sistema activo</span>
-            <h1
-              className="font-black leading-none tracking-tight"
-              style={{ fontSize: 'clamp(2.5rem, 10vw, 5rem)', color: '#ffffff' }}
-            >
-              DÍA A DÍA
-            </h1>
-          </div>
-          <div className="text-right">
-            <div
-              className="font-black tabular-nums"
-              style={{ fontSize: '2rem', color: '#FF2D00', lineHeight: 1 }}
-            >
-              {hours}:{minutes}
-            </div>
-            <div className="label-caps mt-1">{dayName} {dayNum}</div>
-          </div>
-        </div>
-        <div className="w-12 h-0.5 mt-4" style={{ background: '#FF2D00' }} />
+      {/* ── Greeting ──────────────────────────────── */}
+      <header className="mb-6">
+        <p className="text-sm font-semibold text-gray-400 mb-1">{greeting}</p>
+        <h1 className="font-black text-3xl text-gray-900 leading-tight">{userName}</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          {DAY_NAMES_FULL[now.getDay()]}, {now.getDate()} de {MONTH_NAMES[now.getMonth()]}
+        </p>
       </header>
 
-      {/* ── Calories grid ──────────────────────────── */}
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <span className="label-caps">Calorías hoy</span>
-          <Link href="/alimentacion" className="label-caps flex items-center gap-1" style={{ color: '#FF2D00' }}>
-            Ver <ArrowRight size={10} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3">
-          {/* Consumed */}
-          <div className="card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Flame size={12} style={{ color: '#FF2D00' }} />
-              <span className="label-caps">Ingeridas</span>
-            </div>
-            <div className="font-black" style={{ fontSize: '1.75rem', color: '#ffffff', lineHeight: 1 }}>
-              {calories.consumed.toLocaleString()}
-            </div>
-            <div className="label-caps mt-1">kcal</div>
+      {/* ── Week day selector ────────────────────── */}
+      <div className="flex gap-1.5 mb-8 overflow-x-auto pb-1">
+        {weekDays.map(({ key, label, num, isToday }) => (
+          <div
+            key={key}
+            className="flex flex-col items-center gap-1 flex-shrink-0 w-11 py-2.5 rounded-2xl"
+            style={{
+              background: isToday ? '#1A1A1A' : '#FFFFFF',
+              boxShadow: isToday ? '0 4px 14px rgba(0,0,0,0.2)' : '0 1px 4px rgba(0,0,0,0.05)',
+            }}
+          >
+            <span className="text-[9px] font-bold uppercase" style={{ color: isToday ? '#9CA3AF' : '#D1D5DB' }}>
+              {label}
+            </span>
+            <span className="text-sm font-black" style={{ color: isToday ? '#FF6B35' : '#1A1A1A' }}>
+              {num}
+            </span>
           </div>
+        ))}
+      </div>
 
-          {/* Burned */}
-          <div className="card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap size={12} style={{ color: '#FF2D00' }} />
-              <span className="label-caps">Quemadas</span>
+      {/* ── Cards grid ───────────────────────────── */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+
+        {/* Calorías */}
+        <Link href="/alimentacion" className="card p-4 block">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
+              <Flame size={15} style={{ color: '#FF6B35' }} />
             </div>
-            <div className="font-black" style={{ fontSize: '1.75rem', color: '#ffffff', lineHeight: 1 }}>
-              {calories.burned.toLocaleString()}
-            </div>
-            <div className="label-caps mt-1">kcal</div>
+            <span className="label-caps">Calorías</span>
           </div>
-
-          {/* Net */}
-          <div className="card p-4" style={{ borderColor: netCalories > 0 ? '#2a2a2a' : '#FF2D00' }}>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={12} style={{ color: netCalories > 0 ? '#888888' : '#FF2D00' }} />
-              <span className="label-caps">Neto</span>
+          <div className="font-black text-2xl text-gray-900 leading-none">
+            {calories.consumed.toLocaleString()}
+          </div>
+          <div className="text-xs text-gray-400 mt-1">kcal ingeridas</div>
+          {calories.burned > 0 && (
+            <div className="mt-2 flex items-center gap-1">
+              <Zap size={10} style={{ color: '#FF6B35' }} />
+              <span className="text-xs font-semibold" style={{ color: '#FF6B35' }}>
+                -{calories.burned} quemadas
+              </span>
             </div>
+          )}
+          <div className="mt-3 h-1 rounded-full bg-gray-100">
             <div
-              className="font-black"
-              style={{
-                fontSize: '1.75rem',
-                color: netCalories > 2500 ? '#FF2D00' : '#ffffff',
-                lineHeight: 1
-              }}
-            >
-              {netCalories.toLocaleString()}
+              className="h-1 rounded-full"
+              style={{ width: `${Math.min(100, (calories.consumed / 2500) * 100)}%`, background: '#FF6B35' }}
+            />
+          </div>
+        </Link>
+
+        {/* Tareas */}
+        <Link href="/gestor" className="card p-4 block">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#F0FDF4' }}>
+              <CheckSquare size={15} style={{ color: '#22C55E' }} />
             </div>
-            <div className="label-caps mt-1">kcal</div>
+            <span className="label-caps">Tareas</span>
+          </div>
+          <div className="font-black text-2xl text-gray-900 leading-none">
+            {completionPct}%
+          </div>
+          <div className="text-xs text-gray-400 mt-1">{doneTasks.length}/{totalTasks} completadas</div>
+          <div className="mt-3 h-1.5 rounded-full bg-gray-100">
+            <div
+              className="h-1.5 rounded-full transition-all"
+              style={{ width: `${completionPct}%`, background: '#22C55E' }}
+            />
+          </div>
+        </Link>
+      </div>
+
+      {/* ── Workout card ─────────────────────────── */}
+      <Link href="/entreno" className="card p-4 flex items-center justify-between mb-4 block">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
+            <Dumbbell size={18} style={{ color: '#FF6B35' }} />
+          </div>
+          <div>
+            <span className="label-caps block">Entreno hoy</span>
+            <span className="font-bold text-gray-900 text-sm">
+              {workout
+                ? (WORKOUT_TYPES[workout.tipo as keyof typeof WORKOUT_TYPES]?.label ?? workout.tipo)
+                : 'Sin registrar'}
+            </span>
           </div>
         </div>
-      </section>
-
-      {/* ── Divider ────────────────────────────────── */}
-      <div className="divider mb-8" />
-
-      {/* ── Today tasks ────────────────────────────── */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <span className="label-caps">Tareas de hoy</span>
-          <Link href="/gestor" className="label-caps flex items-center gap-1" style={{ color: '#FF2D00' }}>
-            Ver todas <ArrowRight size={10} />
-          </Link>
+        <div className="flex items-center gap-3">
+          {workout && (
+            <div className="text-right">
+              <div className="font-black text-xl leading-none" style={{ color: '#FF6B35' }}>
+                {workout.calorias_quemadas}
+              </div>
+              <div className="label-caps">kcal</div>
+            </div>
+          )}
+          <ArrowRight size={16} className="text-gray-200" />
         </div>
+      </Link>
 
-        {todayTasks.length === 0 ? (
-          <div className="card p-6 text-center">
-            <p className="text-sm" style={{ color: '#555555' }}>Sin tareas pendientes para hoy</p>
-            <Link
-              href="/gestor"
-              className="inline-block mt-3 px-4 py-2 text-xs font-bold tracking-widest uppercase"
-              style={{ background: '#FF2D00', color: '#ffffff' }}
-            >
-              Añadir tarea
+      {/* ── Pending tasks preview ────────────────── */}
+      {pendingTasks.length > 0 && (
+        <div className="card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="label-caps">Pendientes hoy</span>
+            <Link href="/gestor" className="text-xs font-bold flex items-center gap-1" style={{ color: '#FF6B35' }}>
+              Ver todas <ArrowRight size={10} />
             </Link>
           </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {todayTasks.slice(0, 5).map((task) => (
-              <div
-                key={task.id}
-                className="flex items-center gap-4 px-4 py-3"
-                style={{ background: '#111111', borderLeft: '2px solid #FF2D00' }}
-              >
-                <div
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{
-                    background: task.estado === 'en_proceso' ? '#FF2D00' : '#2a2a2a',
-                    border: task.estado === 'en_proceso' ? 'none' : '1px solid #3a3a3a'
-                  }}
-                />
-                <span className="text-sm font-semibold flex-1 truncate" style={{ color: '#ffffff' }}>
-                  {task.nombre}
-                </span>
-                <span
-                  className="text-xs font-bold tracking-wider uppercase shrink-0"
-                  style={{ color: task.estado === 'en_proceso' ? '#FF2D00' : '#555555' }}
-                >
-                  {task.estado === 'por_hacer' ? 'Pendiente' : 'En proceso'}
-                </span>
+          <div className="flex flex-col gap-2.5">
+            {pendingTasks.slice(0, 3).map((task) => (
+              <div key={task.id} className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#FF6B35' }} />
+                <span className="text-sm text-gray-700 font-medium truncate">{task.nombre}</span>
               </div>
             ))}
-            {todayTasks.length > 5 && (
-              <p className="text-xs text-center py-2" style={{ color: '#555555' }}>
-                +{todayTasks.length - 5} más
-              </p>
+            {pendingTasks.length > 3 && (
+              <p className="text-xs text-gray-400 pl-5">+{pendingTasks.length - 3} más</p>
             )}
           </div>
-        )}
-      </section>
-
+        </div>
+      )}
     </div>
   )
 }

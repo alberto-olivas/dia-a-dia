@@ -18,8 +18,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-        <div className="w-8 h-8 border-2 border-[#FF2D00] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F5F7' }}>
+        <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -27,13 +27,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#0a0a0a' }}>
+    <div className="flex min-h-screen" style={{ background: '#F5F5F7' }}>
       <Navigation />
 
       {/* Main content */}
       <main className="flex-1 flex flex-col min-h-screen">
-        {/* Content area with bottom padding for mobile nav */}
-        <div className="flex-1 pb-20 md:pb-0">
+        {/* Content area with bottom padding for floating mobile nav */}
+        <div className="flex-1 pb-28 md:pb-0">
           {children}
         </div>
       </main>
