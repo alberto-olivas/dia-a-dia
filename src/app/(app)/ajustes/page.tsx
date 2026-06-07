@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { useProfile } from '@/lib/profile-context'
 import { useTheme } from '@/lib/theme-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
-import { User, Cake, Weight, Ruler, Mail, Lock, Sun, Moon, Save, CheckCircle, AlertCircle, Download, Smartphone, MonitorSmartphone } from 'lucide-react'
+import { User, Cake, Weight, Ruler, Mail, Lock, Sun, Moon, Save, CheckCircle, AlertCircle, Download, Smartphone, MonitorSmartphone, Flame } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -38,6 +38,20 @@ export default function AjustesPage() {
   const [altura, setAltura] = useState('')
   const [profileMsg, setProfileMsg] = useState<Msg | null>(null)
   const [profileSaving, setProfileSaving] = useState(false)
+
+  // ── Calorie goal ──────────────────────────────────
+  const [calorieGoal, setCalorieGoal] = useState(2500)
+
+  useEffect(() => {
+    const saved = parseInt(localStorage.getItem('calorie_goal') ?? '') || 2500
+    setCalorieGoal(saved)
+  }, [])
+
+  function saveCalorieGoal(val: number) {
+    const clamped = Math.max(500, Math.min(10000, val))
+    setCalorieGoal(clamped)
+    localStorage.setItem('calorie_goal', String(clamped))
+  }
 
   // ── Cuenta fields ─────────────────────────────────
   const [newEmail, setNewEmail] = useState('')
@@ -228,6 +242,50 @@ export default function AjustesPage() {
             <Save size={14} />
             {profileSaving ? 'Guardando...' : 'Guardar perfil'}
           </button>
+        </div>
+      </section>
+
+      {/* ── Sección: Objetivo calórico ───────────── */}
+      <section className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Flame size={14} style={{ color: '#FF6B35' }} />
+          <span className="label-caps">Objetivo calórico</span>
+        </div>
+        <div className="card p-5" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 30%, rgba(255,107,53,0.28) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255,155,80,0.18) 0%, transparent 45%)' }}>
+          <p className="text-xs text-gray-500 mb-4">
+            Personaliza tu objetivo de calorías diarias. Se usará en el apartado de Alimentación.
+          </p>
+
+          {/* Input + presets */}
+          <div className="flex items-center gap-3 mb-3">
+            <input
+              type="number"
+              value={calorieGoal || ''}
+              onChange={(e) => saveCalorieGoal(parseInt(e.target.value) || 2500)}
+              min="500"
+              max="10000"
+              step="50"
+              className="flex-1 px-4 py-3 text-xl font-black rounded-xl text-center"
+              style={{ color: '#FF6B35' }}
+            />
+            <span className="text-sm font-bold text-gray-400">kcal / día</span>
+          </div>
+
+          <div className="flex gap-2">
+            {[1500, 1800, 2000, 2500, 3000, 3500].map((kcal) => (
+              <button
+                key={kcal}
+                onClick={() => saveCalorieGoal(kcal)}
+                className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all"
+                style={{
+                  background: calorieGoal === kcal ? '#FF6B35' : '#F5F5F7',
+                  color: calorieGoal === kcal ? '#FFFFFF' : '#9CA3AF',
+                }}
+              >
+                {(kcal / 1000).toFixed(1)}k
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

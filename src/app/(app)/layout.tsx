@@ -39,7 +39,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const { profile, loadingProfile } = useProfile()
 
   return (
-    <div className="flex min-h-screen relative" style={{ background: 'var(--app-bg)' }}>
+    <div className="flex min-h-screen relative">
       {/* Decorative gradient blobs */}
       <div
         aria-hidden

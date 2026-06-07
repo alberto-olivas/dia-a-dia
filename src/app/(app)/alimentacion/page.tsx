@@ -21,7 +21,7 @@ const MEAL_COLORS: Record<MealSection, string> = {
   cena: '#FFE8DA',
 }
 
-const KCAL_GOAL = 2500
+const DEFAULT_KCAL_GOAL = 2500
 
 function getLast7Days(): Array<{ date: string; label: string }> {
   const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
@@ -58,9 +58,12 @@ export default function AlimentacionPage() {
   const [addingTo, setAddingTo] = useState<MealSection | null>(null)
   const [weeklyData, setWeeklyData] = useState<Array<{ day: string; kcal: number }>>([])
   const [mounted, setMounted] = useState(false)
+  const [kcalGoal, setKcalGoal] = useState(DEFAULT_KCAL_GOAL)
 
   useEffect(() => {
     setMounted(true)
+    const saved = parseInt(localStorage.getItem('calorie_goal') ?? '') || DEFAULT_KCAL_GOAL
+    setKcalGoal(saved)
   }, [])
 
   useEffect(() => {
@@ -148,7 +151,7 @@ export default function AlimentacionPage() {
   }
 
   const totalKcal = entries.reduce((s, e) => s + e.calorias, 0)
-  const progressPct = Math.min(100, (totalKcal / KCAL_GOAL) * 100)
+  const progressPct = Math.min(100, (totalKcal / kcalGoal) * 100)
 
   const mealChartData = MEAL_ORDER.map((section) => ({
     meal: MEAL_LABELS[section].slice(0, 5),
@@ -174,7 +177,7 @@ export default function AlimentacionPage() {
               <span className="font-black text-4xl leading-none text-gray-900">
                 {totalKcal.toLocaleString()}
               </span>
-              <span className="font-bold text-gray-400 mb-1">/ {KCAL_GOAL.toLocaleString()} kcal</span>
+              <span className="font-bold text-gray-400 mb-1">/ {kcalGoal.toLocaleString()} kcal</span>
             </div>
           </div>
           <div className="text-right">
@@ -200,7 +203,7 @@ export default function AlimentacionPage() {
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-gray-200" />
-            <span className="text-xs text-gray-400">Restante: <b className="text-gray-700">{Math.max(0, KCAL_GOAL - totalKcal)}</b></span>
+            <span className="text-xs text-gray-400">Restante: <b className="text-gray-700">{Math.max(0, kcalGoal - totalKcal)}</b></span>
           </div>
         </div>
       </div>

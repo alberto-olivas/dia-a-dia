@@ -12,7 +12,7 @@
 
 /* ── Light / Dark mode CSS variables ─────────────── */
 html {
-  --app-bg: #EEEEF5;
+  --app-bg: #F5F5F5;
   --app-color: #1A1A1A;
   --sidebar-bg: #FFFFFF;
   --sidebar-border: #F3F4F6;
@@ -25,7 +25,7 @@ html {
   --divider: #E5E7EB;
   --text-muted: #9CA3AF;
   --text-muted-2: #6B7280;
-  --scrollbar-track: #EEEEF5;
+  --scrollbar-track: #F0F0F0;
   --scrollbar-thumb: #D1D5DB;
 }
 
@@ -56,12 +56,20 @@ html[data-theme="dark"] {
 
   body {
     background-color: var(--app-bg);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse at 52% 88%, rgba(185,185,185,0.28) 0%, transparent 62%);
+    background-attachment: fixed;
     color: var(--app-color);
     font-family: 'Barlow', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100%;
     overscroll-behavior: none;
+  }
+
+  html[data-theme="dark"] body {
+    background-image: none;
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
