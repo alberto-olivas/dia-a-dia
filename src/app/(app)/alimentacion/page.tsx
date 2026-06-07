@@ -38,6 +38,8 @@ function getLast7Days(): Array<{ date: string; label: string }> {
 interface OFFProduct {
   product_name: string
   product_name_es?: string
+  is_liquid?: boolean
+  default_portion?: number
   nutriments: {
     'energy-kcal_100g'?: number
     'energy-kj_100g'?: number
@@ -359,7 +361,7 @@ export default function AlimentacionPage() {
                               <p className="text-sm font-semibold truncate text-gray-800">
                                 {entry.nombre_alimento}
                               </p>
-                              <p className="text-xs text-gray-400 mt-0.5">{entry.cantidad_gramos}g</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{entry.cantidad_gramos}{LIQUID_FOOD_NAMES.has(entry.nombre_alimento.toLowerCase()) ? 'ml' : 'g'}</p>
                             </div>
                             <span className="font-bold text-sm shrink-0" style={{ color: '#FF6B35' }}>
                               {entry.calorias} kcal
@@ -445,47 +447,225 @@ interface FoodSearchPanelProps {
   onClose: () => void
 }
 
-const PORTION_PRESETS = [100, 150, 200, 250]
 
 // Base de datos personal de Alberto — máxima prioridad en búsquedas
 const LOCAL_FOODS: OFFProduct[] = [
-  { product_name: 'Pechuga de pollo cocinada', nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
-  { product_name: 'Ternera picada 10% grasa', nutriments: { 'energy-kcal_100g': 176, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 10 } },
-  { product_name: 'Salmón crudo', nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
-  { product_name: 'Atún lata al natural escurrido', nutriments: { 'energy-kcal_100g': 116, proteins_100g: 26, carbohydrates_100g: 0, fat_100g: 1 } },
-  { product_name: 'Huevo entero', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 12.6, carbohydrates_100g: 0.7, fat_100g: 9.5 } },
-  { product_name: 'Batido proteína HSN Evolate 2.0 Whey Isolate CFM', nutriments: { 'energy-kcal_100g': 383, proteins_100g: 90, carbohydrates_100g: 3.3, fat_100g: 1.7 } },
-  { product_name: 'Arroz blanco cocido', nutriments: { 'energy-kcal_100g': 130, proteins_100g: 2.7, carbohydrates_100g: 28.2, fat_100g: 0.3 } },
-  { product_name: 'Arroz integral cocido', nutriments: { 'energy-kcal_100g': 112, proteins_100g: 2.6, carbohydrates_100g: 23.5, fat_100g: 0.9 } },
-  { product_name: 'Pasta cocida', nutriments: { 'energy-kcal_100g': 157, proteins_100g: 5.8, carbohydrates_100g: 30.9, fat_100g: 0.9 } },
-  { product_name: 'Copos de avena', nutriments: { 'energy-kcal_100g': 389, proteins_100g: 16.9, carbohydrates_100g: 66.3, fat_100g: 6.9 } },
-  { product_name: 'Tortita de arroz', nutriments: { 'energy-kcal_100g': 387, proteins_100g: 8, carbohydrates_100g: 81, fat_100g: 3 } },
-  { product_name: 'Tortilla de trigo / fajita', nutriments: { 'energy-kcal_100g': 310, proteins_100g: 8, carbohydrates_100g: 50, fat_100g: 8 } },
-  { product_name: 'Plátano', nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 22.8, fat_100g: 0.3 } },
-  { product_name: 'Manzana', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 13.8, fat_100g: 0.2 } },
-  { product_name: 'Yogur griego natural 0%', nutriments: { 'energy-kcal_100g': 59, proteins_100g: 10, carbohydrates_100g: 3.6, fat_100g: 0.4 } },
-  { product_name: 'Yogur griego natural entero', nutriments: { 'energy-kcal_100g': 97, proteins_100g: 9, carbohydrates_100g: 3.9, fat_100g: 5 } },
-  { product_name: 'Queso mozzarella rallado', nutriments: { 'energy-kcal_100g': 280, proteins_100g: 22, carbohydrates_100g: 3, fat_100g: 20 } },
-  { product_name: 'Bebida de soja sin azúcar', nutriments: { 'energy-kcal_100g': 33, proteins_100g: 3.3, carbohydrates_100g: 0.6, fat_100g: 1.8 } },
-  { product_name: 'Aceite de oliva virgen extra', nutriments: { 'energy-kcal_100g': 884, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 100 } },
-  { product_name: 'Aguacate', nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8.5, fat_100g: 14.7 } },
-  { product_name: 'Frutos secos variados', nutriments: { 'energy-kcal_100g': 607, proteins_100g: 20, carbohydrates_100g: 21, fat_100g: 54 } },
-  { product_name: 'Miel', nutriments: { 'energy-kcal_100g': 304, proteins_100g: 0.3, carbohydrates_100g: 82.4, fat_100g: 0 } },
-  { product_name: 'Tomate', nutriments: { 'energy-kcal_100g': 18, proteins_100g: 0.9, carbohydrates_100g: 3.9, fat_100g: 0.2 } },
-  { product_name: 'Pepino', nutriments: { 'energy-kcal_100g': 15, proteins_100g: 0.7, carbohydrates_100g: 3.6, fat_100g: 0.1 } },
-  { product_name: 'Pepinillos encurtidos', nutriments: { 'energy-kcal_100g': 12, proteins_100g: 0.5, carbohydrates_100g: 2.4, fat_100g: 0.2 } },
-  { product_name: 'Aceitunas verdes', nutriments: { 'energy-kcal_100g': 145, proteins_100g: 1, carbohydrates_100g: 3.8, fat_100g: 15.3 } },
-  { product_name: 'Cebolla', nutriments: { 'energy-kcal_100g': 40, proteins_100g: 1.1, carbohydrates_100g: 9.3, fat_100g: 0.1 } },
-  { product_name: 'Pimiento', nutriments: { 'energy-kcal_100g': 31, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.3 } },
-  { product_name: 'Zumo de limón', nutriments: { 'energy-kcal_100g': 22, proteins_100g: 0.4, carbohydrates_100g: 6.9, fat_100g: 0.2 } },
-  { product_name: 'Jengibre en polvo', nutriments: { 'energy-kcal_100g': 335, proteins_100g: 9, carbohydrates_100g: 72, fat_100g: 4.2 } },
-  { product_name: 'Verduras para caldo', nutriments: { 'energy-kcal_100g': 35, proteins_100g: 1.5, carbohydrates_100g: 7, fat_100g: 0.2 } },
-  { product_name: 'Salmorejo casero', nutriments: { 'energy-kcal_100g': 95, proteins_100g: 2, carbohydrates_100g: 8, fat_100g: 6 } },
-  { product_name: 'Base pizza yogur + huevo', nutriments: { 'energy-kcal_100g': 130, proteins_100g: 10, carbohydrates_100g: 10, fat_100g: 5 } },
-  { product_name: 'Creatina monohidrato', nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
-  { product_name: 'Citrulina malato', nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
-  { product_name: 'Café solo', nutriments: { 'energy-kcal_100g': 1, proteins_100g: 0.1, carbohydrates_100g: 0, fat_100g: 0 } },
+  // BEBIDAS (líquidas)
+  { product_name: 'Café solo', is_liquid: true, default_portion: 100, nutriments: { 'energy-kcal_100g': 2, proteins_100g: 0.1, carbohydrates_100g: 0, fat_100g: 0 } },
+  { product_name: 'Café con bebida de soja sin azúcar', is_liquid: true, default_portion: 200, nutriments: { 'energy-kcal_100g': 20, proteins_100g: 1.5, carbohydrates_100g: 0.6, fat_100g: 0.9 } },
+  { product_name: 'Bebida de soja sin azúcar', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 33, proteins_100g: 3.3, carbohydrates_100g: 0.7, fat_100g: 1.8 } },
+  { product_name: 'Bebida de avena', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 45, proteins_100g: 1.0, carbohydrates_100g: 6.5, fat_100g: 1.5 } },
+  { product_name: 'Leche semidesnatada', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 47, proteins_100g: 3.4, carbohydrates_100g: 4.8, fat_100g: 1.6 } },
+  { product_name: 'Isotónica casera agua limón sal miel', is_liquid: true, default_portion: 750, nutriments: { 'energy-kcal_100g': 12, proteins_100g: 0, carbohydrates_100g: 3, fat_100g: 0 } },
+  { product_name: 'Salsa de soja', is_liquid: true, default_portion: 15, nutriments: { 'energy-kcal_100g': 53, proteins_100g: 8, carbohydrates_100g: 4.9, fat_100g: 0.6 } },
+  { product_name: 'Coca Cola Zero', is_liquid: true, default_portion: 330, nutriments: { 'energy-kcal_100g': 1, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
+  { product_name: 'Monster Ultra', is_liquid: true, default_portion: 500, nutriments: { 'energy-kcal_100g': 3, proteins_100g: 0, carbohydrates_100g: 0.8, fat_100g: 0 } },
+  // LECHES (líquidas)
+  { product_name: 'Leche Nirmak entera', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 62, proteins_100g: 3.1, carbohydrates_100g: 4.8, fat_100g: 3.5 } },
+  { product_name: 'Leche Nirmak semidesnatada', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 47, proteins_100g: 3.2, carbohydrates_100g: 4.8, fat_100g: 1.6 } },
+  { product_name: 'Leche Nirmak desnatada', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 35, proteins_100g: 3.4, carbohydrates_100g: 4.9, fat_100g: 0.2 } },
+  { product_name: 'Leche sin lactosa semidesnatada', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 46, proteins_100g: 3.2, carbohydrates_100g: 4.8, fat_100g: 1.5 } },
+  { product_name: 'Leche alta proteína', is_liquid: true, default_portion: 250, nutriments: { 'energy-kcal_100g': 50, proteins_100g: 5.5, carbohydrates_100g: 4.5, fat_100g: 1.5 } },
+  { product_name: 'Leche chocolate proteica', is_liquid: true, default_portion: 330, nutriments: { 'energy-kcal_100g': 63, proteins_100g: 6, carbohydrates_100g: 5.5, fat_100g: 1.8 } },
+  // DESAYUNOS / ENDULZANTES
+  { product_name: 'ColaCao original polvo', default_portion: 15, nutriments: { 'energy-kcal_100g': 376, proteins_100g: 6, carbohydrates_100g: 78, fat_100g: 2.4 } },
+  { product_name: 'Nesquik cacao polvo', default_portion: 15, nutriments: { 'energy-kcal_100g': 379, proteins_100g: 4.9, carbohydrates_100g: 83, fat_100g: 3.0 } },
+  { product_name: 'Eritritol', default_portion: 5, nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
+  { product_name: 'Miel', default_portion: 10, nutriments: { 'energy-kcal_100g': 304, proteins_100g: 0.3, carbohydrates_100g: 82, fat_100g: 0 } },
+  { product_name: 'Azúcar blanco', default_portion: 5, nutriments: { 'energy-kcal_100g': 400, proteins_100g: 0, carbohydrates_100g: 100, fat_100g: 0 } },
+  // SUPLEMENTOS
+  { product_name: 'HSN Evolate 2.0 Whey Isolate CFM', default_portion: 30, nutriments: { 'energy-kcal_100g': 383, proteins_100g: 90, carbohydrates_100g: 3.3, fat_100g: 1.5 } },
+  { product_name: 'Whey protein genérica concentrada', default_portion: 30, nutriments: { 'energy-kcal_100g': 400, proteins_100g: 80, carbohydrates_100g: 7, fat_100g: 6 } },
+  { product_name: 'Creatina monohidrato', default_portion: 5, nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
+  { product_name: 'Citrulina malato', default_portion: 6, nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
+  // LÁCTEOS
+  { product_name: 'Yogur griego natural sin azúcar', default_portion: 200, nutriments: { 'energy-kcal_100g': 97, proteins_100g: 9, carbohydrates_100g: 3.5, fat_100g: 5 } },
+  { product_name: 'Yogur natural 0%', default_portion: 125, nutriments: { 'energy-kcal_100g': 56, proteins_100g: 5.5, carbohydrates_100g: 4, fat_100g: 0.2 } },
+  { product_name: 'Queso fresco batido 0%', default_portion: 200, nutriments: { 'energy-kcal_100g': 50, proteins_100g: 8, carbohydrates_100g: 4, fat_100g: 0.2 } },
+  { product_name: 'Queso mozzarella rallado', default_portion: 40, nutriments: { 'energy-kcal_100g': 280, proteins_100g: 24, carbohydrates_100g: 2, fat_100g: 20 } },
+  { product_name: 'Queso cheddar', default_portion: 20, nutriments: { 'energy-kcal_100g': 403, proteins_100g: 25, carbohydrates_100g: 1.3, fat_100g: 33 } },
+  { product_name: 'Kéfir natural', default_portion: 250, nutriments: { 'energy-kcal_100g': 63, proteins_100g: 3.5, carbohydrates_100g: 4.7, fat_100g: 3.3 } },
+  { product_name: 'Skyr natural', default_portion: 170, nutriments: { 'energy-kcal_100g': 63, proteins_100g: 11, carbohydrates_100g: 4, fat_100g: 0.2 } },
+  { product_name: 'Requesón', default_portion: 150, nutriments: { 'energy-kcal_100g': 98, proteins_100g: 11, carbohydrates_100g: 3, fat_100g: 4 } },
+  { product_name: 'Queso de cabra', default_portion: 40, nutriments: { 'energy-kcal_100g': 364, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 30 } },
+  { product_name: 'Queso manchego', default_portion: 40, nutriments: { 'energy-kcal_100g': 410, proteins_100g: 25, carbohydrates_100g: 1, fat_100g: 34 } },
+  { product_name: 'Queso feta', default_portion: 50, nutriments: { 'energy-kcal_100g': 265, proteins_100g: 14, carbohydrates_100g: 4, fat_100g: 21 } },
+  { product_name: 'Queso parmesano', default_portion: 15, nutriments: { 'energy-kcal_100g': 431, proteins_100g: 38, carbohydrates_100g: 4, fat_100g: 29 } },
+  { product_name: 'Queso crema', default_portion: 30, nutriments: { 'energy-kcal_100g': 342, proteins_100g: 6, carbohydrates_100g: 4, fat_100g: 34 } },
+  { product_name: 'Queso havarti', default_portion: 40, nutriments: { 'energy-kcal_100g': 371, proteins_100g: 23, carbohydrates_100g: 1, fat_100g: 31 } },
+  { product_name: 'Queso light', default_portion: 40, nutriments: { 'energy-kcal_100g': 200, proteins_100g: 30, carbohydrates_100g: 3, fat_100g: 7 } },
+  // CEREALES
+  { product_name: 'Avena en copos', default_portion: 40, nutriments: { 'energy-kcal_100g': 389, proteins_100g: 16.9, carbohydrates_100g: 66, fat_100g: 6.9 } },
+  { product_name: 'Crema de arroz', default_portion: 50, nutriments: { 'energy-kcal_100g': 370, proteins_100g: 7, carbohydrates_100g: 82, fat_100g: 1 } },
+  { product_name: 'Arroz blanco cocido', default_portion: 250, nutriments: { 'energy-kcal_100g': 130, proteins_100g: 2.7, carbohydrates_100g: 28, fat_100g: 0.3 } },
+  { product_name: 'Arroz integral cocido', default_portion: 250, nutriments: { 'energy-kcal_100g': 112, proteins_100g: 2.6, carbohydrates_100g: 23, fat_100g: 0.9 } },
+  { product_name: 'Pasta blanca cocida', default_portion: 250, nutriments: { 'energy-kcal_100g': 158, proteins_100g: 5.8, carbohydrates_100g: 31, fat_100g: 0.9 } },
+  { product_name: 'Pasta integral cocida', default_portion: 250, nutriments: { 'energy-kcal_100g': 145, proteins_100g: 5.5, carbohydrates_100g: 28, fat_100g: 1.1 } },
+  // PANES
+  { product_name: 'Pan de centeno', default_portion: 80, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 8.5, carbohydrates_100g: 48, fat_100g: 3.3 } },
+  { product_name: 'Pan integral', default_portion: 80, nutriments: { 'energy-kcal_100g': 247, proteins_100g: 9, carbohydrates_100g: 41, fat_100g: 4.2 } },
+  { product_name: 'Pan blanco', default_portion: 100, nutriments: { 'energy-kcal_100g': 265, proteins_100g: 9, carbohydrates_100g: 49, fat_100g: 3.2 } },
+  { product_name: 'Tortitas de trigo para fajitas', default_portion: 60, nutriments: { 'energy-kcal_100g': 310, proteins_100g: 8, carbohydrates_100g: 52, fat_100g: 8 } },
+  { product_name: 'Tortitas de maíz', default_portion: 35, nutriments: { 'energy-kcal_100g': 218, proteins_100g: 5.7, carbohydrates_100g: 45, fat_100g: 2.9 } },
+  { product_name: 'Pan brioche hamburguesa', default_portion: 80, nutriments: { 'energy-kcal_100g': 330, proteins_100g: 9, carbohydrates_100g: 50, fat_100g: 10 } },
+  // SALSAS / GRASAS
+  { product_name: 'Base de pizza casera yogur-huevo', default_portion: 250, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 11, carbohydrates_100g: 18, fat_100g: 6 } },
+  { product_name: 'Tomate triturado sin azúcar', default_portion: 60, nutriments: { 'energy-kcal_100g': 32, proteins_100g: 1.4, carbohydrates_100g: 5, fat_100g: 0.2 } },
+  { product_name: 'Tomate frito', default_portion: 60, nutriments: { 'energy-kcal_100g': 80, proteins_100g: 1.5, carbohydrates_100g: 10, fat_100g: 3.5 } },
+  { product_name: 'Salsa yogur griego', default_portion: 50, nutriments: { 'energy-kcal_100g': 90, proteins_100g: 6, carbohydrates_100g: 4, fat_100g: 5 } },
+  { product_name: 'Mayonesa', default_portion: 15, nutriments: { 'energy-kcal_100g': 680, proteins_100g: 1, carbohydrates_100g: 1, fat_100g: 75 } },
+  { product_name: 'Ketchup', default_portion: 15, nutriments: { 'energy-kcal_100g': 110, proteins_100g: 1.3, carbohydrates_100g: 25, fat_100g: 0.1 } },
+  { product_name: 'Mostaza', default_portion: 15, nutriments: { 'energy-kcal_100g': 66, proteins_100g: 4.4, carbohydrates_100g: 5.8, fat_100g: 3.3 } },
+  { product_name: 'Guacamole', default_portion: 50, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8, fat_100g: 14 } },
+  { product_name: 'Aceite de oliva virgen extra', default_portion: 10, nutriments: { 'energy-kcal_100g': 884, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 100 } },
+  { product_name: 'Aguacate', default_portion: 75, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8.5, fat_100g: 14.7 } },
+  // CARNES
+  { product_name: 'Pechuga de pollo cruda', default_portion: 150, nutriments: { 'energy-kcal_100g': 110, proteins_100g: 23, carbohydrates_100g: 0, fat_100g: 1.5 } },
+  { product_name: 'Pechuga de pollo a la air fryer', default_portion: 150, nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
+  { product_name: 'Hamburguesa de pollo a la air fryer', default_portion: 120, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 22, carbohydrates_100g: 3, fat_100g: 8 } },
+  { product_name: 'Hamburguesa de ternera', default_portion: 125, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 17, carbohydrates_100g: 2, fat_100g: 19 } },
+  { product_name: 'Carne picada de ternera 5% grasa', default_portion: 250, nutriments: { 'energy-kcal_100g': 137, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 5 } },
+  { product_name: 'Carne picada de ternera 10% grasa', default_portion: 250, nutriments: { 'energy-kcal_100g': 176, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 10 } },
+  { product_name: 'Carne picada mixta', default_portion: 250, nutriments: { 'energy-kcal_100g': 240, proteins_100g: 17, carbohydrates_100g: 0, fat_100g: 19 } },
+  { product_name: 'Filete de ternera', default_portion: 180, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 8 } },
+  { product_name: 'Solomillo de ternera', default_portion: 180, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 11 } },
+  { product_name: 'Lomo de cerdo', default_portion: 150, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 10 } },
+  { product_name: 'Solomillo de cerdo', default_portion: 180, nutriments: { 'energy-kcal_100g': 143, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 6 } },
+  { product_name: 'Pavo filetes', default_portion: 150, nutriments: { 'energy-kcal_100g': 105, proteins_100g: 24, carbohydrates_100g: 0, fat_100g: 1 } },
+  { product_name: 'Jamón cocido', default_portion: 50, nutriments: { 'energy-kcal_100g': 115, proteins_100g: 18, carbohydrates_100g: 2, fat_100g: 4 } },
+  { product_name: 'Jamón serrano', default_portion: 40, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 30, carbohydrates_100g: 0, fat_100g: 14 } },
+  { product_name: 'Bacon', default_portion: 30, nutriments: { 'energy-kcal_100g': 541, proteins_100g: 37, carbohydrates_100g: 1.4, fat_100g: 42 } },
+  { product_name: 'Salchichas tipo Frankfurt', default_portion: 100, nutriments: { 'energy-kcal_100g': 290, proteins_100g: 12, carbohydrates_100g: 3, fat_100g: 26 } },
+  { product_name: 'Salchichas frescas pollo/pavo', default_portion: 120, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 18, carbohydrates_100g: 2, fat_100g: 11 } },
+  { product_name: 'Entrecot de ternera', default_portion: 250, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 19 } },
+  { product_name: 'Chuleta de cerdo', default_portion: 220, nutriments: { 'energy-kcal_100g': 231, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 16 } },
+  { product_name: 'Costillas BBQ', default_portion: 300, nutriments: { 'energy-kcal_100g': 320, proteins_100g: 20, carbohydrates_100g: 6, fat_100g: 24 } },
+  { product_name: 'Pollo empanado air fryer', default_portion: 200, nutriments: { 'energy-kcal_100g': 220, proteins_100g: 20, carbohydrates_100g: 12, fat_100g: 12 } },
+  { product_name: 'Nuggets de pollo', default_portion: 120, nutriments: { 'energy-kcal_100g': 270, proteins_100g: 15, carbohydrates_100g: 20, fat_100g: 15 } },
+  { product_name: 'Albóndigas de ternera', default_portion: 250, nutriments: { 'energy-kcal_100g': 240, proteins_100g: 17, carbohydrates_100g: 8, fat_100g: 16 } },
+  { product_name: 'Kebab carne', default_portion: 200, nutriments: { 'energy-kcal_100g': 215, proteins_100g: 15, carbohydrates_100g: 4, fat_100g: 15 } },
+  { product_name: 'Pulled pork', default_portion: 200, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 20, carbohydrates_100g: 5, fat_100g: 16 } },
+  { product_name: 'Pollo asado', default_portion: 250, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 25, carbohydrates_100g: 0, fat_100g: 9 } },
+  { product_name: 'Muslos de pollo', default_portion: 250, nutriments: { 'energy-kcal_100g': 215, proteins_100g: 18, carbohydrates_100g: 0, fat_100g: 15 } },
+  // EMBUTIDOS
+  { product_name: 'Pechuga de pavo lonchas', default_portion: 80, nutriments: { 'energy-kcal_100g': 105, proteins_100g: 20, carbohydrates_100g: 3, fat_100g: 1.5 } },
+  { product_name: 'Chorizo', default_portion: 40, nutriments: { 'energy-kcal_100g': 455, proteins_100g: 24, carbohydrates_100g: 2, fat_100g: 38 } },
+  { product_name: 'Salchichón', default_portion: 40, nutriments: { 'energy-kcal_100g': 430, proteins_100g: 22, carbohydrates_100g: 1, fat_100g: 36 } },
+  { product_name: 'Fuet', default_portion: 40, nutriments: { 'energy-kcal_100g': 470, proteins_100g: 24, carbohydrates_100g: 2, fat_100g: 40 } },
+  { product_name: 'Mortadela', default_portion: 60, nutriments: { 'energy-kcal_100g': 311, proteins_100g: 14, carbohydrates_100g: 3, fat_100g: 27 } },
+  { product_name: 'Lomo embuchado', default_portion: 40, nutriments: { 'energy-kcal_100g': 320, proteins_100g: 42, carbohydrates_100g: 1, fat_100g: 16 } },
+  { product_name: 'Cecina', default_portion: 40, nutriments: { 'energy-kcal_100g': 255, proteins_100g: 39, carbohydrates_100g: 1, fat_100g: 9 } },
+  { product_name: 'Pepperoni', default_portion: 30, nutriments: { 'energy-kcal_100g': 494, proteins_100g: 23, carbohydrates_100g: 1, fat_100g: 44 } },
+  // HUEVOS
+  { product_name: 'Huevos', default_portion: 120, nutriments: { 'energy-kcal_100g': 143, proteins_100g: 12.6, carbohydrates_100g: 0.7, fat_100g: 9.5 } },
+  { product_name: 'Claras de huevo', default_portion: 200, nutriments: { 'energy-kcal_100g': 52, proteins_100g: 11, carbohydrates_100g: 0.7, fat_100g: 0.2 } },
+  // PESCADOS Y MARISCO
+  { product_name: 'Salmón crudo', default_portion: 150, nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
+  { product_name: 'Salmón a la plancha', default_portion: 150, nutriments: { 'energy-kcal_100g': 220, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 14 } },
+  { product_name: 'Atún en lata al natural escurrido', default_portion: 80, nutriments: { 'energy-kcal_100g': 116, proteins_100g: 26, carbohydrates_100g: 0, fat_100g: 1 } },
+  { product_name: 'Atún en lata en aceite escurrido', default_portion: 80, nutriments: { 'energy-kcal_100g': 198, proteins_100g: 29, carbohydrates_100g: 0, fat_100g: 8 } },
+  { product_name: 'Merluza', default_portion: 180, nutriments: { 'energy-kcal_100g': 82, proteins_100g: 18, carbohydrates_100g: 0, fat_100g: 1 } },
+  { product_name: 'Bacalao', default_portion: 180, nutriments: { 'energy-kcal_100g': 82, proteins_100g: 18, carbohydrates_100g: 0, fat_100g: 0.7 } },
+  { product_name: 'Gambas', default_portion: 150, nutriments: { 'energy-kcal_100g': 99, proteins_100g: 24, carbohydrates_100g: 0.2, fat_100g: 0.3 } },
+  // SUSHI
+  { product_name: 'Sushi variado', default_portion: 240, nutriments: { 'energy-kcal_100g': 150, proteins_100g: 6, carbohydrates_100g: 25, fat_100g: 2.5 } },
+  { product_name: 'Nigiri salmón', default_portion: 80, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 8, carbohydrates_100g: 23, fat_100g: 3 } },
+  { product_name: 'Maki salmón', default_portion: 120, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 7, carbohydrates_100g: 27, fat_100g: 3 } },
+  { product_name: 'California roll', default_portion: 220, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 6, carbohydrates_100g: 28, fat_100g: 6 } },
+  // TUBÉRCULOS
+  { product_name: 'Patata cruda', default_portion: 200, nutriments: { 'energy-kcal_100g': 77, proteins_100g: 2, carbohydrates_100g: 17, fat_100g: 0.1 } },
+  { product_name: 'Patatas air fryer con poco aceite', default_portion: 250, nutriments: { 'energy-kcal_100g': 120, proteins_100g: 2.5, carbohydrates_100g: 22, fat_100g: 3 } },
+  { product_name: 'Patatas fritas comerciales', default_portion: 150, nutriments: { 'energy-kcal_100g': 312, proteins_100g: 3.4, carbohydrates_100g: 41, fat_100g: 15 } },
+  { product_name: 'Batata cruda', default_portion: 250, nutriments: { 'energy-kcal_100g': 86, proteins_100g: 1.6, carbohydrates_100g: 20, fat_100g: 0.1 } },
+  { product_name: 'Batata air fryer', default_portion: 250, nutriments: { 'energy-kcal_100g': 115, proteins_100g: 2, carbohydrates_100g: 24, fat_100g: 2 } },
+  // VERDURAS
+  { product_name: 'Maíz dulce', default_portion: 60, nutriments: { 'energy-kcal_100g': 86, proteins_100g: 3.2, carbohydrates_100g: 19, fat_100g: 1.2 } },
+  { product_name: 'Tomate', default_portion: 120, nutriments: { 'energy-kcal_100g': 18, proteins_100g: 0.9, carbohydrates_100g: 3.9, fat_100g: 0.2 } },
+  { product_name: 'Pepino', default_portion: 100, nutriments: { 'energy-kcal_100g': 15, proteins_100g: 0.7, carbohydrates_100g: 3.6, fat_100g: 0.1 } },
+  { product_name: 'Cebolla', default_portion: 80, nutriments: { 'energy-kcal_100g': 40, proteins_100g: 1.1, carbohydrates_100g: 9.3, fat_100g: 0.1 } },
+  { product_name: 'Pimiento rojo', default_portion: 100, nutriments: { 'energy-kcal_100g': 31, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.3 } },
+  { product_name: 'Pimiento verde', default_portion: 100, nutriments: { 'energy-kcal_100g': 20, proteins_100g: 0.9, carbohydrates_100g: 4.6, fat_100g: 0.2 } },
+  { product_name: 'Lechuga', default_portion: 80, nutriments: { 'energy-kcal_100g': 15, proteins_100g: 1.4, carbohydrates_100g: 2.9, fat_100g: 0.2 } },
+  { product_name: 'Espinacas', default_portion: 100, nutriments: { 'energy-kcal_100g': 23, proteins_100g: 2.9, carbohydrates_100g: 3.6, fat_100g: 0.4 } },
+  { product_name: 'Brócoli', default_portion: 150, nutriments: { 'energy-kcal_100g': 34, proteins_100g: 2.8, carbohydrates_100g: 6.6, fat_100g: 0.4 } },
+  { product_name: 'Calabacín', default_portion: 150, nutriments: { 'energy-kcal_100g': 17, proteins_100g: 1.2, carbohydrates_100g: 3.1, fat_100g: 0.3 } },
+  { product_name: 'Berenjena', default_portion: 150, nutriments: { 'energy-kcal_100g': 25, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.2 } },
+  { product_name: 'Zanahoria', default_portion: 100, nutriments: { 'energy-kcal_100g': 41, proteins_100g: 0.9, carbohydrates_100g: 10, fat_100g: 0.2 } },
+  { product_name: 'Champiñones', default_portion: 100, nutriments: { 'energy-kcal_100g': 22, proteins_100g: 3.1, carbohydrates_100g: 3.3, fat_100g: 0.3 } },
+  { product_name: 'Guisantes', default_portion: 100, nutriments: { 'energy-kcal_100g': 81, proteins_100g: 5.4, carbohydrates_100g: 14, fat_100g: 0.4 } },
+  { product_name: 'Judías verdes', default_portion: 150, nutriments: { 'energy-kcal_100g': 31, proteins_100g: 1.8, carbohydrates_100g: 7, fat_100g: 0.1 } },
+  { product_name: 'Coliflor', default_portion: 150, nutriments: { 'energy-kcal_100g': 25, proteins_100g: 1.9, carbohydrates_100g: 5, fat_100g: 0.3 } },
+  { product_name: 'Ajo', default_portion: 5, nutriments: { 'energy-kcal_100g': 149, proteins_100g: 6.4, carbohydrates_100g: 33, fat_100g: 0.5 } },
+  { product_name: 'Pico de gallo', default_portion: 80, nutriments: { 'energy-kcal_100g': 30, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.2 } },
+  { product_name: 'Ensalada variada', default_portion: 150, nutriments: { 'energy-kcal_100g': 25, proteins_100g: 1.5, carbohydrates_100g: 4, fat_100g: 0.3 } },
+  { product_name: 'Pepinillos', default_portion: 40, nutriments: { 'energy-kcal_100g': 12, proteins_100g: 0.5, carbohydrates_100g: 2.4, fat_100g: 0.2 } },
+  { product_name: 'Aceitunas verdes', default_portion: 30, nutriments: { 'energy-kcal_100g': 145, proteins_100g: 1, carbohydrates_100g: 3.8, fat_100g: 15 } },
+  // FRUTAS
+  { product_name: 'Plátano', default_portion: 120, nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 23, fat_100g: 0.3 } },
+  { product_name: 'Manzana', default_portion: 180, nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 14, fat_100g: 0.2 } },
+  { product_name: 'Pera', default_portion: 170, nutriments: { 'energy-kcal_100g': 57, proteins_100g: 0.4, carbohydrates_100g: 15, fat_100g: 0.1 } },
+  { product_name: 'Naranja', default_portion: 180, nutriments: { 'energy-kcal_100g': 47, proteins_100g: 0.9, carbohydrates_100g: 12, fat_100g: 0.1 } },
+  { product_name: 'Mandarina', default_portion: 100, nutriments: { 'energy-kcal_100g': 53, proteins_100g: 0.8, carbohydrates_100g: 13, fat_100g: 0.3 } },
+  { product_name: 'Kiwi', default_portion: 100, nutriments: { 'energy-kcal_100g': 61, proteins_100g: 1.1, carbohydrates_100g: 15, fat_100g: 0.5 } },
+  { product_name: 'Fresas', default_portion: 150, nutriments: { 'energy-kcal_100g': 32, proteins_100g: 0.7, carbohydrates_100g: 7.7, fat_100g: 0.3 } },
+  { product_name: 'Arándanos', default_portion: 100, nutriments: { 'energy-kcal_100g': 57, proteins_100g: 0.7, carbohydrates_100g: 14, fat_100g: 0.3 } },
+  { product_name: 'Uvas', default_portion: 150, nutriments: { 'energy-kcal_100g': 69, proteins_100g: 0.7, carbohydrates_100g: 18, fat_100g: 0.2 } },
+  { product_name: 'Melón', default_portion: 200, nutriments: { 'energy-kcal_100g': 34, proteins_100g: 0.8, carbohydrates_100g: 8, fat_100g: 0.2 } },
+  { product_name: 'Sandía', default_portion: 250, nutriments: { 'energy-kcal_100g': 30, proteins_100g: 0.6, carbohydrates_100g: 8, fat_100g: 0.2 } },
+  { product_name: 'Mango', default_portion: 150, nutriments: { 'energy-kcal_100g': 60, proteins_100g: 0.8, carbohydrates_100g: 15, fat_100g: 0.4 } },
+  { product_name: 'Piña', default_portion: 150, nutriments: { 'energy-kcal_100g': 50, proteins_100g: 0.5, carbohydrates_100g: 13, fat_100g: 0.1 } },
+  { product_name: 'Melocotón', default_portion: 150, nutriments: { 'energy-kcal_100g': 39, proteins_100g: 0.9, carbohydrates_100g: 10, fat_100g: 0.3 } },
+  { product_name: 'Ciruela', default_portion: 100, nutriments: { 'energy-kcal_100g': 46, proteins_100g: 0.7, carbohydrates_100g: 11, fat_100g: 0.3 } },
+  { product_name: 'Dátiles', default_portion: 30, nutriments: { 'energy-kcal_100g': 282, proteins_100g: 2.5, carbohydrates_100g: 75, fat_100g: 0.4 } },
+  // LEGUMBRES Y FRUTOS SECOS
+  { product_name: 'Lentejas cocidas', default_portion: 250, nutriments: { 'energy-kcal_100g': 116, proteins_100g: 9, carbohydrates_100g: 20, fat_100g: 0.4 } },
+  { product_name: 'Garbanzos cocidos', default_portion: 250, nutriments: { 'energy-kcal_100g': 164, proteins_100g: 8.9, carbohydrates_100g: 27, fat_100g: 2.6 } },
+  { product_name: 'Alubias cocidas', default_portion: 250, nutriments: { 'energy-kcal_100g': 127, proteins_100g: 8.7, carbohydrates_100g: 23, fat_100g: 0.5 } },
+  { product_name: 'Hummus', default_portion: 60, nutriments: { 'energy-kcal_100g': 166, proteins_100g: 8, carbohydrates_100g: 14, fat_100g: 10 } },
+  { product_name: 'Edamame', default_portion: 150, nutriments: { 'energy-kcal_100g': 121, proteins_100g: 11, carbohydrates_100g: 9, fat_100g: 5 } },
+  { product_name: 'Frutos secos mix', default_portion: 30, nutriments: { 'energy-kcal_100g': 607, proteins_100g: 20, carbohydrates_100g: 21, fat_100g: 54 } },
+  { product_name: 'Almendras', default_portion: 30, nutriments: { 'energy-kcal_100g': 579, proteins_100g: 21, carbohydrates_100g: 22, fat_100g: 50 } },
+  { product_name: 'Nueces', default_portion: 30, nutriments: { 'energy-kcal_100g': 654, proteins_100g: 15, carbohydrates_100g: 14, fat_100g: 65 } },
+  { product_name: 'Anacardos', default_portion: 30, nutriments: { 'energy-kcal_100g': 553, proteins_100g: 18, carbohydrates_100g: 30, fat_100g: 44 } },
+  { product_name: 'Pistachos', default_portion: 30, nutriments: { 'energy-kcal_100g': 560, proteins_100g: 20, carbohydrates_100g: 28, fat_100g: 45 } },
+  { product_name: 'Crema de cacahuete', default_portion: 20, nutriments: { 'energy-kcal_100g': 588, proteins_100g: 25, carbohydrates_100g: 20, fat_100g: 50 } },
+  // PLATOS COMBINADOS ALBERTO
+  { product_name: 'Ensalada de arroz Alberto', default_portion: 550, nutriments: { 'energy-kcal_100g': 125, proteins_100g: 6.5, carbohydrates_100g: 19, fat_100g: 2.5 } },
+  { product_name: 'Ensalada de pasta Alberto', default_portion: 550, nutriments: { 'energy-kcal_100g': 145, proteins_100g: 7, carbohydrates_100g: 22, fat_100g: 3 } },
+  { product_name: 'Fajitas de ternera Alberto', default_portion: 450, nutriments: { 'energy-kcal_100g': 210, proteins_100g: 14, carbohydrates_100g: 16, fat_100g: 10 } },
+  { product_name: 'Tostadas centeno tomate aceite', default_portion: 140, nutriments: { 'energy-kcal_100g': 230, proteins_100g: 6, carbohydrates_100g: 32, fat_100g: 9 } },
+  { product_name: 'Tostadas centeno aguacate huevo', default_portion: 220, nutriments: { 'energy-kcal_100g': 220, proteins_100g: 9, carbohydrates_100g: 24, fat_100g: 10 } },
+  { product_name: 'Hamburguesa completa ternera', default_portion: 300, nutriments: { 'energy-kcal_100g': 260, proteins_100g: 13, carbohydrates_100g: 22, fat_100g: 14 } },
+  { product_name: 'Hamburguesa pollo air fryer completa', default_portion: 300, nutriments: { 'energy-kcal_100g': 220, proteins_100g: 15, carbohydrates_100g: 22, fat_100g: 8 } },
+  { product_name: 'Bowl arroz pollo aguacate', default_portion: 550, nutriments: { 'energy-kcal_100g': 165, proteins_100g: 12, carbohydrates_100g: 18, fat_100g: 5 } },
+  { product_name: 'Bowl arroz salmón aguacate', default_portion: 500, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 10, carbohydrates_100g: 17, fat_100g: 9 } },
+  { product_name: 'Pollo al curry con arroz', default_portion: 550, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 11, carbohydrates_100g: 20, fat_100g: 4 } },
+  { product_name: 'Arroz coreano con pollo', default_portion: 550, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 12, carbohydrates_100g: 20, fat_100g: 5 } },
+  { product_name: 'Puré de verduras', default_portion: 350, nutriments: { 'energy-kcal_100g': 55, proteins_100g: 1.5, carbohydrates_100g: 9, fat_100g: 1.5 } },
+  { product_name: 'Kebab durum pollo', default_portion: 450, nutriments: { 'energy-kcal_100g': 220, proteins_100g: 12, carbohydrates_100g: 24, fat_100g: 9 } },
+  { product_name: 'Burrito pollo', default_portion: 400, nutriments: { 'energy-kcal_100g': 200, proteins_100g: 12, carbohydrates_100g: 24, fat_100g: 7 } },
+  { product_name: 'Pasta boloñesa', default_portion: 450, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 9, carbohydrates_100g: 21, fat_100g: 6 } },
+  { product_name: 'Macarrones con tomate y atún', default_portion: 500, nutriments: { 'energy-kcal_100g': 155, proteins_100g: 9, carbohydrates_100g: 23, fat_100g: 3 } },
+  { product_name: 'Tortilla francesa', default_portion: 120, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 13, carbohydrates_100g: 1, fat_100g: 14 } },
+  { product_name: 'Tortilla de patata', default_portion: 180, nutriments: { 'energy-kcal_100g': 210, proteins_100g: 6, carbohydrates_100g: 17, fat_100g: 13 } },
+  { product_name: 'Croquetas', default_portion: 120, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 8, carbohydrates_100g: 24, fat_100g: 14 } },
+  { product_name: 'Empanadillas', default_portion: 120, nutriments: { 'energy-kcal_100g': 280, proteins_100g: 9, carbohydrates_100g: 30, fat_100g: 14 } },
+  { product_name: 'Pizza casera pollo cebolla queso', default_portion: 450, nutriments: { 'energy-kcal_100g': 210, proteins_100g: 14, carbohydrates_100g: 20, fat_100g: 8 } },
+  { product_name: 'Pizza comercial media', default_portion: 350, nutriments: { 'energy-kcal_100g': 260, proteins_100g: 11, carbohydrates_100g: 32, fat_100g: 10 } },
+  // DULCES Y SNACKS
+  { product_name: 'Helado', default_portion: 100, nutriments: { 'energy-kcal_100g': 210, proteins_100g: 3.5, carbohydrates_100g: 24, fat_100g: 11 } },
+  { product_name: 'Chocolate negro 85%', default_portion: 20, nutriments: { 'energy-kcal_100g': 600, proteins_100g: 10, carbohydrates_100g: 19, fat_100g: 52 } },
+  { product_name: 'Galletas tipo María', default_portion: 28, nutriments: { 'energy-kcal_100g': 430, proteins_100g: 7, carbohydrates_100g: 74, fat_100g: 11 } },
+  { product_name: 'Barrita de cereales', default_portion: 25, nutriments: { 'energy-kcal_100g': 400, proteins_100g: 6, carbohydrates_100g: 65, fat_100g: 12 } },
+  { product_name: 'Tortitas de arroz', default_portion: 18, nutriments: { 'energy-kcal_100g': 380, proteins_100g: 8, carbohydrates_100g: 82, fat_100g: 3 } },
+  { product_name: 'Nachos', default_portion: 60, nutriments: { 'energy-kcal_100g': 490, proteins_100g: 7, carbohydrates_100g: 57, fat_100g: 24 } },
+  { product_name: 'Doritos', default_portion: 44, nutriments: { 'energy-kcal_100g': 510, proteins_100g: 6, carbohydrates_100g: 61, fat_100g: 25 } },
+  { product_name: 'Palomitas', default_portion: 40, nutriments: { 'energy-kcal_100g': 387, proteins_100g: 12, carbohydrates_100g: 78, fat_100g: 4 } },
 ]
+
+const LIQUID_FOOD_NAMES = new Set(
+  LOCAL_FOODS.filter((f) => f.is_liquid).map((f) => f.product_name.toLowerCase())
+)
 
 // Extracts kcal per 100g handling both kcal and kJ fields
 function extractKcal(n: OFFProduct['nutriments']): number {
@@ -549,6 +729,9 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
     }, 600)
   }
 
+  const unit = selected?.is_liquid ? 'ml' : 'g'
+  const portionPresets = selected?.is_liquid ? [100, 200, 250, 500] : [100, 150, 200, 250]
+  const sliderMax = selected?.is_liquid ? 1000 : 500
   const kcalPer100 = selected ? extractKcal(selected.nutriments) : 0
   const prot100 = selected?.nutriments?.proteins_100g ?? 0
   const carbs100 = selected?.nutriments?.carbohydrates_100g ?? 0
@@ -595,7 +778,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           {results.map((p, i) => (
             <button
               key={i}
-              onClick={() => { setSelected(p); setGramos(100) }}
+              onClick={() => { setSelected(p); setGramos(p.default_portion ?? 100) }}
               className="text-left px-3 py-2.5 flex items-center justify-between rounded-xl bg-white"
             >
               <div className="min-w-0 flex-1 pr-2">
@@ -658,7 +841,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           {/* Quick portion presets */}
           <span className="label-caps block mb-2">Porción rápida</span>
           <div className="flex gap-1.5 mb-3">
-            {PORTION_PRESETS.map((p) => (
+            {portionPresets.map((p) => (
               <button
                 key={p}
                 onClick={() => setGramos(p)}
@@ -669,7 +852,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                   border: gramos === p ? 'none' : '1.5px solid #E5E7EB',
                 }}
               >
-                {p}g
+                {p}{unit}
               </button>
             ))}
           </div>
@@ -682,13 +865,13 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                 <input
                   type="number"
                   value={gramos || ''}
-                  onChange={(e) => setGramos(Math.min(500, Math.max(0, parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setGramos(Math.min(sliderMax, Math.max(0, parseInt(e.target.value) || 0)))}
                   min="0"
-                  max="500"
+                  max={sliderMax}
                   className="w-16 px-2 py-1 text-sm rounded-lg text-center font-black"
                   style={{ color: '#FF6B35' }}
                 />
-                <span className="text-xs text-gray-400 font-semibold">g</span>
+                <span className="text-xs text-gray-400 font-semibold">{unit}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -696,14 +879,14 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
               <input
                 type="range"
                 min="0"
-                max="500"
+                max={sliderMax}
                 step="5"
                 value={gramos}
                 onChange={(e) => setGramos(parseInt(e.target.value))}
                 className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
                 style={{ accentColor: '#FF6B35' }}
               />
-              <span className="text-[10px] text-gray-300">500g</span>
+              <span className="text-[10px] text-gray-300">{sliderMax}{unit}</span>
             </div>
           </div>
 
