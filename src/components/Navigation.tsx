@@ -50,7 +50,7 @@ export default function Navigation() {
     <>
       {/* ── Desktop sidebar ─────────────────────────── */}
       <aside
-        className="hidden md:flex flex-col w-60 shrink-0 h-screen sticky top-0"
+        className="hidden md:flex flex-col w-60 shrink-0 h-screen fixed top-0 left-0 z-40"
         style={{ background: sidebarBg }}
       >
         {/* Logo */}
