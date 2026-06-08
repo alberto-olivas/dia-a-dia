@@ -617,6 +617,27 @@ const LIQUID_FOOD_NAMES = new Set(
   LOCAL_FOODS.filter((f) => f.is_liquid).map((f) => f.product_name.toLowerCase())
 )
 
+// Strip diacritics so "proteina" matches "proteína", "cafe" matches "café", etc.
+function normalize(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+// All query words must appear somewhere in the product name (any order, any position)
+function matchesQuery(productName: string, query: string): boolean {
+  const normName = normalize(productName)
+  const words = normalize(query).trim().split(/\s+/).filter(Boolean)
+  return words.every((w) => normName.includes(w))
+}
+
+// Higher score = more relevant: name/word starts with query > substring match
+function scoreMatch(productName: string, query: string): number {
+  const normName = normalize(productName)
+  const normQuery = normalize(query.trim())
+  if (normName.startsWith(normQuery)) return 3
+  if (normName.split(/\s+/).some((w) => w.startsWith(normQuery))) return 2
+  return 1
+}
+
 // Extracts kcal per 100g handling both kcal and kJ fields
 function extractKcal(n: OFFProduct['nutriments']): number {
   if (n['energy-kcal_100g']) return Math.round(n['energy-kcal_100g'])
@@ -635,11 +656,11 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
 
   useEffect(() => { inputRef.current?.focus() }, [])
 
-  // Local matches are instant (no debounce)
+  // Local matches: accent-insensitive, all keywords must appear, sorted by relevance
   const localMatches = query.trim()
-    ? LOCAL_FOODS.filter((f) =>
-        f.product_name.toLowerCase().includes(query.toLowerCase())
-      )
+    ? LOCAL_FOODS
+        .filter((f) => matchesQuery(f.product_name, query))
+        .sort((a, b) => scoreMatch(b.product_name, query) - scoreMatch(a.product_name, query))
     : []
   const localMatchNames = new Set(localMatches.map((f) => f.product_name.toLowerCase()))
 
