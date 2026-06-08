@@ -173,10 +173,10 @@ export default function GestorPage() {
       estado: newEstado,
       fecha_creacion: new Date().toISOString(),
     }
+    // descripcion se omite del insert — la columna puede no existir en Supabase todavía
     const { data } = await supabase.from('tasks').insert({
       user_id: user!.id,
       nombre: tempTask.nombre,
-      descripcion: tempTask.descripcion,
       cuando: tempTask.cuando,
       fecha_objetivo: tempTask.fecha_objetivo,
       estado: tempTask.estado,
@@ -218,16 +218,17 @@ export default function GestorPage() {
   }
 
   async function saveEdit(id: string) {
-    // Capture values synchronously before any async operation
-    const updatedFields = {
-      nombre:        editNombre.trim(),
-      descripcion:   editDescripcion.trim() || null,
-      cuando:        editCuando,
+    const descripcion = editDescripcion.trim() || null
+    // Campos que van a Supabase (sin descripcion — columna puede no existir todavía)
+    const supabaseFields = {
+      nombre:         editNombre.trim(),
+      cuando:         editCuando,
       fecha_objetivo: editCuando === 'fecha' ? editFechaObj || null : null,
-      estado:        editEstado,
+      estado:         editEstado,
     }
+    const updatedFields = { ...supabaseFields, descripcion }
 
-    // Optimistic update — always apply to local state immediately
+    // Optimistic update — aplica de inmediato en local state
     const optimistic = tasks.map((x) => x.id === id ? { ...x, ...updatedFields } : x)
     setTasks(optimistic)
     setEditId(null)
@@ -236,11 +237,9 @@ export default function GestorPage() {
       localStorage.setItem('demo_tasks', JSON.stringify(optimistic))
       return
     }
-    // Persist description locally so it survives re-fetch from Supabase
-    saveDescStore(id, updatedFields.descripcion)
-    // Sync to Supabase; if it returns updated data, merge (don't overwrite descripcion)
-    const { data } = await supabase.from('tasks').update(updatedFields).eq('id', id).select().single()
-    if (data) setTasks((t) => t.map((x) => x.id === id ? { ...x, ...data, descripcion: updatedFields.descripcion } : x))
+    saveDescStore(id, descripcion)
+    const { data } = await supabase.from('tasks').update(supabaseFields).eq('id', id).select().single()
+    if (data) setTasks((t) => t.map((x) => x.id === id ? { ...x, ...data, descripcion } : x))
   }
 
   async function quickStatusChange(task: Task, newStatus: TaskStatus) {
@@ -250,8 +249,11 @@ export default function GestorPage() {
       localStorage.setItem('demo_tasks', JSON.stringify(saved))
       return
     }
+    // Optimistic update local inmediato
+    setTasks((t) => t.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x))
     const { data } = await supabase.from('tasks').update({ estado: newStatus }).eq('id', task.id).select().single()
-    if (data) setTasks((t) => t.map((x) => x.id === task.id ? data : x))
+    // Preservar descripcion local — Supabase no tiene esa columna todavía
+    if (data) setTasks((t) => t.map((x) => x.id === task.id ? { ...data, descripcion: task.descripcion } : x))
   }
 
   const sorted = sortTasks(tasks)
@@ -288,12 +290,12 @@ export default function GestorPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <span className="label-caps block mb-1">Progreso total</span>
-            <span className="font-black text-3xl text-gray-900">{pct}%</span>
+            <span className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>{pct}%</span>
           </div>
           <div className="text-right">
             <div className="font-black text-2xl leading-none" style={{ color: '#22C55E' }}>{completedCount}</div>
             <div className="label-caps">completadas</div>
-            <div className="font-bold text-lg leading-none text-gray-400 mt-1">{pending.length}</div>
+            <div className="font-bold text-lg leading-none mt-1" style={{ color: 'var(--text-muted)' }}>{pending.length}</div>
             <div className="label-caps">pendientes</div>
           </div>
         </div>
