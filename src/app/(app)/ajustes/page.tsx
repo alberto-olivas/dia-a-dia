@@ -5,7 +5,30 @@ import { useAuth } from '@/lib/auth-context'
 import { useProfile } from '@/lib/profile-context'
 import { useTheme } from '@/lib/theme-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
-import { User, Cake, Weight, Ruler, Mail, Lock, Sun, Moon, Save, CheckCircle, AlertCircle, Download, Smartphone, MonitorSmartphone, Flame } from 'lucide-react'
+import { User, Cake, Weight, Ruler, Mail, Lock, Sun, Moon, Save, CheckCircle, AlertCircle, Download, Smartphone, MonitorSmartphone, Flame, Sparkles, ChevronRight } from 'lucide-react'
+
+type ActivityLevel = 'light' | 'moderate' | 'active'
+type GoalType      = 'deficit' | 'maintenance' | 'surplus'
+
+function calcCalorieGoal(peso: number, altura: number, edad: number, activity: ActivityLevel, goal: GoalType): number {
+  const bmr = 10 * peso + 6.25 * altura - 5 * edad - 78
+  const multiplier = { light: 1.375, moderate: 1.55, active: 1.725 }[activity]
+  const tdee = Math.round(bmr * multiplier)
+  const adj  = { deficit: -400, maintenance: 0, surplus: 300 }[goal]
+  return Math.max(1200, Math.round(tdee + adj))
+}
+
+const ACTIVITY_OPTIONS: { value: ActivityLevel; label: string; desc: string }[] = [
+  { value: 'light',    label: 'Poco activo',  desc: '1–2 días/semana' },
+  { value: 'moderate', label: 'Moderado',      desc: '3–5 días/semana' },
+  { value: 'active',   label: 'Muy activo',    desc: '6–7 días o trabajo físico' },
+]
+
+const GOAL_OPTIONS: { value: GoalType; label: string; adj: string }[] = [
+  { value: 'deficit',     label: 'Déficit',       adj: '−400 kcal' },
+  { value: 'maintenance', label: 'Mantenimiento', adj: '±0 kcal'  },
+  { value: 'surplus',     label: 'Superávit',     adj: '+300 kcal' },
+]
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -61,6 +84,21 @@ export default function AjustesPage() {
     if (!isNaN(val) && val >= 500) saveCalorieGoal(val)
     else setCalorieInput(String(calorieGoal))
   }
+
+  // ── Calorie recommendation flow ────────────────────
+  const [recOpen,     setRecOpen]     = useState(false)
+  const [recActivity, setRecActivity] = useState<ActivityLevel | null>(null)
+  const [recGoal,     setRecGoal]     = useState<GoalType | null>(null)
+
+  function getProfileAge() {
+    if (!fechaNacimiento) return null
+    return Math.floor((Date.now() - new Date(fechaNacimiento).getTime()) / 3.15576e10)
+  }
+
+  const hasProfileData = !!(peso && altura)
+  const recResult = (recActivity && recGoal && hasProfileData)
+    ? calcCalorieGoal(parseFloat(peso), parseInt(altura), getProfileAge() ?? 30, recActivity, recGoal)
+    : null
 
   // ── Cuenta fields ─────────────────────────────────
   const [newEmail, setNewEmail] = useState('')
@@ -260,28 +298,29 @@ export default function AjustesPage() {
           <Flame size={14} style={{ color: '#FF6B35' }} />
           <span className="label-caps">Objetivo calórico</span>
         </div>
-        <div className="card p-5" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 30%, rgba(255,107,53,0.28) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255,155,80,0.18) 0%, transparent 45%)' }}>
-          <p className="text-xs text-gray-500 mb-4">
-            Personaliza tu objetivo de calorías diarias. Se usará en el apartado de Alimentación.
-          </p>
+        <div className="card p-5 flex flex-col gap-4" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 30%, rgba(255,107,53,0.28) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255,155,80,0.18) 0%, transparent 45%)' }}>
 
-          {/* Input + presets */}
-          <div className="flex items-center gap-3 mb-3">
-            <input
-              type="number"
-              inputMode="numeric"
-              value={calorieInput}
-              onChange={(e) => setCalorieInput(e.target.value)}
-              onBlur={commitCalorieInput}
-              onKeyDown={(e) => { if (e.key === 'Enter') { commitCalorieInput(); (e.target as HTMLInputElement).blur() } }}
-              min="500"
-              max="10000"
-              className="flex-1 px-4 py-3 text-xl font-black rounded-xl text-center"
-              style={{ color: '#FF6B35' }}
-            />
-            <span className="text-sm font-bold text-gray-400">kcal / día</span>
+          {/* Input manual */}
+          <div>
+            <label className="label-caps block mb-2">Objetivo actual</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={calorieInput}
+                onChange={(e) => setCalorieInput(e.target.value)}
+                onBlur={commitCalorieInput}
+                onKeyDown={(e) => { if (e.key === 'Enter') { commitCalorieInput(); (e.target as HTMLInputElement).blur() } }}
+                min="500"
+                max="10000"
+                className="flex-1 px-4 py-3 text-xl font-black rounded-xl text-center"
+                style={{ color: '#FF6B35' }}
+              />
+              <span className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>kcal / día</span>
+            </div>
           </div>
 
+          {/* Quick presets */}
           <div className="flex gap-2">
             {[1500, 1800, 2000, 2500, 3000, 3500].map((kcal) => (
               <button
@@ -289,14 +328,125 @@ export default function AjustesPage() {
                 onClick={() => saveCalorieGoal(kcal)}
                 className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all"
                 style={{
-                  background: calorieGoal === kcal ? '#FF6B35' : '#F5F5F7',
-                  color: calorieGoal === kcal ? '#FFFFFF' : '#9CA3AF',
+                  background: calorieGoal === kcal ? '#FF6B35' : 'var(--input-bg)',
+                  color: calorieGoal === kcal ? '#FFFFFF' : 'var(--text-muted)',
                 }}
               >
                 {(kcal / 1000).toFixed(1)}k
               </button>
             ))}
           </div>
+
+          <div className="divider" />
+
+          {/* Recommendation flow */}
+          {!recOpen ? (
+            <button
+              onClick={() => { setRecOpen(true); setRecActivity(null); setRecGoal(null) }}
+              disabled={!hasProfileData}
+              className="flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all disabled:opacity-40"
+              style={{ background: 'var(--input-bg)', border: '1px solid var(--divider)' }}
+            >
+              <div className="flex items-center gap-3">
+                <Sparkles size={15} style={{ color: '#FF6B35' }} />
+                <div className="text-left">
+                  <p className="text-sm font-bold" style={{ color: 'var(--app-color)' }}>Calcular recomendación</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {hasProfileData ? 'Basado en tu peso, altura y edad' : 'Completa tu perfil primero'}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />
+            </button>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>CALCULAR RECOMENDACIÓN</p>
+
+              {/* Activity level */}
+              <div>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--app-color)' }}>Nivel de actividad</p>
+                <div className="flex flex-col gap-2">
+                  {ACTIVITY_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setRecActivity(opt.value)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
+                      style={{
+                        background: recActivity === opt.value ? 'rgba(255,107,53,0.12)' : 'var(--input-bg)',
+                        border: `1px solid ${recActivity === opt.value ? '#FF6B35' : 'var(--divider)'}`,
+                      }}
+                    >
+                      <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center border-2"
+                        style={{ borderColor: recActivity === opt.value ? '#FF6B35' : 'var(--divider)', background: recActivity === opt.value ? '#FF6B35' : 'transparent' }}>
+                        {recActivity === opt.value && <CheckCircle size={8} color="#fff" />}
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold" style={{ color: 'var(--app-color)' }}>{opt.label}</span>
+                        <span className="text-xs ml-2" style={{ color: 'var(--text-muted)' }}>{opt.desc}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Goal */}
+              <div>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--app-color)' }}>Objetivo</p>
+                <div className="flex flex-col gap-2">
+                  {GOAL_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setRecGoal(opt.value)}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all"
+                      style={{
+                        background: recGoal === opt.value ? 'rgba(255,107,53,0.12)' : 'var(--input-bg)',
+                        border: `1px solid ${recGoal === opt.value ? '#FF6B35' : 'var(--divider)'}`,
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center border-2"
+                          style={{ borderColor: recGoal === opt.value ? '#FF6B35' : 'var(--divider)', background: recGoal === opt.value ? '#FF6B35' : 'transparent' }}>
+                          {recGoal === opt.value && <CheckCircle size={8} color="#fff" />}
+                        </div>
+                        <span className="text-xs font-bold" style={{ color: 'var(--app-color)' }}>{opt.label}</span>
+                      </div>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--divider)', color: 'var(--text-muted)' }}>{opt.adj}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Result */}
+              {recResult && (
+                <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.3)' }}>
+                  <p className="text-3xl font-black mb-0.5" style={{ color: '#FF6B35' }}>{recResult.toLocaleString()} kcal</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>recomendadas al día</p>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => { saveCalorieGoal(recResult); setRecOpen(false) }}
+                      className="flex-1 py-2 text-xs font-bold rounded-lg"
+                      style={{ background: '#FF6B35', color: '#fff' }}
+                    >
+                      Aplicar
+                    </button>
+                    <button
+                      onClick={() => setRecOpen(false)}
+                      className="flex-1 py-2 text-xs font-bold rounded-lg"
+                      style={{ background: 'var(--input-bg)', color: 'var(--text-muted)', border: '1px solid var(--divider)' }}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!recResult && (
+                <button onClick={() => setRecOpen(false)} className="text-xs text-center py-2" style={{ color: 'var(--text-muted)' }}>
+                  Cancelar
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
