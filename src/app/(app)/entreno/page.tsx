@@ -194,7 +194,7 @@ export default function EntrenoPage() {
       <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 03</span>
         <div className="flex items-end justify-between gap-4">
-          <h1 className="font-black text-3xl text-gray-900">ENTRENO</h1>
+          <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>ENTRENO</h1>
           {workout && (
             <div className="text-right">
               <div className="font-black text-3xl leading-none" style={{ color: '#FF6B35' }}>
@@ -224,7 +224,7 @@ export default function EntrenoPage() {
                   </div>
                   <div>
                     <span className="label-caps block mb-0.5">Entreno de hoy</span>
-                    <h2 className="font-black text-lg text-gray-900">
+                    <h2 className="font-black text-lg" style={{ color: 'var(--app-color)' }}>
                       {WORKOUT_TYPES[workout.tipo as WorkoutType]?.label ?? workout.tipo}
                     </h2>
                     <div className="flex items-center gap-3 mt-1">
@@ -473,7 +473,7 @@ export default function EntrenoPage() {
             {steps > 0 && (
               <div className="grid grid-cols-3 gap-3">
                 <div className="text-center p-2 rounded-xl bg-gray-50">
-                  <div className="font-black text-lg leading-none text-gray-900">{steps.toLocaleString()}</div>
+                  <div className="font-black text-lg leading-none" style={{ color: 'var(--app-color)' }}>{steps.toLocaleString()}</div>
                   <div className="label-caps mt-1">pasos</div>
                 </div>
                 <div className="text-center p-2 rounded-xl bg-gray-50">

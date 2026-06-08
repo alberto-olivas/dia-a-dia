@@ -7,6 +7,7 @@ export interface Task {
   id: string
   user_id: string
   nombre: string
+  descripcion?: string | null
   cuando: TaskWhen
   fecha_objetivo?: string | null
   estado: TaskStatus

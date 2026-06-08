@@ -1,9 +1,22 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, ListTodo, Utensils, Dumbbell, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+
+function useDarkMode() {
+  const [dark, setDark] = useState(false)
+  useEffect(() => {
+    const check = () => setDark(document.documentElement.dataset.theme === 'dark')
+    check()
+    const obs = new MutationObserver(check)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
+  return dark
+}
 
 const NAV_ITEMS = [
   { href: '/home',         label: 'Home',      Icon: Home },
@@ -25,6 +38,11 @@ const SIDEBAR_GRADIENT =
 export default function Navigation() {
   const pathname = usePathname()
   const { user, signOut } = useAuth()
+  const dark = useDarkMode()
+
+  const sidebarBg = dark
+    ? 'linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.42)),' + SIDEBAR_GRADIENT
+    : SIDEBAR_GRADIENT
 
   if (!user) return null
 
@@ -33,7 +51,7 @@ export default function Navigation() {
       {/* ── Desktop sidebar ─────────────────────────── */}
       <aside
         className="hidden md:flex flex-col w-60 shrink-0 h-screen sticky top-0"
-        style={{ background: SIDEBAR_GRADIENT }}
+        style={{ background: sidebarBg }}
       >
         {/* Logo */}
         <div className="px-6 py-8 border-b" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
@@ -114,7 +132,7 @@ export default function Navigation() {
       <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50">
         <div
           className="flex px-1 py-2 rounded-2xl overflow-hidden"
-          style={{ background: SIDEBAR_GRADIENT, boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+          style={{ background: sidebarBg, boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
         >
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const active = pathname === href

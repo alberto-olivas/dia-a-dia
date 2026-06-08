@@ -23,10 +23,10 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   terminada: 'Terminada',
 }
 
-const STATUS_COLORS: Record<TaskStatus, string> = {
-  por_hacer: '#E5E7EB',
-  en_proceso: '#FF6B35',
-  terminada: '#22C55E',
+const STATUS_BADGE: Record<TaskStatus, { bg: string; color: string }> = {
+  por_hacer: { bg: '#22C55E', color: '#FFFFFF' },
+  en_proceso: { bg: '#F59E0B', color: '#FFFFFF' },
+  terminada:  { bg: '#EF4444', color: '#FFFFFF' },
 }
 
 const WHEN_OPTIONS: TaskWhen[] = ['hoy', 'manana', 'semana', 'fecha', 'sin_fecha']
@@ -61,6 +61,7 @@ export default function GestorPage() {
   const [mounted, setMounted] = useState(false)
 
   const [newNombre, setNewNombre] = useState('')
+  const [newDescripcion, setNewDescripcion] = useState('')
   const [newCuando, setNewCuando] = useState<TaskWhen>('hoy')
   const [newFechaObj, setNewFechaObj] = useState('')
   const [newEstado, setNewEstado] = useState<TaskStatus>('por_hacer')
@@ -68,6 +69,7 @@ export default function GestorPage() {
 
   const [editId, setEditId] = useState<string | null>(null)
   const [editNombre, setEditNombre] = useState('')
+  const [editDescripcion, setEditDescripcion] = useState('')
   const [editCuando, setEditCuando] = useState<TaskWhen>('hoy')
   const [editFechaObj, setEditFechaObj] = useState('')
   const [editEstado, setEditEstado] = useState<TaskStatus>('por_hacer')
@@ -88,6 +90,16 @@ export default function GestorPage() {
     fetchWeeklyData()
   }, [user])
 
+  // ── Descripción fallback en localStorage (hasta que exista columna en Supabase) ──
+  function loadDescStore(): Record<string, string> {
+    try { return JSON.parse(localStorage.getItem('task_descriptions') ?? '{}') } catch { return {} }
+  }
+  function saveDescStore(id: string, desc: string | null) {
+    const store = loadDescStore()
+    if (desc) store[id] = desc; else delete store[id]
+    localStorage.setItem('task_descriptions', JSON.stringify(store))
+  }
+
   async function fetchTasks() {
     setLoading(true)
     const { data } = await supabase
@@ -95,7 +107,12 @@ export default function GestorPage() {
       .select('*')
       .eq('user_id', user!.id)
       .order('fecha_creacion', { ascending: false })
-    setTasks(data ?? [])
+    // Merge locally-stored descriptions for tasks that Supabase returns without descripcion
+    const descStore = loadDescStore()
+    setTasks((data ?? []).map((t: Task) => ({
+      ...t,
+      descripcion: t.descripcion ?? descStore[t.id] ?? null,
+    })))
     setLoading(false)
   }
 
@@ -127,6 +144,7 @@ export default function GestorPage() {
         id: crypto.randomUUID(),
         user_id: user!.id,
         nombre: newNombre.trim(),
+        descripcion: newDescripcion.trim() || null,
         cuando: newCuando,
         fecha_objetivo: newCuando === 'fecha' ? newFechaObj || null : null,
         estado: newEstado,
@@ -136,6 +154,7 @@ export default function GestorPage() {
       setTasks(saved)
       localStorage.setItem('demo_tasks', JSON.stringify(saved))
       setNewNombre('')
+      setNewDescripcion('')
       setNewCuando('hoy')
       setNewFechaObj('')
       setNewEstado('por_hacer')
@@ -144,16 +163,32 @@ export default function GestorPage() {
       return
     }
 
-    const { data } = await supabase.from('tasks').insert({
+    const tempTask: Task = {
+      id: crypto.randomUUID(),
       user_id: user!.id,
       nombre: newNombre.trim(),
+      descripcion: newDescripcion.trim() || null,
       cuando: newCuando,
-      fecha_objetivo: newCuando === 'fecha' ? newFechaObj : null,
+      fecha_objetivo: newCuando === 'fecha' ? newFechaObj || null : null,
       estado: newEstado,
       fecha_creacion: new Date().toISOString(),
+    }
+    const { data } = await supabase.from('tasks').insert({
+      user_id: user!.id,
+      nombre: tempTask.nombre,
+      descripcion: tempTask.descripcion,
+      cuando: tempTask.cuando,
+      fecha_objetivo: tempTask.fecha_objetivo,
+      estado: tempTask.estado,
+      fecha_creacion: tempTask.fecha_creacion,
     }).select().single()
-    if (data) setTasks((t) => [data, ...t])
+    // Persist description locally so it survives re-fetch from Supabase
+    const finalId = data?.id ?? tempTask.id
+    saveDescStore(finalId, tempTask.descripcion ?? null)
+    // Merge: keep our descripcion even if Supabase doesn't return it
+    setTasks((t) => [data ? { ...tempTask, ...data, descripcion: tempTask.descripcion } : tempTask, ...t])
     setNewNombre('')
+    setNewDescripcion('')
     setNewCuando('hoy')
     setNewFechaObj('')
     setNewEstado('por_hacer')
@@ -169,39 +204,43 @@ export default function GestorPage() {
       return
     }
     await supabase.from('tasks').delete().eq('id', id)
+    saveDescStore(id, null)
     setTasks((t) => t.filter((x) => x.id !== id))
   }
 
   function startEdit(task: Task) {
     setEditId(task.id)
     setEditNombre(task.nombre)
+    setEditDescripcion(task.descripcion ?? '')
     setEditCuando(task.cuando)
     setEditFechaObj(task.fecha_objetivo ?? '')
     setEditEstado(task.estado)
   }
 
   async function saveEdit(id: string) {
+    // Capture values synchronously before any async operation
+    const updatedFields = {
+      nombre:        editNombre.trim(),
+      descripcion:   editDescripcion.trim() || null,
+      cuando:        editCuando,
+      fecha_objetivo: editCuando === 'fecha' ? editFechaObj || null : null,
+      estado:        editEstado,
+    }
+
+    // Optimistic update — always apply to local state immediately
+    const optimistic = tasks.map((x) => x.id === id ? { ...x, ...updatedFields } : x)
+    setTasks(optimistic)
+    setEditId(null)
+
     if (!IS_SUPABASE_CONFIGURED) {
-      const saved = tasks.map((x) => x.id === id ? {
-        ...x,
-        nombre: editNombre,
-        cuando: editCuando,
-        fecha_objetivo: editCuando === 'fecha' ? editFechaObj || null : null,
-        estado: editEstado,
-      } : x)
-      setTasks(saved)
-      localStorage.setItem('demo_tasks', JSON.stringify(saved))
-      setEditId(null)
+      localStorage.setItem('demo_tasks', JSON.stringify(optimistic))
       return
     }
-    const { data } = await supabase.from('tasks').update({
-      nombre: editNombre,
-      cuando: editCuando,
-      fecha_objetivo: editCuando === 'fecha' ? editFechaObj : null,
-      estado: editEstado,
-    }).eq('id', id).select().single()
-    if (data) setTasks((t) => t.map((x) => x.id === id ? data : x))
-    setEditId(null)
+    // Persist description locally so it survives re-fetch from Supabase
+    saveDescStore(id, updatedFields.descripcion)
+    // Sync to Supabase; if it returns updated data, merge (don't overwrite descripcion)
+    const { data } = await supabase.from('tasks').update(updatedFields).eq('id', id).select().single()
+    if (data) setTasks((t) => t.map((x) => x.id === id ? { ...x, ...data, descripcion: updatedFields.descripcion } : x))
   }
 
   async function quickStatusChange(task: Task, newStatus: TaskStatus) {
@@ -229,7 +268,7 @@ export default function GestorPage() {
       <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 01</span>
         <div className="flex items-center justify-between">
-          <h1 className="font-black text-3xl text-gray-900">GESTOR</h1>
+          <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>GESTOR</h1>
           <button
             onClick={() => setShowForm(!showForm)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all"
@@ -276,7 +315,14 @@ export default function GestorPage() {
             onChange={(e) => setNewNombre(e.target.value)}
             placeholder="¿Qué tienes que hacer?"
             required
-            className="w-full px-4 py-3 text-sm rounded-xl mb-4"
+            className="w-full px-4 py-3 text-sm rounded-xl mb-2"
+          />
+          <textarea
+            value={newDescripcion}
+            onChange={(e) => setNewDescripcion(e.target.value)}
+            placeholder="Descripción (opcional)"
+            rows={2}
+            className="w-full px-4 py-3 text-sm rounded-xl mb-4 resize-none"
           />
 
           {/* Cuando — pill buttons */}
@@ -366,6 +412,7 @@ export default function GestorPage() {
                     task={task}
                     isEditing={editId === task.id}
                     editNombre={editNombre}
+                    editDescripcion={editDescripcion}
                     editCuando={editCuando}
                     editFechaObj={editFechaObj}
                     editEstado={editEstado}
@@ -375,6 +422,7 @@ export default function GestorPage() {
                     onDelete={() => deleteTask(task.id)}
                     onStatusChange={(s) => quickStatusChange(task, s)}
                     setEditNombre={setEditNombre}
+                    setEditDescripcion={setEditDescripcion}
                     setEditCuando={setEditCuando}
                     setEditFechaObj={setEditFechaObj}
                     setEditEstado={setEditEstado}
@@ -395,6 +443,7 @@ export default function GestorPage() {
                     task={task}
                     isEditing={editId === task.id}
                     editNombre={editNombre}
+                    editDescripcion={editDescripcion}
                     editCuando={editCuando}
                     editFechaObj={editFechaObj}
                     editEstado={editEstado}
@@ -404,6 +453,7 @@ export default function GestorPage() {
                     onDelete={() => deleteTask(task.id)}
                     onStatusChange={(s) => quickStatusChange(task, s)}
                     setEditNombre={setEditNombre}
+                    setEditDescripcion={setEditDescripcion}
                     setEditCuando={setEditCuando}
                     setEditFechaObj={setEditFechaObj}
                     setEditEstado={setEditEstado}
@@ -456,6 +506,7 @@ interface TaskCardProps {
   task: Task
   isEditing: boolean
   editNombre: string
+  editDescripcion: string
   editCuando: TaskWhen
   editFechaObj: string
   editEstado: TaskStatus
@@ -465,15 +516,16 @@ interface TaskCardProps {
   onDelete: () => void
   onStatusChange: (s: TaskStatus) => void
   setEditNombre: (v: string) => void
+  setEditDescripcion: (v: string) => void
   setEditCuando: (v: TaskWhen) => void
   setEditFechaObj: (v: string) => void
   setEditEstado: (v: TaskStatus) => void
 }
 
 function TaskCard({
-  task, isEditing, editNombre, editCuando, editFechaObj, editEstado,
+  task, isEditing, editNombre, editDescripcion, editCuando, editFechaObj, editEstado,
   onEdit, onSaveEdit, onCancelEdit, onDelete, onStatusChange,
-  setEditNombre, setEditCuando, setEditFechaObj, setEditEstado,
+  setEditNombre, setEditDescripcion, setEditCuando, setEditFechaObj, setEditEstado,
 }: TaskCardProps) {
   const done = task.estado === 'terminada'
   const [showStatusMenu, setShowStatusMenu] = useState(false)
@@ -485,6 +537,13 @@ function TaskCard({
           value={editNombre}
           onChange={(e) => setEditNombre(e.target.value)}
           className="w-full px-3 py-2.5 text-sm rounded-xl"
+        />
+        <textarea
+          value={editDescripcion}
+          onChange={(e) => setEditDescripcion(e.target.value)}
+          placeholder="Descripción (opcional)"
+          rows={2}
+          className="w-full px-3 py-2.5 text-sm rounded-xl resize-none"
         />
         <div>
           <span className="label-caps block mb-2">¿Cuándo?</span>
@@ -542,7 +601,8 @@ function TaskCard({
           </button>
           <button
             onClick={onCancelEdit}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-gray-100 text-gray-500"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase"
+            style={{ background: 'var(--divider)', color: 'var(--text-muted)' }}
           >
             <X size={12} /> Cancelar
           </button>
@@ -553,13 +613,13 @@ function TaskCard({
 
   return (
     <div
-      className="card flex items-center gap-3 px-4 py-3.5"
+      className="card flex items-start gap-3 px-4 py-3.5"
       style={{ opacity: done ? 0.7 : 1 }}
     >
-      {/* Checkbox */}
+      {/* Checkbox — alineado arriba con el título */}
       <button
         onClick={() => onStatusChange(done ? 'por_hacer' : 'terminada')}
-        className="w-5 h-5 rounded-md flex items-center justify-center border-2 flex-shrink-0 transition-all"
+        className="w-5 h-5 rounded-md flex items-center justify-center border-2 flex-shrink-0 transition-all mt-0.5"
         style={{
           borderColor: done ? '#22C55E' : '#E5E7EB',
           background: done ? '#22C55E' : 'transparent',
@@ -571,20 +631,25 @@ function TaskCard({
       {/* Task info */}
       <div className="flex-1 min-w-0">
         <p
-          className="text-sm font-semibold"
+          className="text-sm font-semibold leading-snug"
           style={{
-            color: done ? '#9CA3AF' : '#1A1A1A',
+            color: done ? 'var(--text-muted)' : 'var(--app-color)',
             textDecoration: done ? 'line-through' : 'none',
           }}
         >
           {task.nombre}
         </p>
-        <div className="flex items-center gap-2 mt-1 flex-wrap">
+        {task.descripcion && (
+          <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            {task.descripcion}
+          </p>
+        )}
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <span
             className="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full"
             style={{
-              background: task.estado === 'en_proceso' ? '#FFF4EF' : '#F5F5F7',
-              color: STATUS_COLORS[task.estado],
+              background: STATUS_BADGE[task.estado].bg,
+              color: STATUS_BADGE[task.estado].color,
             }}
           >
             {STATUS_LABELS[task.estado]}
@@ -598,26 +663,28 @@ function TaskCard({
 
       {/* Quick status cycle */}
       {!done && (
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowStatusMenu(!showStatusMenu)}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-50 text-gray-400"
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-gray-400"
+            style={{ background: 'var(--divider)' }}
           >
             <ChevronDown size={12} />
           </button>
           {showStatusMenu && (
             <div
               className="absolute right-0 top-8 z-10 rounded-xl overflow-hidden"
-              style={{ background: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 140 }}
+              style={{ background: 'var(--card-bg)', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', minWidth: 140, border: '1px solid var(--card-border)' }}
             >
               {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
                 <button
                   key={s}
-                  onClick={() => { onStatusChange(s); setShowStatusMenu(false) }}
-                  className="w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-gray-50 transition-colors"
-                  style={{ color: STATUS_COLORS[s] || '#1A1A1A' }}
+                  onClick={() => { onStatusChange(s as TaskStatus); setShowStatusMenu(false) }}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2"
+                  style={{ color: 'var(--app-color)' }}
                 >
-                  {STATUS_LABELS[s]}
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: STATUS_BADGE[s as TaskStatus].bg }} />
+                  {STATUS_LABELS[s as TaskStatus]}
                 </button>
               ))}
             </div>
@@ -626,11 +693,11 @@ function TaskCard({
       )}
 
       {/* Edit & delete */}
-      <div className="flex items-center gap-0.5">
-        <button onClick={onEdit} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-300">
+      <div className="flex items-center gap-0.5 flex-shrink-0">
+        <button onClick={onEdit} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300" style={{ background: 'transparent' }}>
           <Pencil size={13} />
         </button>
-        <button onClick={onDelete} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-300">
+        <button onClick={onDelete} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300" style={{ background: 'transparent' }}>
           <Trash2 size={13} />
         </button>
       </div>

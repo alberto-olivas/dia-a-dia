@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { FoodEntry, MealSection } from '@/lib/types'
@@ -51,7 +52,11 @@ interface OFFProduct {
 
 export default function AlimentacionPage() {
   const { user } = useAuth()
-  const today = new Date().toISOString().split('T')[0]
+  const searchParams = useSearchParams()
+  const realToday = new Date().toISOString().split('T')[0]
+  const paramDate = searchParams.get('date')
+  const today = (paramDate && paramDate <= realToday) ? paramDate : realToday
+  const isViewingPast = today !== realToday
   const [entries, setEntries] = useState<FoodEntry[]>([])
   const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
   const [openSection, setOpenSection] = useState<MealSection | null>('desayuno')
@@ -165,7 +170,20 @@ export default function AlimentacionPage() {
       {/* ── Header ─────────────────────────────────── */}
       <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 02</span>
-        <h1 className="font-black text-3xl text-gray-900">ALIMENTACIÓN</h1>
+        <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>ALIMENTACIÓN</h1>
+        {isViewingPast && (
+          <div
+            className="flex items-center justify-between mt-3 rounded-xl px-3 py-2"
+            style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.25)' }}
+          >
+            <span className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+              {new Date(today + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </span>
+            <a href="/alimentacion" className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+              Ir a hoy →
+            </a>
+          </div>
+        )}
       </header>
 
       {/* ── Calorie progress card ──────────────────── */}
