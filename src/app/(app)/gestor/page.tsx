@@ -616,7 +616,7 @@ function TaskCard({
   return (
     <div
       className="card flex items-start gap-3 px-4 py-3.5"
-      style={{ opacity: done ? 0.7 : 1 }}
+      style={{ opacity: done ? 0.7 : 1, position: 'relative', zIndex: showStatusMenu ? 50 : undefined }}
     >
       {/* Checkbox — alineado arriba con el título */}
       <button
@@ -675,7 +675,7 @@ function TaskCard({
           </button>
           {showStatusMenu && (
             <div
-              className="absolute right-0 top-8 z-10 rounded-xl overflow-hidden"
+              className="absolute right-0 top-8 z-50 rounded-xl overflow-hidden"
               style={{ background: 'var(--card-bg)', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', minWidth: 140, border: '1px solid var(--card-border)' }}
             >
               {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
