@@ -74,10 +74,11 @@ html[data-theme="dark"] {
     background-image: none;
   }
 
-  ::-webkit-scrollbar { width: 7px; height: 7px; }
-  ::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted-2); }
+  ::-webkit-scrollbar { width: 12px; height: 12px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 8px; margin: 4px; }
+  ::-webkit-scrollbar-thumb { background: #FF6B35; border-radius: 8px; border: 2px solid var(--app-bg); }
+  ::-webkit-scrollbar-thumb:hover { background: #e55a24; }
+  ::-webkit-scrollbar-corner { background: transparent; }
 
   input, select, textarea {
     background: var(--input-bg);
