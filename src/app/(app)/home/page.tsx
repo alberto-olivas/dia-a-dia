@@ -100,6 +100,7 @@ export default function HomePage() {
   const [pendingTasks, setPendingTasks] = useState<Task[]>([])
   const [doneTasks, setDoneTasks] = useState<Task[]>([])
   const [calories, setCalories] = useState({ consumed: 0, workout: 0, steps: 0, sleep: 0 })
+  const [calorieGoal, setCalorieGoal] = useState(2500)
   const [workout, setWorkout] = useState<Workout | null>(null)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const calRef = useRef<HTMLDivElement>(null)
@@ -109,6 +110,16 @@ export default function HomePage() {
   const selD = new Date(selectedDate + 'T12:00:00')
   const [calYear, setCalYear]   = useState(selD.getFullYear())
   const [calMonth, setCalMonth] = useState(selD.getMonth())
+
+  useEffect(() => {
+    const load = () => {
+      const saved = parseInt(localStorage.getItem('calorie_goal') ?? '') || 2500
+      setCalorieGoal(saved)
+    }
+    load()
+    window.addEventListener('storage', load)
+    return () => window.removeEventListener('storage', load)
+  }, [])
 
   // Clock tick + midnight day-reset
   useEffect(() => {
@@ -452,7 +463,7 @@ export default function HomePage() {
                 )}
               </div>
               <div className="mt-3 h-1 rounded-full bg-gray-100">
-                <div className="h-1 rounded-full" style={{ width: `${Math.min(100, (calories.consumed / 2500) * 100)}%`, background: '#FF6B35' }} />
+                <div className="h-1 rounded-full" style={{ width: `${Math.min(100, (calories.consumed / calorieGoal) * 100)}%`, background: '#FF6B35' }} />
               </div>
             </Link>
           )

@@ -41,16 +41,25 @@ export default function AjustesPage() {
 
   // ── Calorie goal ──────────────────────────────────
   const [calorieGoal, setCalorieGoal] = useState(2500)
+  const [calorieInput, setCalorieInput] = useState('2500')
 
   useEffect(() => {
     const saved = parseInt(localStorage.getItem('calorie_goal') ?? '') || 2500
     setCalorieGoal(saved)
+    setCalorieInput(String(saved))
   }, [])
 
   function saveCalorieGoal(val: number) {
     const clamped = Math.max(500, Math.min(10000, val))
     setCalorieGoal(clamped)
+    setCalorieInput(String(clamped))
     localStorage.setItem('calorie_goal', String(clamped))
+  }
+
+  function commitCalorieInput() {
+    const val = parseInt(calorieInput)
+    if (!isNaN(val) && val >= 500) saveCalorieGoal(val)
+    else setCalorieInput(String(calorieGoal))
   }
 
   // ── Cuenta fields ─────────────────────────────────
@@ -260,11 +269,13 @@ export default function AjustesPage() {
           <div className="flex items-center gap-3 mb-3">
             <input
               type="number"
-              value={calorieGoal || ''}
-              onChange={(e) => saveCalorieGoal(parseInt(e.target.value) || 2500)}
+              inputMode="numeric"
+              value={calorieInput}
+              onChange={(e) => setCalorieInput(e.target.value)}
+              onBlur={commitCalorieInput}
+              onKeyDown={(e) => { if (e.key === 'Enter') { commitCalorieInput(); (e.target as HTMLInputElement).blur() } }}
               min="500"
               max="10000"
-              step="50"
               className="flex-1 px-4 py-3 text-xl font-black rounded-xl text-center"
               style={{ color: '#FF6B35' }}
             />
