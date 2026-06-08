@@ -424,8 +424,7 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Miel', default_portion: 10, nutriments: { 'energy-kcal_100g': 304, proteins_100g: 0.3, carbohydrates_100g: 82, fat_100g: 0 } },
   { product_name: 'Azúcar blanco', default_portion: 5, nutriments: { 'energy-kcal_100g': 400, proteins_100g: 0, carbohydrates_100g: 100, fat_100g: 0 } },
   // SUPLEMENTOS
-  { product_name: 'HSN Evolate 2.0 Whey Isolate CFM', default_portion: 30, nutriments: { 'energy-kcal_100g': 383, proteins_100g: 90, carbohydrates_100g: 3.3, fat_100g: 1.5 } },
-  { product_name: 'Whey protein genérica concentrada', default_portion: 30, nutriments: { 'energy-kcal_100g': 400, proteins_100g: 80, carbohydrates_100g: 7, fat_100g: 6 } },
+  { product_name: 'Batido de proteínas HSN Evolate 2.0 Whey Isolate CFM', default_portion: 30, nutriments: { 'energy-kcal_100g': 383, proteins_100g: 90, carbohydrates_100g: 3.3, fat_100g: 1.7 } },
   { product_name: 'Creatina monohidrato', default_portion: 5, nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
   { product_name: 'Citrulina malato', default_portion: 6, nutriments: { 'energy-kcal_100g': 0, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 0 } },
   // LÁCTEOS
