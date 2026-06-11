@@ -26,8 +26,11 @@ function getGreeting(date: Date): { text: string; emoji: string } {
 }
 
 function getTodayStr() {
-  // Use Madrid timezone so midnight reset fires at 00:00 local time
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
+}
+
+function toMadridDate(d: Date): string {
+  return d.toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
 }
 
 function getMadridTime(date: Date): string {
@@ -49,7 +52,7 @@ function getWeekDays(refDateStr: string) {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    const dateStr = d.toISOString().split('T')[0]
+    const dateStr = toMadridDate(d)
     return { dateStr, label: DAY_NAMES_SHORT[d.getDay()], num: d.getDate(), isToday: dateStr === todayStr, isFuture: dateStr > todayStr }
   })
 }
@@ -61,21 +64,21 @@ function getCalendarDays(year: number, month: number) {
   const cells: Array<{ dateStr: string; inMonth: boolean; isToday: boolean; isFuture: boolean; day: number }> = []
   // leading padding
   for (let i = 0; i < firstDow; i++) {
-    const d = new Date(year, month, i - firstDow + 1)
-    const dateStr = d.toISOString().split('T')[0]
+    const d = new Date(year, month, i - firstDow + 1, 12)
+    const dateStr = toMadridDate(d)
     cells.push({ dateStr, inMonth: false, isToday: dateStr === todayStr, isFuture: dateStr > todayStr, day: d.getDate() })
   }
   // current month
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = new Date(year, month, d).toISOString().split('T')[0]
+    const dateStr = toMadridDate(new Date(year, month, d, 12))
     cells.push({ dateStr, inMonth: true, isToday: dateStr === todayStr, isFuture: dateStr > todayStr, day: d })
   }
   // trailing padding to complete last row
   const tail = cells.length % 7
   if (tail > 0) {
     for (let i = 1; i <= 7 - tail; i++) {
-      const d = new Date(year, month + 1, i)
-      const dateStr = d.toISOString().split('T')[0]
+      const d = new Date(year, month + 1, i, 12)
+      const dateStr = toMadridDate(d)
       cells.push({ dateStr, inMonth: false, isToday: dateStr === todayStr, isFuture: dateStr > todayStr, day: i })
     }
   }

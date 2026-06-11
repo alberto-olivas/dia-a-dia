@@ -30,7 +30,7 @@ function getLast7Days(): Array<{ date: string; label: string }> {
     const d = new Date()
     d.setDate(d.getDate() - (6 - i))
     return {
-      date: d.toISOString().split('T')[0],
+      date: d.toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }),
       label: i === 6 ? 'Hoy' : days[d.getDay()],
     }
   })
@@ -53,7 +53,7 @@ interface OFFProduct {
 export default function AlimentacionPage() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
-  const realToday = new Date().toISOString().split('T')[0]
+  const realToday = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
   const paramDate = searchParams.get('date')
   const today = (paramDate && paramDate <= realToday) ? paramDate : realToday
   const isViewingPast = today !== realToday
@@ -83,7 +83,7 @@ export default function AlimentacionPage() {
     }
     fetchEntries()
     fetchWeeklyData()
-  }, [user])
+  }, [user, today])
 
   async function fetchEntries() {
     setLoading(true)

@@ -11,6 +11,7 @@ create table if not exists public.tasks (
   id            uuid primary key default uuid_generate_v4(),
   user_id       uuid references auth.users(id) on delete cascade not null,
   nombre        text not null,
+  descripcion   text,
   cuando        text not null default 'hoy',
   fecha_objetivo date,
   estado        text not null default 'por_hacer',

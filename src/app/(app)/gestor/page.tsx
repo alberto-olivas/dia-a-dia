@@ -90,7 +90,7 @@ export default function GestorPage() {
     fetchWeeklyData()
   }, [user])
 
-  // ── Descripción fallback en localStorage (hasta que exista columna en Supabase) ──
+  // ── Descripción fallback en localStorage (para tareas creadas antes de la migración) ──
   function loadDescStore(): Record<string, string> {
     try { return JSON.parse(localStorage.getItem('task_descriptions') ?? '{}') } catch { return {} }
   }
@@ -173,19 +173,17 @@ export default function GestorPage() {
       estado: newEstado,
       fecha_creacion: new Date().toISOString(),
     }
-    // descripcion se omite del insert — la columna puede no existir en Supabase todavía
     const { data } = await supabase.from('tasks').insert({
       user_id: user!.id,
       nombre: tempTask.nombre,
+      descripcion: tempTask.descripcion ?? null,
       cuando: tempTask.cuando,
       fecha_objetivo: tempTask.fecha_objetivo,
       estado: tempTask.estado,
       fecha_creacion: tempTask.fecha_creacion,
     }).select().single()
-    // Persist description locally so it survives re-fetch from Supabase
     const finalId = data?.id ?? tempTask.id
     saveDescStore(finalId, tempTask.descripcion ?? null)
-    // Merge: keep our descripcion even if Supabase doesn't return it
     setTasks((t) => [data ? { ...tempTask, ...data, descripcion: tempTask.descripcion } : tempTask, ...t])
     setNewNombre('')
     setNewDescripcion('')
@@ -219,9 +217,9 @@ export default function GestorPage() {
 
   async function saveEdit(id: string) {
     const descripcion = editDescripcion.trim() || null
-    // Campos que van a Supabase (sin descripcion — columna puede no existir todavía)
     const supabaseFields = {
       nombre:         editNombre.trim(),
+      descripcion:    descripcion,
       cuando:         editCuando,
       fecha_objetivo: editCuando === 'fecha' ? editFechaObj || null : null,
       estado:         editEstado,
@@ -252,8 +250,7 @@ export default function GestorPage() {
     // Optimistic update local inmediato
     setTasks((t) => t.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x))
     const { data } = await supabase.from('tasks').update({ estado: newStatus }).eq('id', task.id).select().single()
-    // Preservar descripcion local — Supabase no tiene esa columna todavía
-    if (data) setTasks((t) => t.map((x) => x.id === task.id ? { ...data, descripcion: task.descripcion } : x))
+    if (data) setTasks((t) => t.map((x) => x.id === task.id ? { ...data, descripcion: data.descripcion ?? task.descripcion } : x))
   }
 
   const sorted = sortTasks(tasks)
