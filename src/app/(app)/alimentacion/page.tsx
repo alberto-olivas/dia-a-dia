@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
@@ -50,12 +50,14 @@ interface OFFProduct {
   }
 }
 
-export default function AlimentacionPage() {
+function AlimentacionContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const realToday = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
   const paramDate = searchParams.get('date')
-  const today = (paramDate && paramDate <= realToday) ? paramDate : realToday
+  const storedDate = typeof window !== 'undefined' ? sessionStorage.getItem('dia_seleccionado') : null
+  const effectiveDate = paramDate || storedDate || null
+  const today = (effectiveDate && effectiveDate <= realToday) ? effectiveDate : realToday
   const isViewingPast = today !== realToday
   const [entries, setEntries] = useState<FoodEntry[]>([])
   const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
@@ -1061,5 +1063,13 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
         </p>
       )}
     </div>
+  )
+}
+
+export default function AlimentacionPage() {
+  return (
+    <Suspense fallback={null}>
+      <AlimentacionContent />
+    </Suspense>
   )
 }

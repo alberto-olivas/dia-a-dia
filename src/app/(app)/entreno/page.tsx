@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { supabase, IS_SUPABASE_CONFIGURED } from '@/lib/supabase'
 import type { WorkoutType, Workout } from '@/lib/types'
@@ -56,13 +57,19 @@ function getLast7Days(): Array<{ date: string; label: string }> {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - (6 - i))
-    return { date: d.toISOString().split('T')[0], label: i === 6 ? 'Hoy' : days[d.getDay()] }
+    return { date: d.toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }), label: i === 6 ? 'Hoy' : days[d.getDay()] }
   })
 }
 
-export default function EntrenoPage() {
+function EntrenoContent() {
   const { user } = useAuth()
-  const today = new Date().toISOString().split('T')[0]
+  const searchParams = useSearchParams()
+  const realToday = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
+  const paramDate = searchParams.get('date')
+  const storedDate = typeof window !== 'undefined' ? sessionStorage.getItem('dia_seleccionado') : null
+  const effectiveDate = paramDate || storedDate || null
+  const today = (effectiveDate && effectiveDate <= realToday) ? effectiveDate : realToday
+  const isViewingPast = today !== realToday
   const [workout, setWorkout] = useState<Workout | null>(null)
   const [loading, setLoading] = useState(IS_SUPABASE_CONFIGURED)
   const [saving, setSaving] = useState(false)
@@ -204,6 +211,17 @@ export default function EntrenoPage() {
             </div>
           )}
         </div>
+        {isViewingPast && (
+          <div
+            className="flex items-center justify-between mt-3 rounded-xl px-3 py-2"
+            style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.25)' }}
+          >
+            <span className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+              {new Date(today + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </span>
+            <a href="/entreno" className="text-xs font-bold" style={{ color: '#FF6B35' }}>Ir a hoy →</a>
+          </div>
+        )}
       </header>
 
       {loading ? (
@@ -599,5 +617,13 @@ export default function EntrenoPage() {
         </>
       )}
     </div>
+  )
+}
+
+export default function EntrenoPage() {
+  return (
+    <Suspense fallback={null}>
+      <EntrenoContent />
+    </Suspense>
   )
 }

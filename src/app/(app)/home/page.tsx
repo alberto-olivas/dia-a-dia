@@ -124,6 +124,16 @@ export default function HomePage() {
     return () => window.removeEventListener('storage', load)
   }, [])
 
+  // Persist selected past date in sessionStorage so alimentos/entreno pages can read it
+  // when the user navigates via the bottom nav instead of the cards
+  useEffect(() => {
+    if (selectedDate !== todayStr) {
+      sessionStorage.setItem('dia_seleccionado', selectedDate)
+    } else {
+      sessionStorage.removeItem('dia_seleccionado')
+    }
+  }, [selectedDate, todayStr])
+
   // Clock tick + midnight day-reset
   useEffect(() => {
     const id = setInterval(() => {
@@ -491,7 +501,7 @@ export default function HomePage() {
       </div>
 
       {/* ── Workout card ─────────────────────────── */}
-      <Link href="/entreno" className="card p-4 flex items-center justify-between mb-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 18% 62%, rgba(255,100,28,0.36) 0%, rgba(255,148,58,0.22) 38%, transparent 65%), radial-gradient(ellipse at 82% 18%, rgba(98,82,212,0.30) 0%, rgba(48,120,212,0.20) 52%, transparent 72%), radial-gradient(ellipse at 88% 85%, rgba(0,196,175,0.22) 0%, transparent 42%)' }}>
+      <Link href={isViewingToday ? '/entreno' : `/entreno?date=${selectedDate}`} className="card p-4 flex items-center justify-between mb-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 18% 62%, rgba(255,100,28,0.36) 0%, rgba(255,148,58,0.22) 38%, transparent 65%), radial-gradient(ellipse at 82% 18%, rgba(98,82,212,0.30) 0%, rgba(48,120,212,0.20) 52%, transparent 72%), radial-gradient(ellipse at 88% 85%, rgba(0,196,175,0.22) 0%, transparent 42%)' }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
             <Dumbbell size={18} style={{ color: '#FF6B35' }} />
