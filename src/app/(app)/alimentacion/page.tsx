@@ -41,6 +41,8 @@ interface OFFProduct {
   product_name_es?: string
   is_liquid?: boolean
   default_portion?: number
+  unit_weight?: number
+  unit_label?: string
   nutriments: {
     'energy-kcal_100g'?: number
     'energy-kj_100g'?: number
@@ -456,9 +458,9 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Pan de centeno', default_portion: 80, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 8.5, carbohydrates_100g: 48, fat_100g: 3.3 } },
   { product_name: 'Pan integral', default_portion: 80, nutriments: { 'energy-kcal_100g': 247, proteins_100g: 9, carbohydrates_100g: 41, fat_100g: 4.2 } },
   { product_name: 'Pan blanco', default_portion: 100, nutriments: { 'energy-kcal_100g': 265, proteins_100g: 9, carbohydrates_100g: 49, fat_100g: 3.2 } },
-  { product_name: 'Tortitas de trigo para fajitas', default_portion: 60, nutriments: { 'energy-kcal_100g': 310, proteins_100g: 8, carbohydrates_100g: 52, fat_100g: 8 } },
-  { product_name: 'Tortitas de maíz', default_portion: 35, nutriments: { 'energy-kcal_100g': 218, proteins_100g: 5.7, carbohydrates_100g: 45, fat_100g: 2.9 } },
-  { product_name: 'Pan brioche hamburguesa', default_portion: 80, nutriments: { 'energy-kcal_100g': 330, proteins_100g: 9, carbohydrates_100g: 50, fat_100g: 10 } },
+  { product_name: 'Tortitas de trigo para fajitas', default_portion: 60, unit_weight: 20, unit_label: 'tortita', nutriments: { 'energy-kcal_100g': 310, proteins_100g: 8, carbohydrates_100g: 52, fat_100g: 8 } },
+  { product_name: 'Tortitas de maíz', default_portion: 35, unit_weight: 18, unit_label: 'tortita', nutriments: { 'energy-kcal_100g': 218, proteins_100g: 5.7, carbohydrates_100g: 45, fat_100g: 2.9 } },
+  { product_name: 'Pan brioche hamburguesa', default_portion: 80, unit_weight: 80, unit_label: 'bollo', nutriments: { 'energy-kcal_100g': 330, proteins_100g: 9, carbohydrates_100g: 50, fat_100g: 10 } },
   // SALSAS / GRASAS
   { product_name: 'Base de pizza casera yogur-huevo', default_portion: 250, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 11, carbohydrates_100g: 18, fat_100g: 6 } },
   { product_name: 'Tomate triturado sin azúcar', default_portion: 60, nutriments: { 'energy-kcal_100g': 32, proteins_100g: 1.4, carbohydrates_100g: 5, fat_100g: 0.2 } },
@@ -469,37 +471,37 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Mostaza', default_portion: 15, nutriments: { 'energy-kcal_100g': 66, proteins_100g: 4.4, carbohydrates_100g: 5.8, fat_100g: 3.3 } },
   { product_name: 'Guacamole', default_portion: 50, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8, fat_100g: 14 } },
   { product_name: 'Aceite de oliva virgen extra', default_portion: 10, nutriments: { 'energy-kcal_100g': 884, proteins_100g: 0, carbohydrates_100g: 0, fat_100g: 100 } },
-  { product_name: 'Aguacate', default_portion: 75, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8.5, fat_100g: 14.7 } },
+  { product_name: 'Aguacate', default_portion: 75, unit_weight: 200, unit_label: 'aguacate', nutriments: { 'energy-kcal_100g': 160, proteins_100g: 2, carbohydrates_100g: 8.5, fat_100g: 14.7 } },
   // CARNES
-  { product_name: 'Pechuga de pollo cruda', default_portion: 150, nutriments: { 'energy-kcal_100g': 110, proteins_100g: 23, carbohydrates_100g: 0, fat_100g: 1.5 } },
-  { product_name: 'Pechuga de pollo a la air fryer', default_portion: 150, nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
-  { product_name: 'Hamburguesa de pollo a la air fryer', default_portion: 120, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 22, carbohydrates_100g: 3, fat_100g: 8 } },
-  { product_name: 'Hamburguesa de ternera', default_portion: 125, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 17, carbohydrates_100g: 2, fat_100g: 19 } },
+  { product_name: 'Pechuga de pollo cruda', default_portion: 150, unit_weight: 300, unit_label: 'pechuga', nutriments: { 'energy-kcal_100g': 110, proteins_100g: 23, carbohydrates_100g: 0, fat_100g: 1.5 } },
+  { product_name: 'Pechuga de pollo a la air fryer', default_portion: 150, unit_weight: 300, unit_label: 'pechuga', nutriments: { 'energy-kcal_100g': 165, proteins_100g: 31, carbohydrates_100g: 0, fat_100g: 3.6 } },
+  { product_name: 'Hamburguesa de pollo a la air fryer', default_portion: 120, unit_weight: 120, unit_label: 'hamburguesa', nutriments: { 'energy-kcal_100g': 170, proteins_100g: 22, carbohydrates_100g: 3, fat_100g: 8 } },
+  { product_name: 'Hamburguesa de ternera', default_portion: 125, unit_weight: 120, unit_label: 'hamburguesa', nutriments: { 'energy-kcal_100g': 250, proteins_100g: 17, carbohydrates_100g: 2, fat_100g: 19 } },
   { product_name: 'Carne picada de ternera 5% grasa', default_portion: 250, nutriments: { 'energy-kcal_100g': 137, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 5 } },
   { product_name: 'Carne picada de ternera 10% grasa', default_portion: 250, nutriments: { 'energy-kcal_100g': 176, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 10 } },
   { product_name: 'Carne picada mixta', default_portion: 250, nutriments: { 'energy-kcal_100g': 240, proteins_100g: 17, carbohydrates_100g: 0, fat_100g: 19 } },
-  { product_name: 'Filete de ternera', default_portion: 180, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 8 } },
-  { product_name: 'Solomillo de ternera', default_portion: 180, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 11 } },
-  { product_name: 'Lomo de cerdo', default_portion: 150, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 10 } },
-  { product_name: 'Solomillo de cerdo', default_portion: 180, nutriments: { 'energy-kcal_100g': 143, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 6 } },
+  { product_name: 'Filete de ternera', default_portion: 180, unit_weight: 200, unit_label: 'filete', nutriments: { 'energy-kcal_100g': 170, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 8 } },
+  { product_name: 'Solomillo de ternera', default_portion: 180, unit_weight: 200, unit_label: 'solomillo', nutriments: { 'energy-kcal_100g': 190, proteins_100g: 22, carbohydrates_100g: 0, fat_100g: 11 } },
+  { product_name: 'Lomo de cerdo', default_portion: 150, unit_weight: 150, unit_label: 'filete', nutriments: { 'energy-kcal_100g': 180, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 10 } },
+  { product_name: 'Solomillo de cerdo', default_portion: 180, unit_weight: 180, unit_label: 'solomillo', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 6 } },
   { product_name: 'Pavo filetes', default_portion: 150, nutriments: { 'energy-kcal_100g': 105, proteins_100g: 24, carbohydrates_100g: 0, fat_100g: 1 } },
-  { product_name: 'Jamón cocido', default_portion: 50, nutriments: { 'energy-kcal_100g': 115, proteins_100g: 18, carbohydrates_100g: 2, fat_100g: 4 } },
-  { product_name: 'Jamón serrano', default_portion: 40, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 30, carbohydrates_100g: 0, fat_100g: 14 } },
+  { product_name: 'Jamón cocido', default_portion: 50, unit_weight: 20, unit_label: 'loncha', nutriments: { 'energy-kcal_100g': 115, proteins_100g: 18, carbohydrates_100g: 2, fat_100g: 4 } },
+  { product_name: 'Jamón serrano', default_portion: 40, unit_weight: 15, unit_label: 'loncha', nutriments: { 'energy-kcal_100g': 250, proteins_100g: 30, carbohydrates_100g: 0, fat_100g: 14 } },
   { product_name: 'Bacon', default_portion: 30, nutriments: { 'energy-kcal_100g': 541, proteins_100g: 37, carbohydrates_100g: 1.4, fat_100g: 42 } },
-  { product_name: 'Salchichas tipo Frankfurt', default_portion: 100, nutriments: { 'energy-kcal_100g': 290, proteins_100g: 12, carbohydrates_100g: 3, fat_100g: 26 } },
+  { product_name: 'Salchichas tipo Frankfurt', default_portion: 100, unit_weight: 50, unit_label: 'salchicha', nutriments: { 'energy-kcal_100g': 290, proteins_100g: 12, carbohydrates_100g: 3, fat_100g: 26 } },
   { product_name: 'Salchichas frescas pollo/pavo', default_portion: 120, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 18, carbohydrates_100g: 2, fat_100g: 11 } },
-  { product_name: 'Entrecot de ternera', default_portion: 250, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 19 } },
-  { product_name: 'Chuleta de cerdo', default_portion: 220, nutriments: { 'energy-kcal_100g': 231, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 16 } },
+  { product_name: 'Entrecot de ternera', default_portion: 250, unit_weight: 250, unit_label: 'entrecot', nutriments: { 'energy-kcal_100g': 250, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 19 } },
+  { product_name: 'Chuleta de cerdo', default_portion: 220, unit_weight: 220, unit_label: 'chuleta', nutriments: { 'energy-kcal_100g': 231, proteins_100g: 21, carbohydrates_100g: 0, fat_100g: 16 } },
   { product_name: 'Costillas BBQ', default_portion: 300, nutriments: { 'energy-kcal_100g': 320, proteins_100g: 20, carbohydrates_100g: 6, fat_100g: 24 } },
   { product_name: 'Pollo empanado air fryer', default_portion: 200, nutriments: { 'energy-kcal_100g': 220, proteins_100g: 20, carbohydrates_100g: 12, fat_100g: 12 } },
-  { product_name: 'Nuggets de pollo', default_portion: 120, nutriments: { 'energy-kcal_100g': 270, proteins_100g: 15, carbohydrates_100g: 20, fat_100g: 15 } },
+  { product_name: 'Nuggets de pollo', default_portion: 120, unit_weight: 15, unit_label: 'nugget', nutriments: { 'energy-kcal_100g': 270, proteins_100g: 15, carbohydrates_100g: 20, fat_100g: 15 } },
   { product_name: 'Albóndigas de ternera', default_portion: 250, nutriments: { 'energy-kcal_100g': 240, proteins_100g: 17, carbohydrates_100g: 8, fat_100g: 16 } },
   { product_name: 'Kebab carne', default_portion: 200, nutriments: { 'energy-kcal_100g': 215, proteins_100g: 15, carbohydrates_100g: 4, fat_100g: 15 } },
   { product_name: 'Pulled pork', default_portion: 200, nutriments: { 'energy-kcal_100g': 250, proteins_100g: 20, carbohydrates_100g: 5, fat_100g: 16 } },
   { product_name: 'Pollo asado', default_portion: 250, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 25, carbohydrates_100g: 0, fat_100g: 9 } },
   { product_name: 'Muslos de pollo', default_portion: 250, nutriments: { 'energy-kcal_100g': 215, proteins_100g: 18, carbohydrates_100g: 0, fat_100g: 15 } },
   // EMBUTIDOS
-  { product_name: 'Pechuga de pavo lonchas', default_portion: 80, nutriments: { 'energy-kcal_100g': 105, proteins_100g: 20, carbohydrates_100g: 3, fat_100g: 1.5 } },
+  { product_name: 'Pechuga de pavo lonchas', default_portion: 80, unit_weight: 20, unit_label: 'loncha', nutriments: { 'energy-kcal_100g': 105, proteins_100g: 20, carbohydrates_100g: 3, fat_100g: 1.5 } },
   { product_name: 'Chorizo', default_portion: 40, nutriments: { 'energy-kcal_100g': 455, proteins_100g: 24, carbohydrates_100g: 2, fat_100g: 38 } },
   { product_name: 'Salchichón', default_portion: 40, nutriments: { 'energy-kcal_100g': 430, proteins_100g: 22, carbohydrates_100g: 1, fat_100g: 36 } },
   { product_name: 'Fuet', default_portion: 40, nutriments: { 'energy-kcal_100g': 470, proteins_100g: 24, carbohydrates_100g: 2, fat_100g: 40 } },
@@ -508,7 +510,7 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Cecina', default_portion: 40, nutriments: { 'energy-kcal_100g': 255, proteins_100g: 39, carbohydrates_100g: 1, fat_100g: 9 } },
   { product_name: 'Pepperoni', default_portion: 30, nutriments: { 'energy-kcal_100g': 494, proteins_100g: 23, carbohydrates_100g: 1, fat_100g: 44 } },
   // HUEVOS
-  { product_name: 'Huevos', default_portion: 120, nutriments: { 'energy-kcal_100g': 143, proteins_100g: 12.6, carbohydrates_100g: 0.7, fat_100g: 9.5 } },
+  { product_name: 'Huevos', default_portion: 120, unit_weight: 60, unit_label: 'huevo', nutriments: { 'energy-kcal_100g': 143, proteins_100g: 12.6, carbohydrates_100g: 0.7, fat_100g: 9.5 } },
   { product_name: 'Claras de huevo', default_portion: 200, nutriments: { 'energy-kcal_100g': 52, proteins_100g: 11, carbohydrates_100g: 0.7, fat_100g: 0.2 } },
   // PESCADOS Y MARISCO
   { product_name: 'Salmón crudo', default_portion: 150, nutriments: { 'energy-kcal_100g': 208, proteins_100g: 20, carbohydrates_100g: 0, fat_100g: 13 } },
@@ -520,22 +522,22 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Gambas', default_portion: 150, nutriments: { 'energy-kcal_100g': 99, proteins_100g: 24, carbohydrates_100g: 0.2, fat_100g: 0.3 } },
   // SUSHI
   { product_name: 'Sushi variado', default_portion: 240, nutriments: { 'energy-kcal_100g': 150, proteins_100g: 6, carbohydrates_100g: 25, fat_100g: 2.5 } },
-  { product_name: 'Nigiri salmón', default_portion: 80, nutriments: { 'energy-kcal_100g': 160, proteins_100g: 8, carbohydrates_100g: 23, fat_100g: 3 } },
+  { product_name: 'Nigiri salmón', default_portion: 80, unit_weight: 40, unit_label: 'nigiri', nutriments: { 'energy-kcal_100g': 160, proteins_100g: 8, carbohydrates_100g: 23, fat_100g: 3 } },
   { product_name: 'Maki salmón', default_portion: 120, nutriments: { 'energy-kcal_100g': 170, proteins_100g: 7, carbohydrates_100g: 27, fat_100g: 3 } },
   { product_name: 'California roll', default_portion: 220, nutriments: { 'energy-kcal_100g': 190, proteins_100g: 6, carbohydrates_100g: 28, fat_100g: 6 } },
   // TUBÉRCULOS
-  { product_name: 'Patata cruda', default_portion: 200, nutriments: { 'energy-kcal_100g': 77, proteins_100g: 2, carbohydrates_100g: 17, fat_100g: 0.1 } },
+  { product_name: 'Patata cruda', default_portion: 200, unit_weight: 200, unit_label: 'patata', nutriments: { 'energy-kcal_100g': 77, proteins_100g: 2, carbohydrates_100g: 17, fat_100g: 0.1 } },
   { product_name: 'Patatas air fryer con poco aceite', default_portion: 250, nutriments: { 'energy-kcal_100g': 120, proteins_100g: 2.5, carbohydrates_100g: 22, fat_100g: 3 } },
   { product_name: 'Patatas fritas comerciales', default_portion: 150, nutriments: { 'energy-kcal_100g': 312, proteins_100g: 3.4, carbohydrates_100g: 41, fat_100g: 15 } },
   { product_name: 'Batata cruda', default_portion: 250, nutriments: { 'energy-kcal_100g': 86, proteins_100g: 1.6, carbohydrates_100g: 20, fat_100g: 0.1 } },
   { product_name: 'Batata air fryer', default_portion: 250, nutriments: { 'energy-kcal_100g': 115, proteins_100g: 2, carbohydrates_100g: 24, fat_100g: 2 } },
   // VERDURAS
   { product_name: 'Maíz dulce', default_portion: 60, nutriments: { 'energy-kcal_100g': 86, proteins_100g: 3.2, carbohydrates_100g: 19, fat_100g: 1.2 } },
-  { product_name: 'Tomate', default_portion: 120, nutriments: { 'energy-kcal_100g': 18, proteins_100g: 0.9, carbohydrates_100g: 3.9, fat_100g: 0.2 } },
+  { product_name: 'Tomate', default_portion: 120, unit_weight: 120, unit_label: 'tomate', nutriments: { 'energy-kcal_100g': 18, proteins_100g: 0.9, carbohydrates_100g: 3.9, fat_100g: 0.2 } },
   { product_name: 'Pepino', default_portion: 100, nutriments: { 'energy-kcal_100g': 15, proteins_100g: 0.7, carbohydrates_100g: 3.6, fat_100g: 0.1 } },
-  { product_name: 'Cebolla', default_portion: 80, nutriments: { 'energy-kcal_100g': 40, proteins_100g: 1.1, carbohydrates_100g: 9.3, fat_100g: 0.1 } },
-  { product_name: 'Pimiento rojo', default_portion: 100, nutriments: { 'energy-kcal_100g': 31, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.3 } },
-  { product_name: 'Pimiento verde', default_portion: 100, nutriments: { 'energy-kcal_100g': 20, proteins_100g: 0.9, carbohydrates_100g: 4.6, fat_100g: 0.2 } },
+  { product_name: 'Cebolla', default_portion: 80, unit_weight: 150, unit_label: 'cebolla', nutriments: { 'energy-kcal_100g': 40, proteins_100g: 1.1, carbohydrates_100g: 9.3, fat_100g: 0.1 } },
+  { product_name: 'Pimiento rojo', default_portion: 100, unit_weight: 150, unit_label: 'pimiento', nutriments: { 'energy-kcal_100g': 31, proteins_100g: 1, carbohydrates_100g: 6, fat_100g: 0.3 } },
+  { product_name: 'Pimiento verde', default_portion: 100, unit_weight: 120, unit_label: 'pimiento', nutriments: { 'energy-kcal_100g': 20, proteins_100g: 0.9, carbohydrates_100g: 4.6, fat_100g: 0.2 } },
   { product_name: 'Lechuga', default_portion: 80, nutriments: { 'energy-kcal_100g': 15, proteins_100g: 1.4, carbohydrates_100g: 2.9, fat_100g: 0.2 } },
   { product_name: 'Espinacas', default_portion: 100, nutriments: { 'energy-kcal_100g': 23, proteins_100g: 2.9, carbohydrates_100g: 3.6, fat_100g: 0.4 } },
   { product_name: 'Brócoli', default_portion: 150, nutriments: { 'energy-kcal_100g': 34, proteins_100g: 2.8, carbohydrates_100g: 6.6, fat_100g: 0.4 } },
@@ -552,22 +554,22 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Pepinillos', default_portion: 40, nutriments: { 'energy-kcal_100g': 12, proteins_100g: 0.5, carbohydrates_100g: 2.4, fat_100g: 0.2 } },
   { product_name: 'Aceitunas verdes', default_portion: 30, nutriments: { 'energy-kcal_100g': 145, proteins_100g: 1, carbohydrates_100g: 3.8, fat_100g: 15 } },
   // FRUTAS
-  { product_name: 'Plátano', default_portion: 120, nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 23, fat_100g: 0.3 } },
-  { product_name: 'Manzana', default_portion: 180, nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 14, fat_100g: 0.2 } },
-  { product_name: 'Pera', default_portion: 170, nutriments: { 'energy-kcal_100g': 57, proteins_100g: 0.4, carbohydrates_100g: 15, fat_100g: 0.1 } },
-  { product_name: 'Naranja', default_portion: 180, nutriments: { 'energy-kcal_100g': 47, proteins_100g: 0.9, carbohydrates_100g: 12, fat_100g: 0.1 } },
-  { product_name: 'Mandarina', default_portion: 100, nutriments: { 'energy-kcal_100g': 53, proteins_100g: 0.8, carbohydrates_100g: 13, fat_100g: 0.3 } },
-  { product_name: 'Kiwi', default_portion: 100, nutriments: { 'energy-kcal_100g': 61, proteins_100g: 1.1, carbohydrates_100g: 15, fat_100g: 0.5 } },
-  { product_name: 'Fresas', default_portion: 150, nutriments: { 'energy-kcal_100g': 32, proteins_100g: 0.7, carbohydrates_100g: 7.7, fat_100g: 0.3 } },
+  { product_name: 'Plátano', default_portion: 120, unit_weight: 120, unit_label: 'plátano', nutriments: { 'energy-kcal_100g': 89, proteins_100g: 1.1, carbohydrates_100g: 23, fat_100g: 0.3 } },
+  { product_name: 'Manzana', default_portion: 180, unit_weight: 180, unit_label: 'manzana', nutriments: { 'energy-kcal_100g': 52, proteins_100g: 0.3, carbohydrates_100g: 14, fat_100g: 0.2 } },
+  { product_name: 'Pera', default_portion: 170, unit_weight: 170, unit_label: 'pera', nutriments: { 'energy-kcal_100g': 57, proteins_100g: 0.4, carbohydrates_100g: 15, fat_100g: 0.1 } },
+  { product_name: 'Naranja', default_portion: 180, unit_weight: 200, unit_label: 'naranja', nutriments: { 'energy-kcal_100g': 47, proteins_100g: 0.9, carbohydrates_100g: 12, fat_100g: 0.1 } },
+  { product_name: 'Mandarina', default_portion: 100, unit_weight: 75, unit_label: 'mandarina', nutriments: { 'energy-kcal_100g': 53, proteins_100g: 0.8, carbohydrates_100g: 13, fat_100g: 0.3 } },
+  { product_name: 'Kiwi', default_portion: 100, unit_weight: 75, unit_label: 'kiwi', nutriments: { 'energy-kcal_100g': 61, proteins_100g: 1.1, carbohydrates_100g: 15, fat_100g: 0.5 } },
+  { product_name: 'Fresas', default_portion: 150, unit_weight: 15, unit_label: 'fresa', nutriments: { 'energy-kcal_100g': 32, proteins_100g: 0.7, carbohydrates_100g: 7.7, fat_100g: 0.3 } },
   { product_name: 'Arándanos', default_portion: 100, nutriments: { 'energy-kcal_100g': 57, proteins_100g: 0.7, carbohydrates_100g: 14, fat_100g: 0.3 } },
   { product_name: 'Uvas', default_portion: 150, nutriments: { 'energy-kcal_100g': 69, proteins_100g: 0.7, carbohydrates_100g: 18, fat_100g: 0.2 } },
-  { product_name: 'Melón', default_portion: 200, nutriments: { 'energy-kcal_100g': 34, proteins_100g: 0.8, carbohydrates_100g: 8, fat_100g: 0.2 } },
-  { product_name: 'Sandía', default_portion: 250, nutriments: { 'energy-kcal_100g': 30, proteins_100g: 0.6, carbohydrates_100g: 8, fat_100g: 0.2 } },
-  { product_name: 'Mango', default_portion: 150, nutriments: { 'energy-kcal_100g': 60, proteins_100g: 0.8, carbohydrates_100g: 15, fat_100g: 0.4 } },
-  { product_name: 'Piña', default_portion: 150, nutriments: { 'energy-kcal_100g': 50, proteins_100g: 0.5, carbohydrates_100g: 13, fat_100g: 0.1 } },
-  { product_name: 'Melocotón', default_portion: 150, nutriments: { 'energy-kcal_100g': 39, proteins_100g: 0.9, carbohydrates_100g: 10, fat_100g: 0.3 } },
-  { product_name: 'Ciruela', default_portion: 100, nutriments: { 'energy-kcal_100g': 46, proteins_100g: 0.7, carbohydrates_100g: 11, fat_100g: 0.3 } },
-  { product_name: 'Dátiles', default_portion: 30, nutriments: { 'energy-kcal_100g': 282, proteins_100g: 2.5, carbohydrates_100g: 75, fat_100g: 0.4 } },
+  { product_name: 'Melón', default_portion: 200, unit_weight: 200, unit_label: 'raja', nutriments: { 'energy-kcal_100g': 34, proteins_100g: 0.8, carbohydrates_100g: 8, fat_100g: 0.2 } },
+  { product_name: 'Sandía', default_portion: 250, unit_weight: 300, unit_label: 'raja', nutriments: { 'energy-kcal_100g': 30, proteins_100g: 0.6, carbohydrates_100g: 8, fat_100g: 0.2 } },
+  { product_name: 'Mango', default_portion: 150, unit_weight: 200, unit_label: 'mango', nutriments: { 'energy-kcal_100g': 60, proteins_100g: 0.8, carbohydrates_100g: 15, fat_100g: 0.4 } },
+  { product_name: 'Piña', default_portion: 150, unit_weight: 100, unit_label: 'rodaja', nutriments: { 'energy-kcal_100g': 50, proteins_100g: 0.5, carbohydrates_100g: 13, fat_100g: 0.1 } },
+  { product_name: 'Melocotón', default_portion: 150, unit_weight: 150, unit_label: 'melocotón', nutriments: { 'energy-kcal_100g': 39, proteins_100g: 0.9, carbohydrates_100g: 10, fat_100g: 0.3 } },
+  { product_name: 'Ciruela', default_portion: 100, unit_weight: 60, unit_label: 'ciruela', nutriments: { 'energy-kcal_100g': 46, proteins_100g: 0.7, carbohydrates_100g: 11, fat_100g: 0.3 } },
+  { product_name: 'Dátiles', default_portion: 30, unit_weight: 20, unit_label: 'dátil', nutriments: { 'energy-kcal_100g': 282, proteins_100g: 2.5, carbohydrates_100g: 75, fat_100g: 0.4 } },
   // LEGUMBRES Y FRUTOS SECOS
   { product_name: 'Lentejas cocidas', default_portion: 250, nutriments: { 'energy-kcal_100g': 116, proteins_100g: 9, carbohydrates_100g: 20, fat_100g: 0.4 } },
   { product_name: 'Garbanzos cocidos', default_portion: 250, nutriments: { 'energy-kcal_100g': 164, proteins_100g: 8.9, carbohydrates_100g: 27, fat_100g: 2.6 } },
@@ -605,26 +607,26 @@ const LOCAL_FOODS: OFFProduct[] = [
   { product_name: 'Pizza comercial media', default_portion: 350, nutriments: { 'energy-kcal_100g': 260, proteins_100g: 11, carbohydrates_100g: 32, fat_100g: 10 } },
   // DULCES Y SNACKS
   { product_name: 'Helado', default_portion: 100, nutriments: { 'energy-kcal_100g': 210, proteins_100g: 3.5, carbohydrates_100g: 24, fat_100g: 11 } },
-  { product_name: 'Chocolate negro 85%', default_portion: 20, nutriments: { 'energy-kcal_100g': 600, proteins_100g: 10, carbohydrates_100g: 19, fat_100g: 52 } },
-  { product_name: 'Galletas tipo María', default_portion: 28, nutriments: { 'energy-kcal_100g': 430, proteins_100g: 7, carbohydrates_100g: 74, fat_100g: 11 } },
-  { product_name: 'Barrita de cereales', default_portion: 25, nutriments: { 'energy-kcal_100g': 400, proteins_100g: 6, carbohydrates_100g: 65, fat_100g: 12 } },
-  { product_name: 'Tortitas de arroz', default_portion: 18, nutriments: { 'energy-kcal_100g': 380, proteins_100g: 8, carbohydrates_100g: 82, fat_100g: 3 } },
+  { product_name: 'Chocolate negro 85%', default_portion: 20, unit_weight: 10, unit_label: 'onza', nutriments: { 'energy-kcal_100g': 600, proteins_100g: 10, carbohydrates_100g: 19, fat_100g: 52 } },
+  { product_name: 'Galletas tipo María', default_portion: 28, unit_weight: 6.5, unit_label: 'galleta', nutriments: { 'energy-kcal_100g': 430, proteins_100g: 7, carbohydrates_100g: 74, fat_100g: 11 } },
+  { product_name: 'Barrita de cereales', default_portion: 25, unit_weight: 25, unit_label: 'barrita', nutriments: { 'energy-kcal_100g': 400, proteins_100g: 6, carbohydrates_100g: 65, fat_100g: 12 } },
+  { product_name: 'Tortitas de arroz', default_portion: 18, unit_weight: 9, unit_label: 'tortita', nutriments: { 'energy-kcal_100g': 380, proteins_100g: 8, carbohydrates_100g: 82, fat_100g: 3 } },
   { product_name: 'Nachos', default_portion: 60, nutriments: { 'energy-kcal_100g': 490, proteins_100g: 7, carbohydrates_100g: 57, fat_100g: 24 } },
   { product_name: 'Doritos', default_portion: 44, nutriments: { 'energy-kcal_100g': 510, proteins_100g: 6, carbohydrates_100g: 61, fat_100g: 25 } },
   { product_name: 'Palomitas', default_portion: 40, nutriments: { 'energy-kcal_100g': 387, proteins_100g: 12, carbohydrates_100g: 78, fat_100g: 4 } },
   // FRUTAS EXÓTICAS
-  { product_name: 'Papaya', default_portion: 200, nutriments: { 'energy-kcal_100g': 43, proteins_100g: 0.5, carbohydrates_100g: 11, fat_100g: 0.3 } },
-  { product_name: 'Pomelo', default_portion: 250, nutriments: { 'energy-kcal_100g': 42, proteins_100g: 0.8, carbohydrates_100g: 10, fat_100g: 0.1 } },
-  { product_name: 'Lima', default_portion: 80, nutriments: { 'energy-kcal_100g': 30, proteins_100g: 0.7, carbohydrates_100g: 11, fat_100g: 0.2 } },
-  { product_name: 'Limón', default_portion: 80, nutriments: { 'energy-kcal_100g': 29, proteins_100g: 1.1, carbohydrates_100g: 9, fat_100g: 0.3 } },
+  { product_name: 'Papaya', default_portion: 200, unit_weight: 200, unit_label: 'ración', nutriments: { 'energy-kcal_100g': 43, proteins_100g: 0.5, carbohydrates_100g: 11, fat_100g: 0.3 } },
+  { product_name: 'Pomelo', default_portion: 250, unit_weight: 300, unit_label: 'pomelo', nutriments: { 'energy-kcal_100g': 42, proteins_100g: 0.8, carbohydrates_100g: 10, fat_100g: 0.1 } },
+  { product_name: 'Lima', default_portion: 80, unit_weight: 65, unit_label: 'lima', nutriments: { 'energy-kcal_100g': 30, proteins_100g: 0.7, carbohydrates_100g: 11, fat_100g: 0.2 } },
+  { product_name: 'Limón', default_portion: 80, unit_weight: 80, unit_label: 'limón', nutriments: { 'energy-kcal_100g': 29, proteins_100g: 1.1, carbohydrates_100g: 9, fat_100g: 0.3 } },
   { product_name: 'Maracuyá', default_portion: 100, nutriments: { 'energy-kcal_100g': 97, proteins_100g: 2.2, carbohydrates_100g: 23, fat_100g: 0.7 } },
   { product_name: 'Guayaba', default_portion: 150, nutriments: { 'energy-kcal_100g': 68, proteins_100g: 2.6, carbohydrates_100g: 14, fat_100g: 1 } },
   { product_name: 'Lichi', default_portion: 100, nutriments: { 'energy-kcal_100g': 66, proteins_100g: 0.8, carbohydrates_100g: 17, fat_100g: 0.4 } },
-  { product_name: 'Chirimoya', default_portion: 200, nutriments: { 'energy-kcal_100g': 75, proteins_100g: 1.6, carbohydrates_100g: 18, fat_100g: 0.7 } },
+  { product_name: 'Chirimoya', default_portion: 200, unit_weight: 350, unit_label: 'chirimoya', nutriments: { 'energy-kcal_100g': 75, proteins_100g: 1.6, carbohydrates_100g: 18, fat_100g: 0.7 } },
   { product_name: 'Mango deshidratado', default_portion: 40, nutriments: { 'energy-kcal_100g': 320, proteins_100g: 2.5, carbohydrates_100g: 78, fat_100g: 1 } },
-  { product_name: 'Manzana asada', default_portion: 200, nutriments: { 'energy-kcal_100g': 85, proteins_100g: 0.3, carbohydrates_100g: 22, fat_100g: 0.2 } },
-  { product_name: 'Plátano maduro asado', default_portion: 180, nutriments: { 'energy-kcal_100g': 122, proteins_100g: 1.3, carbohydrates_100g: 32, fat_100g: 0.3 } },
-  { product_name: 'Melón piel de sapo', default_portion: 300, nutriments: { 'energy-kcal_100g': 34, proteins_100g: 0.8, carbohydrates_100g: 8, fat_100g: 0.2 } },
+  { product_name: 'Manzana asada', default_portion: 200, unit_weight: 200, unit_label: 'manzana', nutriments: { 'energy-kcal_100g': 85, proteins_100g: 0.3, carbohydrates_100g: 22, fat_100g: 0.2 } },
+  { product_name: 'Plátano maduro asado', default_portion: 180, unit_weight: 180, unit_label: 'plátano', nutriments: { 'energy-kcal_100g': 122, proteins_100g: 1.3, carbohydrates_100g: 32, fat_100g: 0.3 } },
+  { product_name: 'Melón piel de sapo', default_portion: 300, unit_weight: 300, unit_label: 'ración', nutriments: { 'energy-kcal_100g': 34, proteins_100g: 0.8, carbohydrates_100g: 8, fat_100g: 0.2 } },
   // CARNES PREPARADAS
   { product_name: 'Albóndigas de pollo', default_portion: 250, nutriments: { 'energy-kcal_100g': 180, proteins_100g: 21, carbohydrates_100g: 6, fat_100g: 8 } },
   { product_name: 'Albóndigas de pavo', default_portion: 250, nutriments: { 'energy-kcal_100g': 165, proteins_100g: 22, carbohydrates_100g: 5, fat_100g: 6 } },
@@ -812,6 +814,8 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   const [searching, setSearching] = useState(false)
   const [selected, setSelected] = useState<OFFProduct | null>(null)
   const [gramos, setGramos] = useState<number>(100)
+  const [inputMode, setInputMode] = useState<'g' | 'uds'>('g')
+  const [unitCount, setUnitCount] = useState<number>(1)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -868,15 +872,18 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   const prot100 = selected?.nutriments?.proteins_100g ?? 0
   const carbs100 = selected?.nutriments?.carbohydrates_100g ?? 0
   const fat100 = selected?.nutriments?.fat_100g ?? 0
-  const factor = gramos / 100
+  const effectiveGramos = (inputMode === 'uds' && selected?.unit_weight)
+    ? Math.round(unitCount * selected.unit_weight)
+    : gramos
+  const factor = effectiveGramos / 100
   const totalKcal = Math.round(kcalPer100 * factor)
   const totalProt = (prot100 * factor).toFixed(1)
   const totalCarbs = (carbs100 * factor).toFixed(1)
   const totalFat = (fat100 * factor).toFixed(1)
 
   function handleAdd() {
-    if (!selected || gramos <= 0) return
-    onAdd(getDisplayName(selected), gramos, totalKcal)
+    if (!selected || effectiveGramos <= 0) return
+    onAdd(getDisplayName(selected), effectiveGramos, totalKcal)
   }
 
   return (
@@ -910,7 +917,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           {results.map((p, i) => (
             <button
               key={i}
-              onClick={() => { setSelected(p); setGramos(p.default_portion ?? 100) }}
+              onClick={() => { setSelected(p); setGramos(p.default_portion ?? 100); setInputMode('g'); setUnitCount(1) }}
               className="text-left px-3 py-2.5 flex items-center justify-between rounded-xl bg-white"
             >
               <div className="min-w-0 flex-1 pr-2">
@@ -963,64 +970,126 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
               {getDisplayName(selected)}
             </span>
             <button
-              onClick={() => { setSelected(null); setGramos(100) }}
+              onClick={() => { setSelected(null); setGramos(100); setInputMode('g'); setUnitCount(1) }}
               className="text-gray-300 shrink-0"
             >
               <X size={12} />
             </button>
           </div>
 
-          {/* Quick portion presets */}
-          <span className="label-caps block mb-2">Porción rápida</span>
-          <div className="flex gap-1.5 mb-3">
-            {portionPresets.map((p) => (
+          {/* Gramos / Unidades toggle */}
+          {selected.unit_weight && (
+            <div className="flex gap-1.5 mb-3">
               <button
-                key={p}
-                onClick={() => setGramos(p)}
+                onClick={() => setInputMode('g')}
                 className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                 style={{
-                  background: gramos === p ? '#1A1A1A' : '#FFFFFF',
-                  color: gramos === p ? '#FF6B35' : '#9CA3AF',
-                  border: gramos === p ? 'none' : '1.5px solid #E5E7EB',
+                  background: inputMode === 'g' ? '#1A1A1A' : '#FFFFFF',
+                  color: inputMode === 'g' ? '#FF6B35' : '#9CA3AF',
+                  border: inputMode === 'g' ? 'none' : '1.5px solid #E5E7EB',
                 }}
               >
-                {p}{unit}
+                Gramos
               </button>
-            ))}
-          </div>
+              <button
+                onClick={() => setInputMode('uds')}
+                className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
+                style={{
+                  background: inputMode === 'uds' ? '#1A1A1A' : '#FFFFFF',
+                  color: inputMode === 'uds' ? '#FF6B35' : '#9CA3AF',
+                  border: inputMode === 'uds' ? 'none' : '1.5px solid #E5E7EB',
+                }}
+              >
+                Unidades
+              </button>
+            </div>
+          )}
 
-          {/* Gramos slider + input sincronizados */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="label-caps">Cantidad manual</label>
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  value={gramos || ''}
-                  onChange={(e) => setGramos(Math.min(sliderMax, Math.max(0, parseInt(e.target.value) || 0)))}
-                  min="0"
-                  max={sliderMax}
-                  className="w-16 px-2 py-1 text-sm rounded-lg text-center font-black"
-                  style={{ color: '#FF6B35' }}
-                />
-                <span className="text-xs text-gray-400 font-semibold">{unit}</span>
+          {inputMode === 'uds' && selected.unit_weight ? (
+            /* Units stepper */
+            <div className="mb-3">
+              <span className="label-caps block mb-2">Cantidad</span>
+              <div className="flex items-center justify-center gap-6 py-3 rounded-xl bg-white">
+                <button
+                  onClick={() => setUnitCount(Math.max(1, unitCount - 1))}
+                  className="w-10 h-10 rounded-xl text-xl font-black flex items-center justify-center"
+                  style={{ background: '#F3F4F6', color: '#1A1A1A' }}
+                >
+                  −
+                </button>
+                <div className="text-center min-w-[60px]">
+                  <div className="text-3xl font-black leading-none" style={{ color: '#FF6B35' }}>{unitCount}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {selected.unit_label ?? 'unidad'}{unitCount !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setUnitCount(unitCount + 1)}
+                  className="w-10 h-10 rounded-xl text-xl font-black flex items-center justify-center"
+                  style={{ background: '#F3F4F6', color: '#1A1A1A' }}
+                >
+                  +
+                </button>
+              </div>
+              <div className="text-center text-xs text-gray-400 mt-1.5 font-semibold">
+                = {effectiveGramos}g
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-gray-300">0</span>
-              <input
-                type="range"
-                min="0"
-                max={sliderMax}
-                step="5"
-                value={gramos}
-                onChange={(e) => setGramos(parseInt(e.target.value))}
-                className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                style={{ accentColor: '#FF6B35' }}
-              />
-              <span className="text-[10px] text-gray-300">{sliderMax}{unit}</span>
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Quick portion presets */}
+              <span className="label-caps block mb-2">Porción rápida</span>
+              <div className="flex gap-1.5 mb-3">
+                {portionPresets.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setGramos(p)}
+                    className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
+                    style={{
+                      background: gramos === p ? '#1A1A1A' : '#FFFFFF',
+                      color: gramos === p ? '#FF6B35' : '#9CA3AF',
+                      border: gramos === p ? 'none' : '1.5px solid #E5E7EB',
+                    }}
+                  >
+                    {p}{unit}
+                  </button>
+                ))}
+              </div>
+
+              {/* Gramos slider + input sincronizados */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="label-caps">Cantidad manual</label>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      value={gramos || ''}
+                      onChange={(e) => setGramos(Math.min(sliderMax, Math.max(0, parseInt(e.target.value) || 0)))}
+                      min="0"
+                      max={sliderMax}
+                      className="w-16 px-2 py-1 text-sm rounded-lg text-center font-black"
+                      style={{ color: '#FF6B35' }}
+                    />
+                    <span className="text-xs text-gray-400 font-semibold">{unit}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-300">0</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={sliderMax}
+                    step="5"
+                    value={gramos}
+                    onChange={(e) => setGramos(parseInt(e.target.value))}
+                    className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                    style={{ accentColor: '#FF6B35' }}
+                  />
+                  <span className="text-[10px] text-gray-300">{sliderMax}{unit}</span>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Live kcal */}
           <div className="flex items-center justify-center gap-2 mb-3 py-2.5 rounded-xl" style={{ background: '#FFF5F0' }}>
@@ -1048,7 +1117,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
 
           <button
             onClick={handleAdd}
-            disabled={gramos <= 0}
+            disabled={effectiveGramos <= 0}
             className="w-full py-3 rounded-xl text-xs font-bold tracking-widest uppercase disabled:opacity-40"
             style={{ background: '#FF6B35', color: '#fff' }}
           >
