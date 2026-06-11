@@ -99,7 +99,14 @@ export default function HomePage() {
   const { user } = useAuth()
   const { profile } = useProfile()
   const [now, setNow] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState(getTodayStr)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('dia_seleccionado')
+      const today = getTodayStr()
+      if (stored && stored <= today) return stored
+    }
+    return getTodayStr()
+  })
   const [pendingTasks, setPendingTasks] = useState<Task[]>([])
   const [doneTasks, setDoneTasks] = useState<Task[]>([])
   const [calories, setCalories] = useState({ consumed: 0, workout: 0, steps: 0, sleep: 0 })
