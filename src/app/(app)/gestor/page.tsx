@@ -226,10 +226,21 @@ export default function GestorPage() {
     }
     const updatedFields = { ...supabaseFields, descripcion }
 
-    // Optimistic update — aplica de inmediato en local state
+    setEditId(null)
+
+    if (editEstado === 'terminada') {
+      setTasks((t) => t.filter((x) => x.id !== id))
+      if (!IS_SUPABASE_CONFIGURED) {
+        localStorage.setItem('demo_tasks', JSON.stringify(tasks.filter((x) => x.id !== id)))
+      } else {
+        await supabase.from('tasks').delete().eq('id', id)
+        saveDescStore(id, null)
+      }
+      return
+    }
+
     const optimistic = tasks.map((x) => x.id === id ? { ...x, ...updatedFields } : x)
     setTasks(optimistic)
-    setEditId(null)
 
     if (!IS_SUPABASE_CONFIGURED) {
       localStorage.setItem('demo_tasks', JSON.stringify(optimistic))
@@ -242,12 +253,23 @@ export default function GestorPage() {
 
   async function quickStatusChange(task: Task, newStatus: TaskStatus) {
     if (!IS_SUPABASE_CONFIGURED) {
-      const saved = tasks.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x)
-      setTasks(saved)
-      localStorage.setItem('demo_tasks', JSON.stringify(saved))
+      if (newStatus === 'terminada') {
+        const saved = tasks.filter((x) => x.id !== task.id)
+        setTasks(saved)
+        localStorage.setItem('demo_tasks', JSON.stringify(saved))
+      } else {
+        const saved = tasks.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x)
+        setTasks(saved)
+        localStorage.setItem('demo_tasks', JSON.stringify(saved))
+      }
       return
     }
-    // Optimistic update local inmediato
+    if (newStatus === 'terminada') {
+      setTasks((t) => t.filter((x) => x.id !== task.id))
+      await supabase.from('tasks').delete().eq('id', task.id)
+      saveDescStore(task.id, null)
+      return
+    }
     setTasks((t) => t.map((x) => x.id === task.id ? { ...x, estado: newStatus } : x))
     const { data } = await supabase.from('tasks').update({ estado: newStatus }).eq('id', task.id).select().single()
     if (data) setTasks((t) => t.map((x) => x.id === task.id ? { ...data, descripcion: data.descripcion ?? task.descripcion } : x))
