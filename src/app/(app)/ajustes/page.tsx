@@ -193,13 +193,13 @@ export default function AjustesPage() {
       {/* ── Header ─────────────────────────────────── */}
       <header className="mb-8">
         <span className="label-caps block mb-1">Módulo 05</span>
-        <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>AJUSTES</h1>
+        <h1 className="text-3xl font-semibold tracking-wide" style={{ color: 'var(--app-color)', fontFamily: "var(--font-oswald,'Oswald',sans-serif)" }}>AJUSTES</h1>
       </header>
 
       {/* ── Sección: Tu perfil ───────────────────── */}
       <section className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <User size={14} style={{ color: '#FF6B35' }} />
+          <User size={14} style={{ color: '#00BD7D' }} />
           <span className="label-caps">Tu perfil</span>
         </div>
         <div className="card p-5 flex flex-col gap-4" style={{ backgroundImage: 'radial-gradient(ellipse at 78% 16%, rgba(76,134,228,0.36) 0%, transparent 38%), radial-gradient(ellipse at 38% 48%, rgba(136,170,238,0.24) 0%, transparent 48%)' }}>
@@ -221,7 +221,7 @@ export default function AjustesPage() {
             <label className="label-caps block mb-1.5">
               Cumpleaños
               {fechaNacimiento && (
-                <span className="ml-2 normal-case font-semibold" style={{ color: '#FF6B35' }}>
+                <span className="ml-2 normal-case font-semibold" style={{ color: '#00BD7D' }}>
                   {calcAge(fechaNacimiento)}
                 </span>
               )}
@@ -295,7 +295,7 @@ export default function AjustesPage() {
       {/* ── Sección: Objetivo calórico ───────────── */}
       <section className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Flame size={14} style={{ color: '#FF6B35' }} />
+          <Flame size={14} style={{ color: '#00BD7D' }} />
           <span className="label-caps">Objetivo calórico</span>
         </div>
         <div className="card p-5 flex flex-col gap-4" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 30%, rgba(255,107,53,0.28) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(255,155,80,0.18) 0%, transparent 45%)' }}>
@@ -314,7 +314,7 @@ export default function AjustesPage() {
                 min="500"
                 max="10000"
                 className="flex-1 px-4 py-3 text-xl font-black rounded-xl text-center"
-                style={{ color: '#FF6B35' }}
+                style={{ color: '#00BD7D' }}
               />
               <span className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>kcal / día</span>
             </div>
@@ -328,7 +328,7 @@ export default function AjustesPage() {
                 onClick={() => saveCalorieGoal(kcal)}
                 className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all"
                 style={{
-                  background: calorieGoal === kcal ? '#FF6B35' : 'var(--input-bg)',
+                  background: calorieGoal === kcal ? '#00BD7D' : 'var(--input-bg)',
                   color: calorieGoal === kcal ? '#FFFFFF' : 'var(--text-muted)',
                 }}
               >
@@ -348,7 +348,7 @@ export default function AjustesPage() {
               style={{ background: 'var(--input-bg)', border: '1px solid var(--divider)' }}
             >
               <div className="flex items-center gap-3">
-                <Sparkles size={15} style={{ color: '#FF6B35' }} />
+                <Sparkles size={15} style={{ color: '#00BD7D' }} />
                 <div className="text-left">
                   <p className="text-sm font-bold" style={{ color: 'var(--app-color)' }}>Calcular recomendación</p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -373,11 +373,11 @@ export default function AjustesPage() {
                       className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
                       style={{
                         background: recActivity === opt.value ? 'rgba(255,107,53,0.12)' : 'var(--input-bg)',
-                        border: `1px solid ${recActivity === opt.value ? '#FF6B35' : 'var(--divider)'}`,
+                        border: `1px solid ${recActivity === opt.value ? '#00BD7D' : 'var(--divider)'}`,
                       }}
                     >
                       <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center border-2"
-                        style={{ borderColor: recActivity === opt.value ? '#FF6B35' : 'var(--divider)', background: recActivity === opt.value ? '#FF6B35' : 'transparent' }}>
+                        style={{ borderColor: recActivity === opt.value ? '#00BD7D' : 'var(--divider)', background: recActivity === opt.value ? '#00BD7D' : 'transparent' }}>
                         {recActivity === opt.value && <CheckCircle size={8} color="#fff" />}
                       </div>
                       <div>
@@ -400,12 +400,12 @@ export default function AjustesPage() {
                       className="flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all"
                       style={{
                         background: recGoal === opt.value ? 'rgba(255,107,53,0.12)' : 'var(--input-bg)',
-                        border: `1px solid ${recGoal === opt.value ? '#FF6B35' : 'var(--divider)'}`,
+                        border: `1px solid ${recGoal === opt.value ? '#00BD7D' : 'var(--divider)'}`,
                       }}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center border-2"
-                          style={{ borderColor: recGoal === opt.value ? '#FF6B35' : 'var(--divider)', background: recGoal === opt.value ? '#FF6B35' : 'transparent' }}>
+                          style={{ borderColor: recGoal === opt.value ? '#00BD7D' : 'var(--divider)', background: recGoal === opt.value ? '#00BD7D' : 'transparent' }}>
                           {recGoal === opt.value && <CheckCircle size={8} color="#fff" />}
                         </div>
                         <span className="text-xs font-bold" style={{ color: 'var(--app-color)' }}>{opt.label}</span>
@@ -419,13 +419,13 @@ export default function AjustesPage() {
               {/* Result */}
               {recResult && (
                 <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.3)' }}>
-                  <p className="text-3xl font-black mb-0.5" style={{ color: '#FF6B35' }}>{recResult.toLocaleString()} kcal</p>
+                  <p className="text-3xl font-black mb-0.5" style={{ color: '#00BD7D' }}>{recResult.toLocaleString()} kcal</p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>recomendadas al día</p>
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => { saveCalorieGoal(recResult); setRecOpen(false) }}
                       className="flex-1 py-2 text-xs font-bold rounded-lg"
-                      style={{ background: '#FF6B35', color: '#fff' }}
+                      style={{ background: '#00BD7D', color: '#fff' }}
                     >
                       Aplicar
                     </button>
@@ -453,7 +453,7 @@ export default function AjustesPage() {
       {/* ── Sección: Tu cuenta ───────────────────── */}
       <section className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Mail size={14} style={{ color: '#FF6B35' }} />
+          <Mail size={14} style={{ color: '#00BD7D' }} />
           <span className="label-caps">Tu cuenta</span>
         </div>
         <div className="card p-5 flex flex-col gap-5">
@@ -544,7 +544,7 @@ export default function AjustesPage() {
       {/* ── Sección: Instalar app ───────────────── */}
       <section className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <MonitorSmartphone size={14} style={{ color: '#FF6B35' }} />
+          <MonitorSmartphone size={14} style={{ color: '#00BD7D' }} />
           <span className="label-caps">Instalar app</span>
         </div>
         <div className="card p-5" style={{ backgroundImage: 'radial-gradient(ellipse at 48% 42%, rgba(38,94,215,0.42) 0%, rgba(62,122,230,0.26) 28%, transparent 55%), radial-gradient(ellipse at 58% 28%, rgba(38,90,215,0.24) 0%, transparent 36%)' }}>
@@ -561,7 +561,7 @@ export default function AjustesPage() {
           ) : isIOS ? (
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#FFF4EF' }}>
-                <Smartphone size={18} style={{ color: '#FF6B35' }} />
+                <Smartphone size={18} style={{ color: '#00BD7D' }} />
               </div>
               <div>
                 <p className="text-sm font-bold mb-1" style={{ color: 'var(--app-color)' }}>Añadir a pantalla de inicio</p>
@@ -575,7 +575,7 @@ export default function AjustesPage() {
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#FFF4EF' }}>
-                  <Download size={18} style={{ color: '#FF6B35' }} />
+                  <Download size={18} style={{ color: '#00BD7D' }} />
                 </div>
                 <div>
                   <p className="text-sm font-bold" style={{ color: 'var(--app-color)' }}>Instalar en este dispositivo</p>
@@ -585,7 +585,7 @@ export default function AjustesPage() {
               <button
                 onClick={handleInstall}
                 className="shrink-0 px-4 py-2 rounded-xl font-bold text-xs tracking-widest uppercase"
-                style={{ background: '#FF6B35', color: '#ffffff' }}
+                style={{ background: '#00BD7D', color: '#ffffff' }}
               >
                 Instalar
               </button>
@@ -609,7 +609,7 @@ export default function AjustesPage() {
       {/* ── Sección: Apariencia ──────────────────── */}
       <section className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Sun size={14} style={{ color: '#FF6B35' }} />
+          <Sun size={14} style={{ color: '#00BD7D' }} />
           <span className="label-caps">Apariencia</span>
         </div>
         <div className="card p-5">
@@ -621,7 +621,7 @@ export default function AjustesPage() {
               >
                 {theme === 'dark'
                   ? <Moon size={18} style={{ color: '#8B8BF8' }} />
-                  : <Sun size={18} style={{ color: '#FF6B35' }} />
+                  : <Sun size={18} style={{ color: '#00BD7D' }} />
                 }
               </div>
               <div>

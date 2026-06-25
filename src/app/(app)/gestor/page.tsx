@@ -266,13 +266,13 @@ export default function GestorPage() {
       <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 01</span>
         <div className="flex items-center justify-between">
-          <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>GESTOR</h1>
+          <h1 className="font-oswald font-semibold text-3xl tracking-wide" style={{ color: 'var(--app-color)', fontFamily: "var(--font-oswald,'Oswald',sans-serif)" }}>GESTOR</h1>
           <button
             onClick={() => setShowForm(!showForm)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all"
             style={{
-              background: showForm ? '#F5F5F7' : '#1A1A1A',
-              color: showForm ? '#9CA3AF' : '#FFFFFF',
+              background: showForm ? 'var(--divider)' : '#00BD7D',
+              color: showForm ? 'var(--text-muted)' : '#FFFFFF',
             }}
           >
             {showForm ? <X size={14} /> : <Plus size={14} />}
@@ -298,7 +298,7 @@ export default function GestorPage() {
         <div className="h-2 rounded-full bg-gray-100">
           <div
             className="h-2 rounded-full transition-all"
-            style={{ width: `${pct}%`, background: pct === 100 ? '#22C55E' : '#FF6B35' }}
+            style={{ width: `${pct}%`, background: pct === 100 ? '#22C55E' : '#00BD7D' }}
           />
         </div>
       </div>
@@ -335,7 +335,7 @@ export default function GestorPage() {
                   className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                   style={{
                     background: newCuando === w ? '#1A1A1A' : '#F5F5F7',
-                    color: newCuando === w ? '#FF6B35' : '#9CA3AF',
+                    color: newCuando === w ? '#00BD7D' : '#9CA3AF',
                   }}
                 >
                   {WHEN_LABELS[w]}
@@ -365,7 +365,7 @@ export default function GestorPage() {
                   className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                   style={{
                     background: newEstado === s ? '#1A1A1A' : '#F5F5F7',
-                    color: newEstado === s ? '#FF6B35' : '#9CA3AF',
+                    color: newEstado === s ? '#00BD7D' : '#9CA3AF',
                   }}
                 >
                   {STATUS_LABELS[s]}
@@ -378,7 +378,7 @@ export default function GestorPage() {
             type="submit"
             disabled={saving}
             className="w-full py-3 rounded-xl text-xs font-bold tracking-widest uppercase disabled:opacity-50"
-            style={{ background: '#FF6B35', color: '#ffffff' }}
+            style={{ background: '#00BD7D', color: '#ffffff' }}
           >
             {saving ? 'Guardando...' : 'Crear tarea'}
           </button>
@@ -388,7 +388,7 @@ export default function GestorPage() {
       {/* ── Task list ──────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-6 h-6 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#00BD7D] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <>
@@ -398,7 +398,7 @@ export default function GestorPage() {
                 <span className="label-caps">Pendientes</span>
                 <span
                   className="text-xs font-black px-2 py-0.5 rounded-full"
-                  style={{ background: '#FF6B35', color: '#fff' }}
+                  style={{ background: '#00BD7D', color: '#fff' }}
                 >
                   {pending.length}
                 </span>
@@ -554,7 +554,7 @@ function TaskCard({
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
                   background: editCuando === w ? '#1A1A1A' : '#F5F5F7',
-                  color: editCuando === w ? '#FF6B35' : '#9CA3AF',
+                  color: editCuando === w ? '#00BD7D' : '#9CA3AF',
                 }}
               >
                 {WHEN_LABELS[w]}
@@ -581,7 +581,7 @@ function TaskCard({
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
                   background: editEstado === s ? '#1A1A1A' : '#F5F5F7',
-                  color: editEstado === s ? '#FF6B35' : '#9CA3AF',
+                  color: editEstado === s ? '#00BD7D' : '#9CA3AF',
                 }}
               >
                 {STATUS_LABELS[s]}
@@ -593,7 +593,7 @@ function TaskCard({
           <button
             onClick={onSaveEdit}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase"
-            style={{ background: '#FF6B35', color: '#fff' }}
+            style={{ background: '#00BD7D', color: '#fff' }}
           >
             <Check size={12} /> Guardar
           </button>

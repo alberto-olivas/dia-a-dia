@@ -23,7 +23,6 @@ export default function AuthPage() {
   }, [user, loading, router])
 
   useEffect(() => {
-    // Test server-side connectivity (browser → /api/health → Supabase)
     fetch('/api/health')
       .then((r) => r.json())
       .then((d) => setConnStatus(d.ok ? 'ok' : 'error'))
@@ -60,8 +59,6 @@ export default function AuthPage() {
     setSubmitting(true)
 
     try {
-      // Use server-side proxy — browser provides the public Supabase URL/key
-      // so the server doesn't depend on potentially-corrupted env vars
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,7 +66,6 @@ export default function AuthPage() {
           action: mode === 'login' ? 'signin' : 'signup',
           email,
           password,
-          // Strip BOM that Vercel CLI can add to env var values
           supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/^﻿/, '').trim(),
           supabaseKey: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').replace(/^﻿/, '').trim(),
         }),
@@ -81,14 +77,12 @@ export default function AuthPage() {
         const errMsg = data.msg || data.error?.message || data.error || 'Error desconocido'
         setError(translateError({ message: errMsg, status: res.status }))
       } else if (data.access_token) {
-        // Session returned — set it in the Supabase client
         await supabase.auth.setSession({
           access_token: data.access_token,
           refresh_token: data.refresh_token,
         })
         router.replace('/home')
       } else if (mode === 'register' && data.id) {
-        // Signup without immediate session (email confirmation needed)
         setInfo('✓ Cuenta creada. Revisa tu email para confirmar tu cuenta y luego inicia sesión.')
         setMode('login')
       } else {
@@ -104,149 +98,197 @@ export default function AuthPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-        <div className="w-8 h-8 border-2 border-[#FF2D00] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--app-bg)' }}>
+        <div className="w-8 h-8 border-2 border-[#00BD7D] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: '#0a0a0a' }}>
+    <div
+      className="min-h-screen flex flex-col md:flex-row"
+      style={{
+        background: 'var(--app-bg)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Atmospheric orbs */}
+      <div style={{
+        position: 'fixed', top: '-20%', right: '-15%',
+        width: '65vw', height: '65vw', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(0,189,125,0.12) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'fixed', bottom: '-15%', left: '-20%',
+        width: '55vw', height: '55vw', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+
       {/* Left panel - branding (desktop only) */}
       <div
-        className="hidden md:flex md:flex-1 flex-col justify-between p-12 border-r"
-        style={{ borderColor: '#2a2a2a' }}
+        className="hidden md:flex md:flex-1 flex-col justify-between p-12"
+        style={{ position: 'relative', zIndex: 1 }}
       >
         <div>
-          <span className="label-caps">Sistema</span>
-          <div
-            className="w-8 h-1 mt-2"
-            style={{ background: '#FF2D00' }}
-          />
+          <span className="label-caps block">Sistema</span>
+          <div className="w-8 h-1 mt-2 rounded-full" style={{ background: '#00BD7D' }} />
         </div>
 
         <div>
           <h1
-            className="font-black leading-none tracking-tight"
-            style={{ fontSize: 'clamp(4rem, 8vw, 7rem)', color: '#ffffff' }}
+            style={{
+              fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+              fontSize: 'clamp(4rem, 8vw, 7rem)',
+              fontWeight: 700,
+              lineHeight: 1,
+              color: 'var(--app-color)',
+              letterSpacing: '0.02em',
+            }}
           >
             DÍA<br />A<br />DÍA
           </h1>
-          <p className="mt-6 max-w-xs" style={{ color: '#555555', fontSize: '0.9rem', lineHeight: '1.6' }}>
+          <p className="mt-6 max-w-xs" style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.7' }}>
             Control total de tu día. Calorías, entrenamientos, tareas — todo en un sistema.
           </p>
         </div>
 
         <div className="flex gap-8">
-          <div>
-            <div className="font-black text-3xl" style={{ color: '#FF2D00' }}>3</div>
-            <div className="label-caps mt-1">Módulos</div>
-          </div>
-          <div>
-            <div className="font-black text-3xl" style={{ color: '#FF2D00' }}>24/7</div>
-            <div className="label-caps mt-1">Disponible</div>
-          </div>
-          <div>
-            <div className="font-black text-3xl" style={{ color: '#FF2D00' }}>∞</div>
-            <div className="label-caps mt-1">Historial</div>
-          </div>
+          {[['3', 'Módulos'], ['24/7', 'Disponible'], ['∞', 'Historial']].map(([n, l]) => (
+            <div key={l}>
+              <div style={{
+                fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                fontWeight: 700,
+                fontSize: '1.75rem',
+                color: '#00BD7D',
+              }}>{n}</div>
+              <div className="label-caps mt-1">{l}</div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Right panel - form */}
-      <div className="flex flex-1 flex-col justify-center px-6 py-12 md:max-w-md md:mx-auto w-full">
+      <div
+        className="flex flex-1 flex-col justify-center px-6 py-12 md:max-w-md md:mx-auto w-full"
+        style={{ position: 'relative', zIndex: 1 }}
+      >
         {/* Mobile header */}
         <div className="mb-10 md:hidden">
-          <h1
-            className="font-black leading-none"
-            style={{ fontSize: '3.5rem', color: '#ffffff' }}
-          >
+          <h1 style={{
+            fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+            fontSize: '3rem', fontWeight: 700,
+            color: 'var(--app-color)', lineHeight: 1,
+          }}>
             DÍA A DÍA
           </h1>
-          <div className="w-8 h-1 mt-3" style={{ background: '#FF2D00' }} />
+          <div className="w-8 h-1 mt-3 rounded-full" style={{ background: '#00BD7D' }} />
         </div>
 
-        {/* Connection status indicator */}
         {connStatus === 'error' && (
-          <div className="mb-6 py-3 px-4 text-sm" style={{ background: 'rgba(255,45,0,0.1)', border: '1px solid #FF2D00', color: '#FF2D00' }}>
+          <div className="mb-6 py-3 px-4 text-sm rounded-xl" style={{
+            background: 'rgba(239,68,68,0.08)',
+            border: '1px solid rgba(239,68,68,0.25)',
+            color: '#DC2626',
+          }}>
             ⚠ Sin conexión al servidor. Comprueba tu red o prueba desde otro dispositivo/red.
           </div>
         )}
 
-        {/* Form header */}
-        <div className="mb-8">
-          <span className="label-caps">{mode === 'login' ? 'Acceso' : 'Registro'}</span>
-          <h2
-            className="font-black mt-1"
-            style={{ fontSize: '1.75rem', color: '#ffffff' }}
-          >
-            {mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}
-          </h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="label-caps" htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              required
-              className="px-4 py-3 text-sm rounded-none"
-              style={{ background: '#111111', border: '1px solid #2a2a2a', color: '#fff' }}
-            />
+        {/* Glass form card */}
+        <div style={{
+          background: 'var(--card-bg)',
+          backdropFilter: 'blur(20px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+          border: '1px solid var(--card-border)',
+          borderRadius: 20,
+          boxShadow: 'var(--card-shadow)',
+          padding: '2rem',
+          borderTop: '3px solid #00BD7D',
+        }}>
+          <div className="mb-6">
+            <span className="label-caps block mb-2">{mode === 'login' ? 'Acceso' : 'Registro'}</span>
+            <h2 style={{
+              fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+              fontSize: '1.75rem', fontWeight: 600,
+              color: 'var(--app-color)',
+            }}>
+              {mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}
+            </h2>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="label-caps" htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-              className="px-4 py-3 text-sm rounded-none"
-              style={{ background: '#111111', border: '1px solid #2a2a2a', color: '#fff' }}
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="label-caps" htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                required
+                className="px-4 py-3 text-sm rounded-xl"
+              />
+            </div>
 
-          {error && (
-            <p className="text-sm py-3 px-4" style={{ background: 'rgba(255,45,0,0.1)', border: '1px solid #FF2D00', color: '#FF2D00' }}>
-              {error}
-            </p>
-          )}
-          {info && (
-            <p className="text-sm py-3 px-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid #2a2a2a', color: '#888' }}>
-              {info}
-            </p>
-          )}
+            <div className="flex flex-col gap-1.5">
+              <label className="label-caps" htmlFor="password">Contraseña</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                className="px-4 py-3 text-sm rounded-xl"
+              />
+            </div>
+
+            {error && (
+              <p className="text-sm py-3 px-4 rounded-xl" style={{
+                background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.2)',
+                color: '#DC2626',
+              }}>
+                {error}
+              </p>
+            )}
+            {info && (
+              <p className="text-sm py-3 px-4 rounded-xl" style={{
+                background: 'rgba(0,189,125,0.08)',
+                border: '1px solid rgba(0,189,125,0.2)',
+                color: '#00BD7D',
+              }}>
+                {info}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-2 py-3.5 font-bold text-sm tracking-widest uppercase transition-opacity disabled:opacity-50 rounded-xl"
+              style={{ background: '#00BD7D', color: '#ffffff', boxShadow: '0 4px 12px rgba(0,189,125,0.25)' }}
+            >
+              {submitting ? 'Cargando...' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+            </button>
+          </form>
+
+          <div className="mt-6 divider" />
 
           <button
-            type="submit"
-            disabled={submitting}
-            className="mt-2 py-4 font-bold text-sm tracking-widest uppercase transition-opacity disabled:opacity-50"
-            style={{ background: '#FF2D00', color: '#ffffff' }}
+            onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setInfo('') }}
+            className="mt-5 text-sm text-center w-full transition-colors"
+            style={{ color: 'var(--text-muted)' }}
           >
-            {submitting ? 'Cargando...' : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+            {mode === 'login'
+              ? <>¿Sin cuenta? <span style={{ color: '#00BD7D' }} className="font-semibold">Regístrate</span></>
+              : <>¿Ya tienes cuenta? <span style={{ color: '#00BD7D' }} className="font-semibold">Inicia sesión</span></>
+            }
           </button>
-        </form>
-
-        <div className="mt-6 divider" />
-
-        <button
-          onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setInfo('') }}
-          className="mt-6 text-sm text-center transition-colors"
-          style={{ color: '#555555' }}
-        >
-          {mode === 'login'
-            ? <>¿Sin cuenta? <span style={{ color: '#ffffff' }} className="font-semibold">Regístrate</span></>
-            : <>¿Ya tienes cuenta? <span style={{ color: '#ffffff' }} className="font-semibold">Inicia sesión</span></>
-          }
-        </button>
+        </div>
       </div>
     </div>
   )

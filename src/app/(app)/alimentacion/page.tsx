@@ -14,12 +14,12 @@ import {
 
 const MEAL_ORDER: MealSection[] = ['desayuno', 'almuerzo', 'comida', 'pre_entreno', 'post_entreno', 'cena']
 const MEAL_COLORS: Record<MealSection, string> = {
-  desayuno: '#FF6B35',
-  almuerzo: '#FF8C5A',
-  comida: '#FFA878',
-  pre_entreno: '#FFBE9E',
-  post_entreno: '#FFD4BC',
-  cena: '#FFE8DA',
+  desayuno: '#00BD7D',
+  almuerzo: '#10B981',
+  comida: '#34D399',
+  pre_entreno: '#0166FF',
+  post_entreno: '#3B82F6',
+  cena: '#8B5CF6',
 }
 
 const DEFAULT_KCAL_GOAL = 2500
@@ -174,16 +174,16 @@ function AlimentacionContent() {
       {/* ── Header ─────────────────────────────────── */}
       <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 02</span>
-        <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>ALIMENTACIÓN</h1>
+        <h1 className="text-3xl font-semibold tracking-wide" style={{ color: 'var(--app-color)', fontFamily: "var(--font-oswald,'Oswald',sans-serif)" }}>ALIMENTACIÓN</h1>
         {isViewingPast && (
           <div
             className="flex items-center justify-between mt-3 rounded-xl px-3 py-2"
             style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.25)' }}
           >
-            <span className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+            <span className="text-xs font-bold" style={{ color: '#00BD7D' }}>
               {new Date(today + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
             </span>
-            <a href="/alimentacion" className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+            <a href="/alimentacion" className="text-xs font-bold" style={{ color: '#00BD7D' }}>
               Ir a hoy →
             </a>
           </div>
@@ -203,7 +203,7 @@ function AlimentacionContent() {
             </div>
           </div>
           <div className="text-right">
-            <span className="font-black text-2xl leading-none" style={{ color: '#FF6B35' }}>
+            <span className="font-black text-2xl leading-none" style={{ color: '#00BD7D' }}>
               {Math.round(progressPct)}%
             </span>
             <span className="label-caps block">del objetivo</span>
@@ -214,13 +214,13 @@ function AlimentacionContent() {
             className="h-2.5 rounded-full transition-all"
             style={{
               width: `${progressPct}%`,
-              background: progressPct >= 100 ? '#EF4444' : 'linear-gradient(90deg, #FF6B35, #FF8C5A)',
+              background: progressPct >= 100 ? '#EF4444' : 'linear-gradient(90deg, #00BD7D, #10B981)',
             }}
           />
         </div>
         <div className="flex items-center gap-4 mt-3">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: '#FF6B35' }} />
+            <div className="w-2 h-2 rounded-full" style={{ background: '#00BD7D' }} />
             <span className="text-xs text-gray-400">Ingeridas: <b className="text-gray-700">{totalKcal}</b></span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -249,7 +249,7 @@ function AlimentacionContent() {
                 cursor={{ fill: 'rgba(0,0,0,0.03)' }}
                 formatter={(val: unknown) => [`${val} kcal`, '']}
               />
-              <Bar dataKey="kcal" fill="#FF6B35" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="kcal" fill="#00BD7D" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -259,7 +259,7 @@ function AlimentacionContent() {
       {/* ── Meal sections accordion ────────────────── */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-6 h-6 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#00BD7D] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <div className="flex flex-col gap-2 mb-4">
@@ -277,7 +277,7 @@ function AlimentacionContent() {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-2.5 h-2.5 rounded-full"
-                      style={{ background: isOpen ? '#FF6B35' : '#E5E7EB' }}
+                      style={{ background: isOpen ? '#00BD7D' : '#E5E7EB' }}
                     />
                     <span
                       className="font-bold text-sm uppercase tracking-wider"
@@ -291,7 +291,7 @@ function AlimentacionContent() {
                   </div>
                   <div className="flex items-center gap-3">
                     {sectionKcal > 0 && (
-                      <span className="font-bold text-sm" style={{ color: '#FF6B35' }}>
+                      <span className="font-bold text-sm" style={{ color: '#00BD7D' }}>
                         {sectionKcal} kcal
                       </span>
                     )}
@@ -317,7 +317,7 @@ function AlimentacionContent() {
                               </p>
                               <p className="text-xs text-gray-400 mt-0.5">{entry.cantidad_gramos}{LIQUID_FOOD_NAMES.has(entry.nombre_alimento.toLowerCase()) ? 'ml' : 'g'}</p>
                             </div>
-                            <span className="font-bold text-sm shrink-0" style={{ color: '#FF6B35' }}>
+                            <span className="font-bold text-sm shrink-0" style={{ color: '#00BD7D' }}>
                               {entry.calorias} kcal
                             </span>
                             <button
@@ -340,7 +340,7 @@ function AlimentacionContent() {
                       <button
                         onClick={() => setAddingTo(section)}
                         className="mt-2 flex items-center gap-2 text-xs font-bold tracking-widest uppercase py-2.5 px-4 rounded-xl w-full justify-center"
-                        style={{ border: '1.5px dashed #FFD4BC', color: '#FF6B35' }}
+                        style={{ border: '1.5px dashed rgba(0,189,125,0.35)', color: '#00BD7D' }}
                       >
                         <Plus size={12} /> Añadir alimento
                       </button>
@@ -361,8 +361,8 @@ function AlimentacionContent() {
             <AreaChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="kcalGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF6B35" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#FF6B35" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#00BD7D" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#00BD7D" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
@@ -380,10 +380,10 @@ function AlimentacionContent() {
               <Area
                 type="monotone"
                 dataKey="kcal"
-                stroke="#FF6B35"
+                stroke="#00BD7D"
                 strokeWidth={2.5}
                 fill="url(#kcalGrad)"
-                dot={{ fill: '#FF6B35', r: 3, strokeWidth: 0 }}
+                dot={{ fill: '#00BD7D', r: 3, strokeWidth: 0 }}
                 activeDot={{ r: 5 }}
               />
             </AreaChart>
@@ -907,7 +907,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl"
         />
         {searching && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 border border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 border border-[#00BD7D] border-t-transparent rounded-full animate-spin" />
         )}
       </div>
 
@@ -926,7 +926,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                     {getDisplayName(p)}
                   </span>
                   {localMatchNames.has(p.product_name.toLowerCase()) && (
-                    <span className="shrink-0 text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: '#FFF5F0', color: '#FF6B35' }}>★ mi base</span>
+                    <span className="shrink-0 text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: '#E6FBF3', color: '#00BD7D' }}>★ mi base</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -948,7 +948,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-sm font-black block" style={{ color: '#FF6B35' }}>
+                <span className="text-sm font-black block" style={{ color: '#00BD7D' }}>
                   {Math.round(p.nutriments?.['energy-kcal_100g'] ?? 0)}
                 </span>
                 <span className="text-[10px] text-gray-400">kcal/100g</span>
@@ -964,7 +964,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           {/* Selected product chip */}
           <div
             className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-white border-2"
-            style={{ borderColor: '#FF6B35' }}
+            style={{ borderColor: '#00BD7D' }}
           >
             <span className="text-sm font-semibold truncate pr-4 text-gray-800">
               {getDisplayName(selected)}
@@ -985,7 +985,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                 className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                 style={{
                   background: inputMode === 'g' ? '#1A1A1A' : '#FFFFFF',
-                  color: inputMode === 'g' ? '#FF6B35' : '#9CA3AF',
+                  color: inputMode === 'g' ? '#00BD7D' : '#9CA3AF',
                   border: inputMode === 'g' ? 'none' : '1.5px solid #E5E7EB',
                 }}
               >
@@ -996,7 +996,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                 className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                 style={{
                   background: inputMode === 'uds' ? '#1A1A1A' : '#FFFFFF',
-                  color: inputMode === 'uds' ? '#FF6B35' : '#9CA3AF',
+                  color: inputMode === 'uds' ? '#00BD7D' : '#9CA3AF',
                   border: inputMode === 'uds' ? 'none' : '1.5px solid #E5E7EB',
                 }}
               >
@@ -1018,7 +1018,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                   −
                 </button>
                 <div className="text-center min-w-[60px]">
-                  <div className="text-3xl font-black leading-none" style={{ color: '#FF6B35' }}>{unitCount}</div>
+                  <div className="text-3xl font-black leading-none" style={{ color: '#00BD7D' }}>{unitCount}</div>
                   <div className="text-xs text-gray-400 mt-0.5">
                     {selected.unit_label ?? 'unidad'}{unitCount !== 1 ? 's' : ''}
                   </div>
@@ -1047,7 +1047,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                     className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                     style={{
                       background: gramos === p ? '#1A1A1A' : '#FFFFFF',
-                      color: gramos === p ? '#FF6B35' : '#9CA3AF',
+                      color: gramos === p ? '#00BD7D' : '#9CA3AF',
                       border: gramos === p ? 'none' : '1.5px solid #E5E7EB',
                     }}
                   >
@@ -1068,7 +1068,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                       min="0"
                       max={sliderMax}
                       className="w-16 px-2 py-1 text-sm rounded-lg text-center font-black"
-                      style={{ color: '#FF6B35' }}
+                      style={{ color: '#00BD7D' }}
                     />
                     <span className="text-xs text-gray-400 font-semibold">{unit}</span>
                   </div>
@@ -1083,7 +1083,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                     value={gramos}
                     onChange={(e) => setGramos(parseInt(e.target.value))}
                     className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                    style={{ accentColor: '#FF6B35' }}
+                    style={{ accentColor: '#00BD7D' }}
                   />
                   <span className="text-[10px] text-gray-300">{sliderMax}{unit}</span>
                 </div>
@@ -1092,8 +1092,8 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           )}
 
           {/* Live kcal */}
-          <div className="flex items-center justify-center gap-2 mb-3 py-2.5 rounded-xl" style={{ background: '#FFF5F0' }}>
-            <div className="font-black text-3xl leading-none" style={{ color: '#FF6B35' }}>
+          <div className="flex items-center justify-center gap-2 mb-3 py-2.5 rounded-xl" style={{ background: '#E6FBF3' }}>
+            <div className="font-black text-3xl leading-none" style={{ color: '#00BD7D' }}>
               {totalKcal}
             </div>
             <div className="label-caps">kcal</div>
@@ -1119,7 +1119,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
             onClick={handleAdd}
             disabled={effectiveGramos <= 0}
             className="w-full py-3 rounded-xl text-xs font-bold tracking-widest uppercase disabled:opacity-40"
-            style={{ background: '#FF6B35', color: '#fff' }}
+            style={{ background: '#00BD7D', color: '#fff' }}
           >
             Añadir al registro
           </button>

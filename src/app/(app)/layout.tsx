@@ -21,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--app-bg)' }}>
-        <div className="w-8 h-8 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#00BD7D] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -46,7 +46,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         style={{
           position: 'fixed', top: '-15%', right: '-15%',
           width: '55vw', height: '55vw',
-          background: 'radial-gradient(circle, rgba(255,107,53,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(0,189,125,0.12) 0%, transparent 70%)',
           filter: 'blur(60px)',
           pointerEvents: 'none', zIndex: 0,
         }}
@@ -66,7 +66,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         style={{
           position: 'fixed', top: '40%', right: '10%',
           width: '30vw', height: '30vw',
-          background: 'radial-gradient(circle, rgba(34,197,94,0.05) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)',
           filter: 'blur(50px)',
           pointerEvents: 'none', zIndex: 0,
         }}

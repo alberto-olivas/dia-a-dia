@@ -92,34 +92,6 @@ function getUserName(email: string): string {
   return part.charAt(0).toUpperCase() + part.slice(1).replace(/[._-]/g, ' ')
 }
 
-// ── Perspective Design System tokens ──────────────────────────────────────────
-const DS = {
-  bg:          '#060B18',
-  bgSoft:      '#0C1222',
-  bgMedium:    '#131B2E',
-  bgStrong:    '#1E293B',
-  heading:     '#F1F5F9',
-  body:        '#94A3B8',
-  brand:       '#0166FF',
-  brandSofter: '#0A1A3D',
-  brandSoft:   '#0D2B66',
-  success:     '#009966',
-  purple:      '#8B5CF6',
-  cyan:        '#22D3EE',
-  shadowMd:    '0 6px 16px -4px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.05)',
-  shadowLg:    '0 12px 28px -6px rgb(0 0 0 / 0.1), 0 4px 12px -4px rgb(0 0 0 / 0.06)',
-  shadowXl:    '0 24px 48px -10px rgb(0 0 0 / 0.14), 0 8px 20px -8px rgb(0 0 0 / 0.08)',
-}
-
-const GLASS_BASE = {
-  background:            'rgba(255,255,255,0.06)',
-  backdropFilter:        'blur(16px) saturate(1.4)',
-  WebkitBackdropFilter:  'blur(16px) saturate(1.4)',
-  border:                '1px solid rgba(255,255,255,0.10)',
-  borderRadius:          16,
-} as const
-
-// ── Component ──────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { user } = useAuth()
   const { profile } = useProfile()
@@ -280,70 +252,63 @@ export default function HomePage() {
   const isViewingToday = selectedDate === todayStr
   const nowD = new Date()
   const futureMonth = calYear > nowD.getFullYear() || (calYear === nowD.getFullYear() && calMonth >= nowD.getMonth())
+  const net = calories.consumed - calories.workout - calories.steps - calories.sleep
 
   return (
-    <div style={{ minHeight: '100vh', background: DS.bg, position: 'relative', overflow: 'hidden' }}>
-
-      {/* ── Hover / transition styles ── */}
+    <div style={{ minHeight: '100vh', background: 'var(--app-bg)', position: 'relative' }}>
       <style>{`
-        .p-card-link {
+        .h-card-link {
           display: block;
-          background: rgba(255,255,255,0.06);
-          backdrop-filter: blur(16px) saturate(1.4);
-          -webkit-backdrop-filter: blur(16px) saturate(1.4);
-          border: 1px solid rgba(255,255,255,0.10);
+          background: var(--card-bg);
+          backdrop-filter: blur(20px) saturate(1.8);
+          -webkit-backdrop-filter: blur(20px) saturate(1.8);
+          border: 1px solid var(--card-border);
           border-radius: 16px;
-          transition: background 300ms ease-out, box-shadow 300ms ease-out, transform 300ms ease-out;
+          box-shadow: var(--card-shadow);
+          transition: transform 250ms ease, box-shadow 250ms ease;
           text-decoration: none;
+          color: inherit;
         }
-        .p-card-link:hover {
-          background: rgba(255,255,255,0.10);
-          box-shadow: 0 12px 28px -6px rgb(0 0 0 / 0.12), 0 4px 12px -4px rgb(0 0 0 / 0.08);
+        .h-card-link:hover {
           transform: translateY(-2px);
+          box-shadow: 0 12px 36px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.95);
         }
-        .p-week-btn {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+        .h-week-btn {
+          border: 1.5px solid transparent;
           transition: background 150ms, border-color 150ms;
         }
-        .p-week-btn:hover:not(:disabled) {
-          background: rgba(255,255,255,0.08);
-          border-color: rgba(255,255,255,0.14);
+        .h-week-btn:hover:not(:disabled) {
+          background: rgba(0,189,125,0.06) !important;
+          border-color: rgba(0,189,125,0.18) !important;
         }
-        .p-cal-btn:hover {
-          background: rgba(255,255,255,0.10) !important;
+        .h-cal-btn:hover {
+          background: rgba(0,189,125,0.10) !important;
         }
-        .p-nav-btn:hover {
-          background: rgba(255,255,255,0.12) !important;
+        .h-nav-btn:hover {
+          background: rgba(0,0,0,0.06) !important;
         }
       `}</style>
 
-      {/* ── Atmospheric orbs ── */}
-      <div style={{
-        position: 'fixed', top: '-20%', right: '-15%',
-        width: '65vw', height: '65vw', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(1,102,255,0.14) 0%, transparent 70%)',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-      <div style={{
-        position: 'fixed', bottom: '-15%', left: '-20%',
-        width: '55vw', height: '55vw', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(139,92,246,0.09) 0%, transparent 70%)',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-
-      {/* ── Content ── */}
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 640, margin: '0 auto', padding: '32px 16px 96px' }}>
 
         {/* ── Greeting ── */}
         <header style={{ marginBottom: 28 }}>
-          <h1 style={{ fontWeight: 700, fontSize: 28, lineHeight: 1.2, color: DS.heading, margin: 0 }}>
+          <h1 style={{
+            fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+            fontWeight: 600, fontSize: 30, lineHeight: 1.15,
+            color: 'var(--app-color)', margin: 0,
+            letterSpacing: '0.01em',
+          }}>
             {greeting.text}, {userName} {greeting.emoji}
           </h1>
-          <p style={{ fontSize: 13, color: DS.body, marginTop: 6, marginBottom: 0 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6, marginBottom: 0 }}>
             {DAY_NAMES_FULL[now.getDay()]}, {now.getDate()} de {MONTH_NAMES[now.getMonth()]}
           </p>
-          <p style={{ fontSize: 13, color: DS.body, marginTop: 2, marginBottom: 0, fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{
+            fontSize: 13, color: 'var(--text-muted)', marginTop: 2, marginBottom: 0,
+            fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+            fontVariantNumeric: 'tabular-nums',
+          }}>
             {getMadridTime(now)}
           </p>
         </header>
@@ -359,34 +324,40 @@ export default function HomePage() {
                   onClick={() => handleDateSelect(todayStr)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 4,
-                    fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
-                    padding: '5px 10px', borderRadius: 16,
-                    background: DS.brand, color: '#fff',
+                    fontSize: 11, fontWeight: 600, letterSpacing: '0.04em',
+                    padding: '5px 12px', borderRadius: 20,
+                    background: '#00BD7D', color: '#fff',
                     border: 'none', cursor: 'pointer',
-                    boxShadow: `${DS.shadowMd}, inset rgba(255,255,255,0.08) 0 6px 0px -5px, rgba(1,102,255,0.35) 0 4px 10px -5px`,
+                    boxShadow: '0 2px 8px rgba(0,189,125,0.3)',
                   }}
                 >
                   <ChevronLeft size={10} />
                   Hoy
                 </button>
               )}
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: DS.body }}>
+              <span style={{
+                fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
+                textTransform: 'uppercase', color: 'var(--text-muted)',
+              }}>
                 {isViewingToday ? 'Esta semana' : formatShortDate(selectedDate)}
               </span>
             </div>
             <button
               onClick={openCalendar}
-              className="p-nav-btn"
+              className="h-nav-btn"
               style={{
-                ...GLASS_BASE,
-                width: 36, height: 36,
+                width: 36, height: 36, borderRadius: 12,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: DS.shadowMd,
+                background: 'var(--card-bg)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid var(--card-border)',
+                boxShadow: 'var(--card-shadow)',
                 cursor: 'pointer',
               }}
               title="Abrir calendario"
             >
-              <CalendarDays size={14} style={{ color: DS.brand }} />
+              <CalendarDays size={14} style={{ color: '#00BD7D' }} />
             </button>
           </div>
 
@@ -399,39 +370,40 @@ export default function HomePage() {
                   key={dateStr}
                   onClick={() => !isFuture && handleDateSelect(dateStr)}
                   disabled={isFuture}
-                  className="p-week-btn"
+                  className="h-week-btn"
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                    flexShrink: 0, width: 44, padding: '10px 0', borderRadius: 16,
+                    flexShrink: 0, width: 44, padding: '10px 0', borderRadius: 14,
                     background: isSelected
-                      ? 'rgba(1,102,255,0.22)'
+                      ? '#00BD7D'
                       : isToday
-                      ? 'rgba(255,255,255,0.06)'
-                      : undefined,
-                    borderColor: isSelected
-                      ? 'rgba(1,102,255,0.45)'
-                      : isToday
-                      ? 'rgba(255,255,255,0.14)'
-                      : undefined,
-                    opacity: isFuture ? 0.3 : 1,
+                      ? 'rgba(0,189,125,0.08)'
+                      : 'rgba(255,255,255,0.6)',
+                    borderColor: isSelected ? '#00BD7D' : isToday ? 'rgba(0,189,125,0.3)' : 'rgba(0,0,0,0.06)',
+                    opacity: isFuture ? 0.35 : 1,
                     cursor: isFuture ? 'default' : 'pointer',
-                    boxShadow: isSelected ? '0 0 14px rgba(1,102,255,0.22)' : undefined,
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    boxShadow: isSelected
+                      ? '0 4px 12px rgba(0,189,125,0.3)'
+                      : '0 1px 4px rgba(0,0,0,0.05)',
                   }}
                 >
                   <span style={{
                     fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
-                    color: isSelected ? 'rgba(77,154,255,0.9)' : isToday ? DS.brand : DS.body,
+                    color: isSelected ? 'rgba(255,255,255,0.85)' : isToday ? '#00BD7D' : 'var(--text-muted)',
                   }}>
                     {label}
                   </span>
                   <span style={{
                     fontSize: 14, fontWeight: 800,
-                    color: isSelected ? '#fff' : isToday ? DS.heading : DS.body,
+                    fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                    color: isSelected ? '#fff' : isToday ? '#00BD7D' : 'var(--app-color)',
                   }}>
                     {num}
                   </span>
                   {isToday && !isSelected && (
-                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: DS.brand, boxShadow: `0 0 6px ${DS.brand}` }} />
+                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#00BD7D' }} />
                   )}
                 </button>
               )
@@ -442,42 +414,49 @@ export default function HomePage() {
           {calendarOpen && (
             <div
               style={{
-                ...GLASS_BASE,
-                background: 'rgba(6,11,24,0.92)',
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(24px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                border: '1px solid rgba(255,255,255,0.9)',
+                borderRadius: 16,
+                boxShadow: '0 20px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.9)',
                 position: 'absolute', right: 0, zIndex: 50,
                 marginTop: 8, minWidth: 280, padding: 16,
-                boxShadow: DS.shadowXl,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <button
                   onClick={prevMonth}
-                  className="p-nav-btn"
+                  className="h-nav-btn"
                   style={{
-                    width: 28, height: 28, borderRadius: 10,
+                    width: 28, height: 28, borderRadius: 8,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)',
+                    background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)',
                     cursor: 'pointer',
                   }}
                 >
-                  <ChevronLeft size={12} style={{ color: DS.heading }} />
+                  <ChevronLeft size={12} style={{ color: 'var(--app-color)' }} />
                 </button>
-                <span style={{ fontSize: 13, fontWeight: 700, color: DS.heading }}>
+                <span style={{
+                  fontSize: 13, fontWeight: 700,
+                  fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+                  color: 'var(--app-color)',
+                }}>
                   {MONTH_NAMES_CAP[calMonth]} {calYear}
                 </span>
                 <button
                   onClick={nextMonth}
-                  className="p-nav-btn"
+                  className="h-nav-btn"
                   style={{
-                    width: 28, height: 28, borderRadius: 10,
+                    width: 28, height: 28, borderRadius: 8,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)',
+                    background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)',
                     cursor: 'pointer',
                     opacity: futureMonth ? 0.3 : 1,
                   }}
                   disabled={futureMonth}
                 >
-                  <ChevronRight size={12} style={{ color: DS.heading }} />
+                  <ChevronRight size={12} style={{ color: 'var(--app-color)' }} />
                 </button>
               </div>
 
@@ -485,7 +464,7 @@ export default function HomePage() {
                 {CAL_HEADERS.map((h) => (
                   <div key={h} style={{
                     textAlign: 'center', fontSize: 9, fontWeight: 700,
-                    letterSpacing: '0.06em', textTransform: 'uppercase', color: DS.body,
+                    letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)',
                   }}>
                     {h}
                   </div>
@@ -500,17 +479,17 @@ export default function HomePage() {
                       key={dateStr}
                       onClick={() => !isFuture && handleDateSelect(dateStr)}
                       disabled={isFuture}
-                      className="p-cal-btn"
+                      className="h-cal-btn"
                       style={{
                         aspectRatio: '1', borderRadius: 8,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 11, fontWeight: isToday || isSelected ? 800 : 600,
-                        background: isSelected ? DS.brand : isToday ? 'rgba(1,102,255,0.18)' : 'transparent',
-                        color: isSelected ? '#fff' : isFuture || !inMonth ? DS.body : isToday ? DS.brand : DS.heading,
-                        opacity: !inMonth ? 0.35 : isFuture ? 0.25 : 1,
+                        background: isSelected ? '#00BD7D' : isToday ? 'rgba(0,189,125,0.12)' : 'transparent',
+                        color: isSelected ? '#fff' : isFuture || !inMonth ? 'var(--text-muted-2)' : isToday ? '#00BD7D' : 'var(--app-color)',
+                        opacity: !inMonth ? 0.4 : isFuture ? 0.25 : 1,
                         cursor: isFuture ? 'default' : 'pointer',
                         border: 'none',
-                        boxShadow: isSelected ? '0 0 10px rgba(1,102,255,0.45)' : undefined,
+                        boxShadow: isSelected ? '0 2px 8px rgba(0,189,125,0.35)' : undefined,
                         transition: 'background 150ms',
                       }}
                     >
@@ -524,9 +503,9 @@ export default function HomePage() {
                 onClick={() => setCalendarOpen(false)}
                 style={{
                   width: '100%', marginTop: 12, padding: '7px 0', borderRadius: 10,
-                  fontSize: 11, fontWeight: 700,
-                  background: 'rgba(255,255,255,0.07)', color: DS.body,
-                  border: '1px solid rgba(255,255,255,0.10)',
+                  fontSize: 11, fontWeight: 600,
+                  background: 'rgba(0,0,0,0.05)', color: 'var(--text-muted)',
+                  border: '1px solid rgba(0,0,0,0.08)',
                   cursor: 'pointer',
                 }}
               >
@@ -541,21 +520,21 @@ export default function HomePage() {
           <div
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              borderRadius: 16, padding: '10px 16px', marginBottom: 16,
-              background: 'rgba(1,102,255,0.10)',
-              border: '1px solid rgba(1,102,255,0.22)',
+              borderRadius: 14, padding: '10px 16px', marginBottom: 16,
+              background: 'rgba(0,189,125,0.08)',
+              border: '1px solid rgba(0,189,125,0.2)',
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, color: DS.brand }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#00BD7D' }}>
               Revisando {formatShortDate(selectedDate)}
             </span>
             <Link
               href={`/alimentacion?date=${selectedDate}`}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 10,
-                background: DS.brand, color: '#fff', textDecoration: 'none',
-                boxShadow: `${DS.shadowMd}, inset rgba(255,255,255,0.08) 0 6px 0px -5px`,
+                fontSize: 11, fontWeight: 600, padding: '6px 12px', borderRadius: 10,
+                background: '#00BD7D', color: '#fff', textDecoration: 'none',
+                boxShadow: '0 2px 6px rgba(0,189,125,0.3)',
               }}
             >
               <Pencil size={9} />
@@ -564,200 +543,193 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ── Cards grid — wrapped in perspective for 3D depth ── */}
-        <div style={{ perspective: '1200px', marginBottom: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        {/* ── Metric cards grid ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
 
-            {/* Calorías */}
-            {(() => {
-              const net  = calories.consumed - calories.workout - calories.steps - calories.sleep
-              const href = isViewingToday ? '/alimentacion' : `/alimentacion?date=${selectedDate}`
-              return (
-                <Link
-                  href={href}
-                  className="p-card-link"
-                  style={{
-                    padding: 16,
-                    backgroundImage: 'radial-gradient(ellipse at 20% 20%, rgba(1,102,255,0.22) 0%, transparent 65%)',
-                    boxShadow: DS.shadowMd,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: 10,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'rgba(1,102,255,0.14)', border: '1px solid rgba(1,102,255,0.28)',
-                    }}>
-                      <Flame size={14} style={{ color: DS.brand }} />
-                    </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>
-                      Calorías
-                    </span>
+          {/* Calorías consumidas */}
+          {(() => {
+            const href = isViewingToday ? '/alimentacion' : `/alimentacion?date=${selectedDate}`
+            return (
+              <Link href={href} className="h-card-link" style={{ padding: 16, borderTop: '3px solid #00BD7D' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: 10,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(0,189,125,0.12)',
+                  }}>
+                    <Flame size={14} style={{ color: '#00BD7D' }} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1, color: DS.heading }}>
-                    {net.toLocaleString()}
-                  </div>
-                  <div style={{ fontSize: 11, marginTop: 4, color: DS.body }}>kcal netas</div>
-                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: DS.success }}>+{calories.consumed.toLocaleString()}</span>
-                      <span style={{ fontSize: 10, color: DS.body }}>consumidas</span>
-                    </div>
-                    {calories.workout > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: DS.brand }}>-{calories.workout}</span>
-                        <span style={{ fontSize: 10, color: DS.body }}>entreno</span>
-                      </div>
-                    )}
-                    {calories.steps > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: DS.cyan }}>-{calories.steps}</span>
-                        <span style={{ fontSize: 10, color: DS.body }}>pasos</span>
-                      </div>
-                    )}
-                    {calories.sleep > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: DS.purple }}>-{calories.sleep}</span>
-                        <span style={{ fontSize: 10, color: DS.body }}>dormir</span>
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ marginTop: 12, height: 3, borderRadius: 9999, background: 'rgba(255,255,255,0.08)' }}>
-                    <div style={{
-                      height: 3, borderRadius: 9999,
-                      width: `${Math.min(100, (calories.consumed / calorieGoal) * 100)}%`,
-                      background: `linear-gradient(90deg, ${DS.brand}, rgba(1,102,255,0.5))`,
-                      boxShadow: `0 0 8px rgba(1,102,255,0.5)`,
-                    }} />
-                  </div>
-                </Link>
-              )
-            })()}
-
-            {/* Tareas */}
-            <Link
-              href="/gestor"
-              className="p-card-link"
-              style={{
-                padding: 16,
-                backgroundImage: 'radial-gradient(ellipse at 78% 18%, rgba(0,153,102,0.20) 0%, transparent 60%)',
-                boxShadow: DS.shadowMd,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(0,153,102,0.14)', border: '1px solid rgba(0,153,102,0.28)',
-                }}>
-                  <CheckSquare size={14} style={{ color: DS.success }} />
+                  <span className="label-caps">Calorías</span>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>
-                  Tareas
-                </span>
-              </div>
-              <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1, color: DS.heading }}>
-                {completionPct}%
-              </div>
-              <div style={{ fontSize: 11, marginTop: 4, color: DS.body }}>{doneTasks.length}/{totalTasks} completadas</div>
-              <div style={{ marginTop: 12, height: 3, borderRadius: 9999, background: 'rgba(255,255,255,0.08)' }}>
                 <div style={{
-                  height: 3, borderRadius: 9999,
-                  width: `${completionPct}%`,
-                  background: `linear-gradient(90deg, ${DS.success}, rgba(0,153,102,0.5))`,
-                  boxShadow: '0 0 8px rgba(0,153,102,0.5)',
-                  transition: 'width 400ms ease-out',
-                }} />
-              </div>
-            </Link>
-          </div>
-        </div>
+                  fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                  fontWeight: 700, fontSize: 28, lineHeight: 1, color: 'var(--app-color)',
+                }}>
+                  {calories.consumed.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 11, marginTop: 3, color: 'var(--text-muted)' }}>kcal consumidas</div>
+                <div style={{ marginTop: 10, height: 4, borderRadius: 9999, background: 'rgba(0,0,0,0.07)' }}>
+                  <div style={{
+                    height: 4, borderRadius: 9999,
+                    width: `${Math.min(100, (calories.consumed / calorieGoal) * 100)}%`,
+                    background: 'linear-gradient(90deg, #00BD7D, rgba(0,189,125,0.5))',
+                    transition: 'width 400ms ease-out',
+                  }} />
+                </div>
+                <div style={{ fontSize: 10, marginTop: 4, color: 'var(--text-muted-2)' }}>
+                  meta: {calorieGoal.toLocaleString()} kcal
+                </div>
+              </Link>
+            )
+          })()}
 
-        {/* ── Workout card ── */}
-        <Link
-          href={isViewingToday ? '/entreno' : `/entreno?date=${selectedDate}`}
-          className="p-card-link"
-          style={{
-            padding: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: 16,
-            backgroundImage: 'radial-gradient(ellipse at 12% 55%, rgba(1,102,255,0.18) 0%, transparent 55%), radial-gradient(ellipse at 85% 25%, rgba(139,92,246,0.16) 0%, transparent 50%)',
-            boxShadow: DS.shadowMd,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 12,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(1,102,255,0.14)', border: '1px solid rgba(1,102,255,0.28)',
-            }}>
-              <Dumbbell size={18} style={{ color: DS.brand }} />
-            </div>
-            <div>
-              <span style={{
-                display: 'block', fontSize: 10, fontWeight: 700,
-                letterSpacing: '0.08em', textTransform: 'uppercase',
-                color: DS.body, marginBottom: 3,
+          {/* Tareas */}
+          <Link href="/gestor" className="h-card-link" style={{ padding: 16, borderTop: '3px solid #D97706' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(217,119,6,0.12)',
               }}>
-                {isViewingToday ? 'Entreno hoy' : 'Entreno'}
-              </span>
-              <span style={{ fontWeight: 600, fontSize: 13, color: DS.heading }}>
-                {workout ? (WORKOUT_TYPES[workout.tipo as keyof typeof WORKOUT_TYPES]?.label ?? workout.tipo) : 'Sin registrar'}
-              </span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {workout && (
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1, color: DS.brand }}>{workout.calorias_quemadas}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>kcal</div>
+                <CheckSquare size={14} style={{ color: '#D97706' }} />
               </div>
+              <span className="label-caps">Tareas</span>
+            </div>
+            <div style={{
+              fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+              fontWeight: 700, fontSize: 28, lineHeight: 1, color: 'var(--app-color)',
+            }}>
+              {completionPct}%
+            </div>
+            <div style={{ fontSize: 11, marginTop: 3, color: 'var(--text-muted)' }}>
+              {doneTasks.length}/{totalTasks} completadas
+            </div>
+            <div style={{ marginTop: 10, height: 4, borderRadius: 9999, background: 'rgba(0,0,0,0.07)' }}>
+              <div style={{
+                height: 4, borderRadius: 9999,
+                width: `${completionPct}%`,
+                background: 'linear-gradient(90deg, #D97706, rgba(217,119,6,0.5))',
+                transition: 'width 400ms ease-out',
+              }} />
+            </div>
+          </Link>
+
+          {/* Balance neto */}
+          <Link
+            href={isViewingToday ? '/alimentacion' : `/alimentacion?date=${selectedDate}`}
+            className="h-card-link"
+            style={{ padding: 16, borderTop: '3px solid #0166FF' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(1,102,255,0.10)',
+              }}>
+                <Flame size={14} style={{ color: '#0166FF' }} />
+              </div>
+              <span className="label-caps">Netas</span>
+            </div>
+            <div style={{
+              fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+              fontWeight: 700, fontSize: 28, lineHeight: 1,
+              color: net < 0 ? '#00BD7D' : 'var(--app-color)',
+            }}>
+              {net.toLocaleString()}
+            </div>
+            <div style={{ fontSize: 11, marginTop: 3, color: 'var(--text-muted)' }}>kcal netas</div>
+            {calories.workout > 0 && (
+              <div style={{ fontSize: 10, marginTop: 6, color: '#0166FF' }}>-{calories.workout} entreno</div>
             )}
-            <ArrowRight size={15} style={{ color: 'rgba(255,255,255,0.22)' }} />
-          </div>
-        </Link>
+          </Link>
+
+          {/* Entreno */}
+          <Link
+            href={isViewingToday ? '/entreno' : `/entreno?date=${selectedDate}`}
+            className="h-card-link"
+            style={{ padding: 16, borderTop: '3px solid #8B5CF6' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(139,92,246,0.12)',
+              }}>
+                <Dumbbell size={14} style={{ color: '#8B5CF6' }} />
+              </div>
+              <span className="label-caps">Entreno</span>
+            </div>
+            <div style={{
+              fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+              fontWeight: 600, fontSize: 18, lineHeight: 1.2, color: 'var(--app-color)',
+            }}>
+              {workout ? (WORKOUT_TYPES[workout.tipo as keyof typeof WORKOUT_TYPES]?.label ?? workout.tipo) : '—'}
+            </div>
+            {workout ? (
+              <div style={{ marginTop: 4 }}>
+                <span style={{
+                  fontFamily: "var(--font-mono,'JetBrains Mono',monospace)",
+                  fontSize: 13, fontWeight: 600, color: '#8B5CF6',
+                }}>
+                  {workout.calorias_quemadas}
+                </span>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 4 }}>kcal</span>
+              </div>
+            ) : (
+              <div style={{ fontSize: 11, marginTop: 3, color: 'var(--text-muted)' }}>sin registrar</div>
+            )}
+          </Link>
+        </div>
 
         {/* ── Pending tasks preview ── */}
         {pendingTasks.length > 0 && (
-          <div
-            style={{
-              ...GLASS_BASE,
-              padding: 16,
-              boxShadow: DS.shadowMd,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>
+          <div style={{
+            background: 'var(--card-bg)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid var(--card-border)',
+            borderRadius: 16,
+            boxShadow: 'var(--card-shadow)',
+            padding: 16,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <span style={{
+                fontFamily: "var(--font-oswald,'Oswald',sans-serif)",
+                fontSize: 14, fontWeight: 600, letterSpacing: '0.04em',
+                textTransform: 'uppercase', color: 'var(--app-color)',
+              }}>
                 {isViewingToday ? 'Pendientes hoy' : 'Tareas pendientes'}
               </span>
               <Link
                 href="/gestor"
                 style={{
-                  fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4,
-                  color: DS.brand, textDecoration: 'none',
+                  fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4,
+                  color: '#00BD7D', textDecoration: 'none',
                 }}
               >
                 Ver todas <ArrowRight size={9} />
               </Link>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {pendingTasks.slice(0, 3).map((task) => (
+              {pendingTasks.slice(0, 4).map((task) => (
                 <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
-                    width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                    background: DS.brand, boxShadow: `0 0 6px rgba(1,102,255,0.55)`,
+                    width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                    border: '2px solid rgba(0,189,125,0.4)',
+                    background: 'rgba(0,189,125,0.05)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }} />
                   <span style={{
-                    fontSize: 13, fontWeight: 500, color: DS.heading,
+                    fontSize: 13, fontWeight: 500, color: 'var(--app-color)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
                     {task.nombre}
                   </span>
                 </div>
               ))}
-              {pendingTasks.length > 3 && (
-                <p style={{ fontSize: 11, paddingLeft: 16, color: DS.body, margin: 0 }}>
-                  +{pendingTasks.length - 3} más
+              {pendingTasks.length > 4 && (
+                <p style={{ fontSize: 11, paddingLeft: 26, color: 'var(--text-muted)', margin: 0 }}>
+                  +{pendingTasks.length - 4} más
                 </p>
               )}
             </div>

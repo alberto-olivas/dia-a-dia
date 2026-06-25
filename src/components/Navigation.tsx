@@ -26,14 +26,14 @@ const NAV_ITEMS = [
 ]
 
 const SIDEBAR_GRADIENT =
-  'radial-gradient(ellipse at 32% 5%, rgba(120,72,235,0.92) 0%, transparent 40%),' +
-  'radial-gradient(ellipse at 90% 10%, rgba(72,122,228,0.78) 0%, transparent 30%),' +
-  'radial-gradient(ellipse at 8% 46%, rgba(255,72,20,0.88) 0%, rgba(255,130,40,0.62) 30%, transparent 52%),' +
-  'radial-gradient(ellipse at 72% 42%, rgba(42,98,218,0.68) 0%, transparent 36%),' +
-  'radial-gradient(ellipse at 42% 62%, rgba(255,165,148,0.45) 0%, transparent 35%),' +
-  'radial-gradient(ellipse at 18% 82%, rgba(255,185,25,0.58) 0%, transparent 28%),' +
+  'radial-gradient(ellipse at 32% 5%, rgba(0,120,100,0.92) 0%, transparent 40%),' +
+  'radial-gradient(ellipse at 90% 10%, rgba(0,189,125,0.78) 0%, transparent 30%),' +
+  'radial-gradient(ellipse at 8% 46%, rgba(6,182,212,0.88) 0%, rgba(14,165,233,0.62) 30%, transparent 52%),' +
+  'radial-gradient(ellipse at 72% 42%, rgba(99,102,241,0.68) 0%, transparent 36%),' +
+  'radial-gradient(ellipse at 42% 62%, rgba(52,211,153,0.45) 0%, transparent 35%),' +
+  'radial-gradient(ellipse at 18% 82%, rgba(16,185,129,0.58) 0%, transparent 28%),' +
   'radial-gradient(ellipse at 88% 82%, rgba(0,195,195,0.72) 0%, transparent 30%),' +
-  '#7A97BE'
+  '#0F766E'
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -55,9 +55,9 @@ export default function Navigation() {
       >
         {/* Logo */}
         <div className="px-6 py-8 border-b" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
-          <span className="label-caps block mb-1" style={{ color: 'rgba(255,255,255,0.6)' }}>Sistema</span>
-          <div className="font-black text-2xl leading-none text-white">DÍA A DÍA</div>
-          <div className="w-6 h-1 mt-2 rounded-full" style={{ background: '#FF6B35' }} />
+          <span className="label-caps block mb-1" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "var(--font-poppins,'Poppins',sans-serif)" }}>Sistema</span>
+          <div className="font-black text-2xl leading-none text-white" style={{ fontFamily: "var(--font-oswald,'Oswald',sans-serif)" }}>DÍA A DÍA</div>
+          <div className="w-6 h-1 mt-2 rounded-full" style={{ background: '#00BD7D' }} />
         </div>
 
         {/* Main nav */}
@@ -76,7 +76,7 @@ export default function Navigation() {
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: active ? '#FF6B35' : 'rgba(255,255,255,0.14)' }}
+                  style={{ background: active ? '#00BD7D' : 'rgba(255,255,255,0.14)' }}
                 >
                   <Icon size={15} style={{ color: active ? '#FFFFFF' : 'rgba(255,255,255,0.75)' }} />
                 </div>
@@ -102,7 +102,7 @@ export default function Navigation() {
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: active ? '#FF6B35' : 'rgba(255,255,255,0.14)' }}
+                  style={{ background: active ? '#00BD7D' : 'rgba(255,255,255,0.14)' }}
                 >
                   <Settings size={15} style={{ color: active ? '#FFFFFF' : 'rgba(255,255,255,0.75)' }} />
                 </div>
@@ -143,7 +143,7 @@ export default function Navigation() {
                 className="flex flex-col items-center justify-center flex-1 gap-0.5 py-2 rounded-xl transition-all"
                 style={{ background: active ? 'rgba(255,255,255,0.2)' : 'transparent' }}
               >
-                <Icon size={16} style={{ color: active ? '#FF6B35' : 'rgba(255,255,255,0.72)' }} />
+                <Icon size={16} style={{ color: active ? '#00BD7D' : 'rgba(255,255,255,0.72)' }} />
                 <span
                   className="text-[8px] font-bold tracking-wider uppercase"
                   style={{ color: active ? '#FFFFFF' : 'rgba(255,255,255,0.65)' }}
@@ -162,7 +162,7 @@ export default function Navigation() {
                 className="flex flex-col items-center justify-center flex-1 gap-0.5 py-2 rounded-xl transition-all"
                 style={{ background: active ? 'rgba(255,255,255,0.2)' : 'transparent' }}
               >
-                <Settings size={16} style={{ color: active ? '#FF6B35' : 'rgba(255,255,255,0.72)' }} />
+                <Settings size={16} style={{ color: active ? '#00BD7D' : 'rgba(255,255,255,0.72)' }} />
                 <span
                   className="text-[8px] font-bold tracking-wider uppercase"
                   style={{ color: active ? '#FFFFFF' : 'rgba(255,255,255,0.65)' }}

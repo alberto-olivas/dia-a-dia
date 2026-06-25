@@ -1,14 +1,28 @@
 import type { Metadata, Viewport } from 'next'
-import { Barlow } from 'next/font/google'
+import { Oswald, Poppins, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/lib/theme-context'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 
-const barlow = Barlow({
+const oswald = Oswald({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-barlow',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-oswald',
+  display: 'swap',
+})
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-poppins',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
   display: 'swap',
 })
 
@@ -31,12 +45,16 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0a0a0a',
+  themeColor: '#EDF2F7',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={barlow.variable} suppressHydrationWarning>
+    <html
+      lang="es"
+      className={`${oswald.variable} ${poppins.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Applies saved theme before first paint to avoid flash */}
         <script
@@ -46,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body
-        style={{ fontFamily: 'var(--font-barlow), Barlow, system-ui, sans-serif' }}
+        style={{ fontFamily: "var(--font-poppins), 'Poppins', system-ui, sans-serif" }}
         suppressHydrationWarning
       >
         <ThemeProvider>

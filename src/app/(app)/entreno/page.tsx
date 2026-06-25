@@ -48,7 +48,7 @@ const WORKOUT_BG: Record<WorkoutType, string> = {
   pesas: '#EFF6FF', boxeo_pesas: '#FDF4FF', descanso: '#F9FAFB',
 }
 const WORKOUT_COLOR: Record<WorkoutType, string> = {
-  boxeo_tecnica: '#FF6B35', boxeo_fisico: '#EF4444', sparring: '#8B5CF6',
+  boxeo_tecnica: '#00BD7D', boxeo_fisico: '#EF4444', sparring: '#8B5CF6',
   pesas: '#3B82F6', boxeo_pesas: '#EC4899', descanso: '#9CA3AF',
 }
 
@@ -201,10 +201,10 @@ function EntrenoContent() {
       <header className="mb-6">
         <span className="label-caps block mb-1">Módulo 03</span>
         <div className="flex items-end justify-between gap-4">
-          <h1 className="font-black text-3xl" style={{ color: 'var(--app-color)' }}>ENTRENO</h1>
+          <h1 className="text-3xl font-semibold tracking-wide" style={{ color: 'var(--app-color)', fontFamily: "var(--font-oswald,'Oswald',sans-serif)" }}>ENTRENO</h1>
           {workout && (
             <div className="text-right">
-              <div className="font-black text-3xl leading-none" style={{ color: '#FF6B35' }}>
+              <div className="font-black text-3xl leading-none" style={{ color: '#00BD7D' }}>
                 {workout.calorias_quemadas.toLocaleString()}
               </div>
               <div className="label-caps">kcal quemadas</div>
@@ -216,17 +216,17 @@ function EntrenoContent() {
             className="flex items-center justify-between mt-3 rounded-xl px-3 py-2"
             style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.25)' }}
           >
-            <span className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+            <span className="text-xs font-bold" style={{ color: '#00BD7D' }}>
               {new Date(today + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
             </span>
-            <a href="/entreno" className="text-xs font-bold" style={{ color: '#FF6B35' }}>Ir a hoy →</a>
+            <a href="/entreno" className="text-xs font-bold" style={{ color: '#00BD7D' }}>Ir a hoy →</a>
           </div>
         )}
       </header>
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-6 h-6 border-2 border-[#FF6B35] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#00BD7D] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <>
@@ -253,8 +253,8 @@ function EntrenoContent() {
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Zap size={11} style={{ color: '#FF6B35' }} />
-                        <span className="text-xs font-bold" style={{ color: '#FF6B35' }}>
+                        <Zap size={11} style={{ color: '#00BD7D' }} />
+                        <span className="text-xs font-bold" style={{ color: '#00BD7D' }}>
                           {workout.calorias_quemadas} kcal
                         </span>
                       </div>
@@ -361,7 +361,7 @@ function EntrenoContent() {
                         <span className="text-[11px] font-black" style={{ color: active ? '#fff' : '#1A1A1A' }}>
                           {cond.label}
                         </span>
-                        <span className="text-[10px] font-semibold" style={{ color: active ? '#FF6B35' : '#9CA3AF' }}>
+                        <span className="text-[10px] font-semibold" style={{ color: active ? '#00BD7D' : '#9CA3AF' }}>
                           ×{cond.multiplier.toFixed(1)}
                         </span>
                       </button>
@@ -373,7 +373,7 @@ function EntrenoContent() {
               {/* ── 4. Duration ────────────────────────── */}
               <div className="card p-5 mb-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Clock size={14} style={{ color: '#FF6B35' }} />
+                  <Clock size={14} style={{ color: '#00BD7D' }} />
                   <span className="label-caps">4. Duración</span>
                 </div>
                 <input
@@ -381,7 +381,7 @@ function EntrenoContent() {
                   onChange={(e) => setDuracion(Math.max(1, parseInt(e.target.value) || 1))}
                   min="1" max="300"
                   className="w-full px-4 py-3 text-xl font-black rounded-xl text-center mb-2"
-                  style={{ color: '#FF6B35' }}
+                  style={{ color: '#00BD7D' }}
                 />
                 <div className="flex gap-1.5">
                   {[30, 45, 60, 90, 120].map((m) => (
@@ -389,7 +389,7 @@ function EntrenoContent() {
                       className="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all"
                       style={{
                         background: duracion === m ? '#1A1A1A' : '#F5F5F7',
-                        color: duracion === m ? '#FF6B35' : '#9CA3AF',
+                        color: duracion === m ? '#00BD7D' : '#9CA3AF',
                       }}
                     >
                       {m}
@@ -431,10 +431,10 @@ function EntrenoContent() {
                   </div>
                 </div>
                 <div className="text-center py-2">
-                  <div className="font-black leading-none" style={{ fontSize: '3.5rem', color: '#FF6B35' }}>
+                  <div className="font-black leading-none" style={{ fontSize: '3.5rem', color: '#00BD7D' }}>
                     {previewKcal.toLocaleString()}
                   </div>
-                  <div className="font-black text-sm tracking-widest mt-1" style={{ color: '#FF6B35', opacity: 0.6 }}>
+                  <div className="font-black text-sm tracking-widest mt-1" style={{ color: '#00BD7D', opacity: 0.6 }}>
                     KCAL QUEMADAS
                   </div>
                 </div>
@@ -499,7 +499,7 @@ function EntrenoContent() {
                   <div className="label-caps mt-1">km</div>
                 </div>
                 <div className="text-center p-2 rounded-xl bg-gray-50">
-                  <div className="font-black text-lg leading-none" style={{ color: '#FF6B35' }}>{kcalWalking}</div>
+                  <div className="font-black text-lg leading-none" style={{ color: '#00BD7D' }}>{kcalWalking}</div>
                   <div className="label-caps mt-1">kcal</div>
                 </div>
               </div>
@@ -553,7 +553,7 @@ function EntrenoContent() {
                   <div className="label-caps mt-1">dormidas</div>
                 </div>
                 <div className="text-center p-2 rounded-xl bg-gray-50">
-                  <div className="font-black text-lg leading-none" style={{ color: '#FF6B35' }}>{kcalSleep}</div>
+                  <div className="font-black text-lg leading-none" style={{ color: '#00BD7D' }}>{kcalSleep}</div>
                   <div className="label-caps mt-1">kcal</div>
                 </div>
               </div>
@@ -568,8 +568,8 @@ function EntrenoContent() {
                 <AreaChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="burnGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF6B35" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#FF6B35" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#00BD7D" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="#00BD7D" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
@@ -579,8 +579,8 @@ function EntrenoContent() {
                     contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12 }}
                     formatter={(val: unknown) => [`${val} kcal`, 'Quemadas']}
                   />
-                  <Area type="monotone" dataKey="kcal" stroke="#FF6B35" strokeWidth={2.5}
-                    fill="url(#burnGrad)" dot={{ fill: '#FF6B35', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                  <Area type="monotone" dataKey="kcal" stroke="#00BD7D" strokeWidth={2.5}
+                    fill="url(#burnGrad)" dot={{ fill: '#00BD7D', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -605,7 +605,7 @@ function EntrenoContent() {
                         </p>
                         <p className="text-xs text-gray-400">{w.fecha} · {w.duracion_minutos} min</p>
                       </div>
-                      <div className="font-bold text-sm" style={{ color: '#FF6B35' }}>
+                      <div className="font-bold text-sm" style={{ color: '#00BD7D' }}>
                         {w.calorias_quemadas} kcal
                       </div>
                     </div>
