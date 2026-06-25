@@ -295,7 +295,7 @@ export default function GestorPage() {
             <div className="label-caps">pendientes</div>
           </div>
         </div>
-        <div className="h-2 rounded-full bg-gray-100">
+        <div className="h-2 rounded-full bg-white/25">
           <div
             className="h-2 rounded-full transition-all"
             style={{ width: `${pct}%`, background: pct === 100 ? '#22C55E' : '#00BD7D' }}
@@ -334,7 +334,7 @@ export default function GestorPage() {
                   onClick={() => setNewCuando(w)}
                   className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                   style={{
-                    background: newCuando === w ? '#1A1A1A' : '#F5F5F7',
+                    background: newCuando === w ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                     color: newCuando === w ? '#00BD7D' : '#9CA3AF',
                   }}
                 >
@@ -364,7 +364,7 @@ export default function GestorPage() {
                   onClick={() => setNewEstado(s)}
                   className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                   style={{
-                    background: newEstado === s ? '#1A1A1A' : '#F5F5F7',
+                    background: newEstado === s ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                     color: newEstado === s ? '#00BD7D' : '#9CA3AF',
                   }}
                 >
@@ -485,7 +485,7 @@ export default function GestorPage() {
               />
               <YAxis hide />
               <Tooltip
-                contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12 }}
+                contentStyle={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 10, fontSize: 12 }}
                 cursor={{ fill: 'rgba(0,0,0,0.03)' }}
               />
               <Bar dataKey="completadas" name="Completadas" fill="#22C55E" radius={[4, 4, 0, 0]} stackId="a" />
@@ -553,7 +553,7 @@ function TaskCard({
                 onClick={() => setEditCuando(w)}
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
-                  background: editCuando === w ? '#1A1A1A' : '#F5F5F7',
+                  background: editCuando === w ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                   color: editCuando === w ? '#00BD7D' : '#9CA3AF',
                 }}
               >
@@ -580,7 +580,7 @@ function TaskCard({
                 onClick={() => setEditEstado(s)}
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
-                  background: editEstado === s ? '#1A1A1A' : '#F5F5F7',
+                  background: editEstado === s ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                   color: editEstado === s ? '#00BD7D' : '#9CA3AF',
                 }}
               >

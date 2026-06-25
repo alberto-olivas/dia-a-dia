@@ -209,7 +209,7 @@ function AlimentacionContent() {
             <span className="label-caps block">del objetivo</span>
           </div>
         </div>
-        <div className="h-2.5 rounded-full bg-gray-100">
+        <div className="h-2.5 rounded-full bg-white/25">
           <div
             className="h-2.5 rounded-full transition-all"
             style={{
@@ -245,7 +245,7 @@ function AlimentacionContent() {
               />
               <YAxis hide />
               <Tooltip
-                contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12 }}
+                contentStyle={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 10, fontSize: 12 }}
                 cursor={{ fill: 'rgba(0,0,0,0.03)' }}
                 formatter={(val: unknown) => [`${val} kcal`, '']}
               />
@@ -309,7 +309,7 @@ function AlimentacionContent() {
                         {sectionEntries.map((entry) => (
                           <div
                             key={entry.id}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-gray-50"
+                            className="flex items-center gap-3 p-3 rounded-xl bg-white/20"
                           >
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold truncate text-gray-800">
@@ -374,7 +374,7 @@ function AlimentacionContent() {
               />
               <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12 }}
+                contentStyle={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 10, fontSize: 12 }}
                 formatter={(val: unknown) => [`${val} kcal`, 'Calorías']}
               />
               <Area
@@ -887,7 +887,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
   }
 
   return (
-    <div className="mt-3 p-4 rounded-2xl bg-gray-50">
+    <div className="mt-3 p-4 rounded-2xl bg-white/20">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <span className="label-caps">Buscar alimento</span>
@@ -918,7 +918,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
             <button
               key={i}
               onClick={() => { setSelected(p); setGramos(p.default_portion ?? 100); setInputMode('g'); setUnitCount(1) }}
-              className="text-left px-3 py-2.5 flex items-center justify-between rounded-xl bg-white"
+              className="text-left px-3 py-2.5 flex items-center justify-between rounded-xl bg-white/20"
             >
               <div className="min-w-0 flex-1 pr-2">
                 <div className="flex items-center gap-1.5 mb-0.5">
@@ -964,7 +964,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
           {/* Selected product chip */}
           <div
             className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-white border-2"
-            style={{ borderColor: '#00BD7D' }}
+            style={{ borderColor: '#00BD7D', background: 'rgba(255,255,255,0.22)' }}
           >
             <span className="text-sm font-semibold truncate pr-4 text-gray-800">
               {getDisplayName(selected)}
@@ -984,7 +984,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                 onClick={() => setInputMode('g')}
                 className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                 style={{
-                  background: inputMode === 'g' ? '#1A1A1A' : '#FFFFFF',
+                  background: inputMode === 'g' ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                   color: inputMode === 'g' ? '#00BD7D' : '#9CA3AF',
                   border: inputMode === 'g' ? 'none' : '1.5px solid #E5E7EB',
                 }}
@@ -995,7 +995,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                 onClick={() => setInputMode('uds')}
                 className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                 style={{
-                  background: inputMode === 'uds' ? '#1A1A1A' : '#FFFFFF',
+                  background: inputMode === 'uds' ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                   color: inputMode === 'uds' ? '#00BD7D' : '#9CA3AF',
                   border: inputMode === 'uds' ? 'none' : '1.5px solid #E5E7EB',
                 }}
@@ -1009,7 +1009,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
             /* Units stepper */
             <div className="mb-3">
               <span className="label-caps block mb-2">Cantidad</span>
-              <div className="flex items-center justify-center gap-6 py-3 rounded-xl bg-white">
+              <div className="flex items-center justify-center gap-6 py-3 rounded-xl bg-white/20">
                 <button
                   onClick={() => setUnitCount(Math.max(1, unitCount - 1))}
                   className="w-10 h-10 rounded-xl text-xl font-black flex items-center justify-center"
@@ -1046,7 +1046,7 @@ function FoodSearchPanel({ onAdd, onClose }: FoodSearchPanelProps) {
                     onClick={() => setGramos(p)}
                     className="flex-1 py-2 text-xs font-bold rounded-xl transition-all"
                     style={{
-                      background: gramos === p ? '#1A1A1A' : '#FFFFFF',
+                      background: gramos === p ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                       color: gramos === p ? '#00BD7D' : '#9CA3AF',
                       border: gramos === p ? 'none' : '1.5px solid #E5E7EB',
                     }}

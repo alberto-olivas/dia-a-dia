@@ -285,12 +285,12 @@ function EntrenoContent() {
                     onClick={() => { setSelectedType(type); setDuracion(wData.duracion > 0 ? wData.duracion : 60) }}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left transition-all"
                     style={{
-                      background: active ? '#1A1A1A' : '#FFFFFF',
+                      background: active ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                       boxShadow: active ? '0 4px 14px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.05)',
                     }}
                   >
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: active ? WORKOUT_BG[type] : '#F5F5F7' }}>
+                      style={{ background: active ? WORKOUT_BG[type] : 'rgba(255,255,255,0.25)' }}>
                       <Icon size={18} color={active ? WORKOUT_COLOR[type] : '#9CA3AF'} />
                     </div>
                     <div className="min-w-0">
@@ -324,7 +324,7 @@ function EntrenoContent() {
                       <button key={level} onClick={() => setIntensidad(level)}
                         className="flex flex-col items-center gap-1.5 py-4 px-2 rounded-2xl transition-all"
                         style={{
-                          background: active ? cfg.color : '#FFFFFF',
+                          background: active ? cfg.color : 'rgba(255,255,255,0.22)',
                           boxShadow: active ? `0 4px 14px ${cfg.color}40` : '0 1px 3px rgba(0,0,0,0.05)',
                           border: active ? 'none' : `1.5px solid ${cfg.color}30`,
                         }}
@@ -388,7 +388,7 @@ function EntrenoContent() {
                     <button key={m} onClick={() => setDuracion(m)}
                       className="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all"
                       style={{
-                        background: duracion === m ? '#1A1A1A' : '#F5F5F7',
+                        background: duracion === m ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
                         color: duracion === m ? '#00BD7D' : '#9CA3AF',
                       }}
                     >
@@ -490,15 +490,15 @@ function EntrenoContent() {
             </div>
             {steps > 0 && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-2 rounded-xl bg-gray-50">
+                <div className="text-center p-2 rounded-xl bg-white/20">
                   <div className="font-black text-lg leading-none" style={{ color: 'var(--app-color)' }}>{steps.toLocaleString()}</div>
                   <div className="label-caps mt-1">pasos</div>
                 </div>
-                <div className="text-center p-2 rounded-xl bg-gray-50">
+                <div className="text-center p-2 rounded-xl bg-white/20">
                   <div className="font-black text-lg leading-none" style={{ color: '#3B82F6' }}>{kmEstimated}</div>
                   <div className="label-caps mt-1">km</div>
                 </div>
-                <div className="text-center p-2 rounded-xl bg-gray-50">
+                <div className="text-center p-2 rounded-xl bg-white/20">
                   <div className="font-black text-lg leading-none" style={{ color: '#00BD7D' }}>{kcalWalking}</div>
                   <div className="label-caps mt-1">kcal</div>
                 </div>
@@ -538,7 +538,7 @@ function EntrenoContent() {
                   onClick={() => saveSleep(h)}
                   className="flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all"
                   style={{
-                    background: sleepHours === h ? '#8B5CF6' : '#F5F5F7',
+                    background: sleepHours === h ? '#8B5CF6' : 'rgba(255,255,255,0.22)',
                     color: sleepHours === h ? '#fff' : '#9CA3AF',
                   }}
                 >
@@ -548,11 +548,11 @@ function EntrenoContent() {
             </div>
             {sleepHours > 0 && (
               <div className="grid grid-cols-2 gap-3">
-                <div className="text-center p-2 rounded-xl bg-gray-50">
+                <div className="text-center p-2 rounded-xl bg-white/20">
                   <div className="font-black text-lg leading-none" style={{ color: '#8B5CF6' }}>{sleepHours}h</div>
                   <div className="label-caps mt-1">dormidas</div>
                 </div>
-                <div className="text-center p-2 rounded-xl bg-gray-50">
+                <div className="text-center p-2 rounded-xl bg-white/20">
                   <div className="font-black text-lg leading-none" style={{ color: '#00BD7D' }}>{kcalSleep}</div>
                   <div className="label-caps mt-1">kcal</div>
                 </div>
@@ -576,7 +576,7 @@ function EntrenoContent() {
                   <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12 }}
+                    contentStyle={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 10, fontSize: 12 }}
                     formatter={(val: unknown) => [`${val} kcal`, 'Quemadas']}
                   />
                   <Area type="monotone" dataKey="kcal" stroke="#00BD7D" strokeWidth={2.5}

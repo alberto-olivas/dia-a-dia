@@ -643,7 +643,7 @@ export default function AjustesPage() {
               <div
                 className="absolute top-1 w-5 h-5 rounded-full transition-all"
                 style={{
-                  background: '#FFFFFF',
+                  background: 'rgba(255,255,255,0.90)',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
                   left: theme === 'dark' ? 'calc(100% - 24px)' : '4px',
                 }}
