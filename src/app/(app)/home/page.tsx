@@ -259,19 +259,20 @@ export default function HomePage() {
       <style>{`
         .h-card-link {
           display: block;
-          background: var(--card-bg);
-          backdrop-filter: blur(20px) saturate(1.8);
-          -webkit-backdrop-filter: blur(20px) saturate(1.8);
-          border: 1px solid var(--card-border);
+          background: rgba(255,255,255,0.20);
+          backdrop-filter: blur(24px) saturate(1.8);
+          -webkit-backdrop-filter: blur(24px) saturate(1.8);
+          border: 1px solid rgba(255,255,255,0.55);
           border-radius: 16px;
-          box-shadow: var(--card-shadow);
-          transition: transform 250ms ease, box-shadow 250ms ease;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7);
+          transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
           text-decoration: none;
           color: inherit;
         }
         .h-card-link:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 36px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.95);
+          background: rgba(255,255,255,0.30);
+          box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
         }
         .h-week-btn {
           border: 1.5px solid transparent;
@@ -348,11 +349,11 @@ export default function HomePage() {
               style={{
                 width: 36, height: 36, borderRadius: 12,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'var(--card-bg)',
+                background: 'rgba(255,255,255,0.22)',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid var(--card-border)',
-                boxShadow: 'var(--card-shadow)',
+                border: '1px solid rgba(255,255,255,0.55)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                 cursor: 'pointer',
               }}
               title="Abrir calendario"
@@ -378,7 +379,7 @@ export default function HomePage() {
                       ? '#00BD7D'
                       : isToday
                       ? 'rgba(0,189,125,0.08)'
-                      : 'rgba(255,255,255,0.6)',
+                      : 'rgba(255,255,255,0.22)',
                     borderColor: isSelected ? '#00BD7D' : isToday ? 'rgba(0,189,125,0.3)' : 'rgba(0,0,0,0.06)',
                     opacity: isFuture ? 0.35 : 1,
                     cursor: isFuture ? 'default' : 'pointer',
@@ -414,10 +415,10 @@ export default function HomePage() {
           {calendarOpen && (
             <div
               style={{
-                background: 'rgba(255,255,255,0.92)',
-                backdropFilter: 'blur(24px) saturate(1.8)',
-                WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                border: '1px solid rgba(255,255,255,0.9)',
+                background: 'rgba(255,255,255,0.28)',
+                backdropFilter: 'blur(28px) saturate(2)',
+                WebkitBackdropFilter: 'blur(28px) saturate(2)',
+                border: '1px solid rgba(255,255,255,0.55)',
                 borderRadius: 16,
                 boxShadow: '0 20px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.9)',
                 position: 'absolute', right: 0, zIndex: 50,
