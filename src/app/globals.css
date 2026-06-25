@@ -50,7 +50,7 @@ html[data-theme="dark"] {
 
 @layer base {
   html {
-    background-color: var(--app-bg);
+    background-color: transparent;
     color: var(--app-color);
     height: 100%;
   }

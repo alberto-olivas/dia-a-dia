@@ -255,7 +255,7 @@ export default function HomePage() {
   const net = calories.consumed - calories.workout - calories.steps - calories.sleep
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--app-bg)', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
       <style>{`
         .h-card-link {
           display: block;
