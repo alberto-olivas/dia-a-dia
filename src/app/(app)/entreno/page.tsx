@@ -285,8 +285,11 @@ function EntrenoContent() {
                     onClick={() => { setSelectedType(type); setDuracion(wData.duracion > 0 ? wData.duracion : 60) }}
                     className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left transition-all"
                     style={{
-                      background: active ? '#1A1A1A' : 'rgba(255,255,255,0.22)',
-                      boxShadow: active ? '0 4px 14px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.05)',
+                      background: active ? '#1A1A1A' : 'rgba(255,255,255,0.18)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                      border: active ? 'none' : '1px solid rgba(255,255,255,0.45)',
+                      boxShadow: active ? '0 4px 14px rgba(0,0,0,0.25)' : '0 2px 8px rgba(0,0,0,0.08)',
                     }}
                   >
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -324,9 +327,11 @@ function EntrenoContent() {
                       <button key={level} onClick={() => setIntensidad(level)}
                         className="flex flex-col items-center gap-1.5 py-4 px-2 rounded-2xl transition-all"
                         style={{
-                          background: active ? cfg.color : 'rgba(255,255,255,0.22)',
-                          boxShadow: active ? `0 4px 14px ${cfg.color}40` : '0 1px 3px rgba(0,0,0,0.05)',
-                          border: active ? 'none' : `1.5px solid ${cfg.color}30`,
+                          background: active ? cfg.color : 'rgba(255,255,255,0.18)',
+                          backdropFilter: 'blur(16px)',
+                          WebkitBackdropFilter: 'blur(16px)',
+                          boxShadow: active ? `0 4px 14px ${cfg.color}40` : '0 2px 8px rgba(0,0,0,0.08)',
+                          border: active ? 'none' : `1.5px solid rgba(255,255,255,0.45)`,
                         }}
                       >
                         <span className="text-xl">{cfg.emoji}</span>
@@ -399,7 +404,7 @@ function EntrenoContent() {
               </div>
 
               {/* ── 5. Calorie summary ─────────────────── */}
-              <div className="card p-5 mb-4" style={{ background: '#FFF4EF', border: '1.5px solid #FFD4BC' }}>
+              <div className="card p-5 mb-4">
                 <span className="label-caps block mb-4">Resumen del cálculo</span>
                 <div className="flex flex-col gap-2.5 mb-5">
                   <div className="flex items-center justify-between">

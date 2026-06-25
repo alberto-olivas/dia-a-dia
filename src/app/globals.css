@@ -18,14 +18,14 @@ html {
   --sidebar-bg: rgba(255,255,255,0.85);
   --sidebar-border: #E2E8F0;
   --nav-active-bg: #E6FBF3;
-  --card-bg: rgba(255, 255, 255, 0.22);
+  --card-bg: rgba(255, 255, 255, 0.28);
   --card-border: rgba(255, 255, 255, 0.55);
   --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.7);
   --input-bg: rgba(255, 255, 255, 0.55);
   --input-border: #CBD5E1;
   --divider: #E2E8F0;
-  --text-muted: #64748B;
-  --text-muted-2: #94A3B8;
+  --text-muted: #374151;
+  --text-muted-2: #4B5563;
   --scrollbar-track: #E2E8F0;
   --scrollbar-thumb: #CBD5E1;
 }
@@ -57,7 +57,7 @@ html[data-theme="dark"] {
 
   body {
     background-color: #08040F;
-    background-image: url('/fondo.jpg');
+    background-image: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('/fondo.jpg');
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
