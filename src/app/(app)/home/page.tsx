@@ -59,21 +59,18 @@ function getWeekDays(refDateStr: string) {
 
 function getCalendarDays(year: number, month: number) {
   const todayStr = getTodayStr()
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7 // 0=Mon
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const cells: Array<{ dateStr: string; inMonth: boolean; isToday: boolean; isFuture: boolean; day: number }> = []
-  // leading padding
   for (let i = 0; i < firstDow; i++) {
     const d = new Date(year, month, i - firstDow + 1, 12)
     const dateStr = toMadridDate(d)
     cells.push({ dateStr, inMonth: false, isToday: dateStr === todayStr, isFuture: dateStr > todayStr, day: d.getDate() })
   }
-  // current month
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = toMadridDate(new Date(year, month, d, 12))
     cells.push({ dateStr, inMonth: true, isToday: dateStr === todayStr, isFuture: dateStr > todayStr, day: d })
   }
-  // trailing padding to complete last row
   const tail = cells.length % 7
   if (tail > 0) {
     for (let i = 1; i <= 7 - tail; i++) {
@@ -95,6 +92,34 @@ function getUserName(email: string): string {
   return part.charAt(0).toUpperCase() + part.slice(1).replace(/[._-]/g, ' ')
 }
 
+// ── Perspective Design System tokens ──────────────────────────────────────────
+const DS = {
+  bg:          '#060B18',
+  bgSoft:      '#0C1222',
+  bgMedium:    '#131B2E',
+  bgStrong:    '#1E293B',
+  heading:     '#F1F5F9',
+  body:        '#94A3B8',
+  brand:       '#0166FF',
+  brandSofter: '#0A1A3D',
+  brandSoft:   '#0D2B66',
+  success:     '#009966',
+  purple:      '#8B5CF6',
+  cyan:        '#22D3EE',
+  shadowMd:    '0 6px 16px -4px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.05)',
+  shadowLg:    '0 12px 28px -6px rgb(0 0 0 / 0.1), 0 4px 12px -4px rgb(0 0 0 / 0.06)',
+  shadowXl:    '0 24px 48px -10px rgb(0 0 0 / 0.14), 0 8px 20px -8px rgb(0 0 0 / 0.08)',
+}
+
+const GLASS_BASE = {
+  background:            'rgba(255,255,255,0.06)',
+  backdropFilter:        'blur(16px) saturate(1.4)',
+  WebkitBackdropFilter:  'blur(16px) saturate(1.4)',
+  border:                '1px solid rgba(255,255,255,0.10)',
+  borderRadius:          16,
+} as const
+
+// ── Component ──────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { user } = useAuth()
   const { profile } = useProfile()
@@ -108,15 +133,14 @@ export default function HomePage() {
     return getTodayStr()
   })
   const [pendingTasks, setPendingTasks] = useState<Task[]>([])
-  const [doneTasks, setDoneTasks] = useState<Task[]>([])
-  const [calories, setCalories] = useState({ consumed: 0, workout: 0, steps: 0, sleep: 0 })
-  const [calorieGoal, setCalorieGoal] = useState(2500)
-  const [workout, setWorkout] = useState<Workout | null>(null)
+  const [doneTasks, setDoneTasks]       = useState<Task[]>([])
+  const [calories, setCalories]         = useState({ consumed: 0, workout: 0, steps: 0, sleep: 0 })
+  const [calorieGoal, setCalorieGoal]   = useState(2500)
+  const [workout, setWorkout]           = useState<Workout | null>(null)
   const [calendarOpen, setCalendarOpen] = useState(false)
-  const calRef = useRef<HTMLDivElement>(null)
+  const calRef   = useRef<HTMLDivElement>(null)
   const todayStr = getTodayStr()
 
-  // Calendar month state
   const selD = new Date(selectedDate + 'T12:00:00')
   const [calYear, setCalYear]   = useState(selD.getFullYear())
   const [calMonth, setCalMonth] = useState(selD.getMonth())
@@ -131,8 +155,6 @@ export default function HomePage() {
     return () => window.removeEventListener('storage', load)
   }, [])
 
-  // Persist selected past date in sessionStorage so alimentos/entreno pages can read it
-  // when the user navigates via the bottom nav instead of the cards
   useEffect(() => {
     if (selectedDate !== todayStr) {
       sessionStorage.setItem('dia_seleccionado', selectedDate)
@@ -141,7 +163,6 @@ export default function HomePage() {
     }
   }, [selectedDate, todayStr])
 
-  // Clock tick + midnight day-reset
   useEffect(() => {
     const id = setInterval(() => {
       const prevToday = getTodayStr()
@@ -149,14 +170,12 @@ export default function HomePage() {
       const newToday = newNow.toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' })
       setNow(newNow)
       if (newToday !== prevToday) {
-        // Midnight crossed in Madrid — auto-advance to new day if user was on today
         setSelectedDate(prev => prev === prevToday ? newToday : prev)
       }
     }, 1000)
     return () => clearInterval(id)
   }, [])
 
-  // Close calendar on outside click
   useEffect(() => {
     if (!calendarOpen) return
     function onDown(e: MouseEvent) {
@@ -168,7 +187,6 @@ export default function HomePage() {
     return () => document.removeEventListener('mousedown', onDown)
   }, [calendarOpen])
 
-  // Data fetch
   useEffect(() => {
     if (!user) return
     if (!IS_SUPABASE_CONFIGURED) { loadDemoData(selectedDate); return }
@@ -189,7 +207,7 @@ export default function HomePage() {
     } catch {}
     try {
       const food = JSON.parse(localStorage.getItem(`demo_food_${date}`) ?? '[]') as Array<{ calorias: number }>
-      const w = JSON.parse(localStorage.getItem(`demo_workout_${date}`) ?? 'null')
+      const w    = JSON.parse(localStorage.getItem(`demo_workout_${date}`) ?? 'null')
       const stepsVal = parseInt(localStorage.getItem(`steps_${date}`) ?? '0') || 0
       const sleepVal = parseFloat(localStorage.getItem(`sleep_${date}`) ?? '0') || 0
       setCalories({
@@ -261,298 +279,492 @@ export default function HomePage() {
   const completionPct = totalTasks > 0 ? Math.round((doneTasks.length / totalTasks) * 100) : 0
   const isViewingToday = selectedDate === todayStr
   const nowD = new Date()
-  const futureMonth   = calYear > nowD.getFullYear() || (calYear === nowD.getFullYear() && calMonth >= nowD.getMonth())
+  const futureMonth = calYear > nowD.getFullYear() || (calYear === nowD.getFullYear() && calMonth >= nowD.getMonth())
 
   return (
-    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
+    <div style={{ minHeight: '100vh', background: DS.bg, position: 'relative', overflow: 'hidden' }}>
 
-      {/* ── Greeting ──────────────────────────────── */}
-      <header className="mb-5">
-        <h1 className="font-black text-3xl leading-tight" style={{ color: 'var(--app-color)' }}>
-          {greeting.text}, {userName} {greeting.emoji}
-        </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          {DAY_NAMES_FULL[now.getDay()]}, {now.getDate()} de {MONTH_NAMES[now.getMonth()]}
-        </p>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {getMadridTime(now)}
-        </p>
-      </header>
+      {/* ── Hover / transition styles ── */}
+      <style>{`
+        .p-card-link {
+          display: block;
+          background: rgba(255,255,255,0.06);
+          backdrop-filter: blur(16px) saturate(1.4);
+          -webkit-backdrop-filter: blur(16px) saturate(1.4);
+          border: 1px solid rgba(255,255,255,0.10);
+          border-radius: 16px;
+          transition: background 300ms ease-out, box-shadow 300ms ease-out, transform 300ms ease-out;
+          text-decoration: none;
+        }
+        .p-card-link:hover {
+          background: rgba(255,255,255,0.10);
+          box-shadow: 0 12px 28px -6px rgb(0 0 0 / 0.12), 0 4px 12px -4px rgb(0 0 0 / 0.08);
+          transform: translateY(-2px);
+        }
+        .p-week-btn {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          transition: background 150ms, border-color 150ms;
+        }
+        .p-week-btn:hover:not(:disabled) {
+          background: rgba(255,255,255,0.08);
+          border-color: rgba(255,255,255,0.14);
+        }
+        .p-cal-btn:hover {
+          background: rgba(255,255,255,0.10) !important;
+        }
+        .p-nav-btn:hover {
+          background: rgba(255,255,255,0.12) !important;
+        }
+      `}</style>
 
-      {/* ── Date navigation ───────────────────────── */}
-      <div className="mb-6 relative" ref={calRef}>
+      {/* ── Atmospheric orbs ── */}
+      <div style={{
+        position: 'fixed', top: '-20%', right: '-15%',
+        width: '65vw', height: '65vw', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(1,102,255,0.14) 0%, transparent 70%)',
+        pointerEvents: 'none', zIndex: 0,
+      }} />
+      <div style={{
+        position: 'fixed', bottom: '-15%', left: '-20%',
+        width: '55vw', height: '55vw', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(139,92,246,0.09) 0%, transparent 70%)',
+        pointerEvents: 'none', zIndex: 0,
+      }} />
 
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            {!isViewingToday && (
-              <button
-                onClick={() => handleDateSelect(todayStr)}
-                className="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg"
-                style={{ background: '#FF6B35', color: '#FFFFFF' }}
-              >
-                <ChevronLeft size={11} />
-                Hoy
-              </button>
-            )}
-            <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-              {isViewingToday ? 'Esta semana' : formatShortDate(selectedDate)}
-            </span>
-          </div>
-          <button
-            onClick={openCalendar}
-            className="w-9 h-9 rounded-xl flex items-center justify-center card"
-            title="Abrir calendario"
-          >
-            <CalendarDays size={15} style={{ color: '#FF6B35' }} />
-          </button>
-        </div>
+      {/* ── Content ── */}
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 640, margin: '0 auto', padding: '32px 16px 96px' }}>
 
-        {/* Week strip */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {weekDays.map(({ dateStr, label, num, isToday, isFuture }) => {
-            const isSelected = dateStr === selectedDate
-            return (
-              <button
-                key={dateStr}
-                onClick={() => !isFuture && handleDateSelect(dateStr)}
-                disabled={isFuture}
-                className="flex flex-col items-center gap-1 flex-shrink-0 w-11 py-2.5 rounded-2xl transition-all"
-                style={{
-                  background: isSelected ? '#1A1A1A' : isToday ? '#F5F5F7' : 'var(--card-bg)',
-                  boxShadow: isSelected ? '0 4px 14px rgba(0,0,0,0.2)' : '0 1px 4px rgba(0,0,0,0.05)',
-                  opacity: isFuture ? 0.35 : 1,
-                  cursor: isFuture ? 'default' : 'pointer',
-                }}
-              >
-                <span className="text-[9px] font-bold uppercase" style={{ color: isSelected ? '#9CA3AF' : isToday ? '#FF6B35' : 'var(--text-muted)' }}>
-                  {label}
-                </span>
-                <span className="text-sm font-black" style={{ color: isSelected ? '#FF6B35' : 'var(--app-color)' }}>
-                  {num}
-                </span>
-                {isToday && !isSelected && (
-                  <div className="w-1 h-1 rounded-full" style={{ background: '#FF6B35' }} />
-                )}
-              </button>
-            )
-          })}
-        </div>
+        {/* ── Greeting ── */}
+        <header style={{ marginBottom: 28 }}>
+          <h1 style={{ fontWeight: 700, fontSize: 28, lineHeight: 1.2, color: DS.heading, margin: 0 }}>
+            {greeting.text}, {userName} {greeting.emoji}
+          </h1>
+          <p style={{ fontSize: 13, color: DS.body, marginTop: 6, marginBottom: 0 }}>
+            {DAY_NAMES_FULL[now.getDay()]}, {now.getDate()} de {MONTH_NAMES[now.getMonth()]}
+          </p>
+          <p style={{ fontSize: 13, color: DS.body, marginTop: 2, marginBottom: 0, fontVariantNumeric: 'tabular-nums' }}>
+            {getMadridTime(now)}
+          </p>
+        </header>
 
-        {/* ── Calendar popup ─────────────────────── */}
-        {calendarOpen && (
-          <div
-            className="card absolute right-0 z-50 p-4 mt-2"
-            style={{ minWidth: 280, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
-          >
-            {/* Month nav */}
-            <div className="flex items-center justify-between mb-3">
-              <button
-                onClick={prevMonth}
-                className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-                style={{ background: 'var(--card-border)' }}
-              >
-                <ChevronLeft size={13} style={{ color: 'var(--app-color)' }} />
-              </button>
-              <span className="text-sm font-black" style={{ color: 'var(--app-color)' }}>
-                {MONTH_NAMES_CAP[calMonth]} {calYear}
+        {/* ── Date navigation ── */}
+        <div style={{ marginBottom: 24, position: 'relative' }} ref={calRef}>
+
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {!isViewingToday && (
+                <button
+                  onClick={() => handleDateSelect(todayStr)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 4,
+                    fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
+                    padding: '5px 10px', borderRadius: 16,
+                    background: DS.brand, color: '#fff',
+                    border: 'none', cursor: 'pointer',
+                    boxShadow: `${DS.shadowMd}, inset rgba(255,255,255,0.08) 0 6px 0px -5px, rgba(1,102,255,0.35) 0 4px 10px -5px`,
+                  }}
+                >
+                  <ChevronLeft size={10} />
+                  Hoy
+                </button>
+              )}
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: DS.body }}>
+                {isViewingToday ? 'Esta semana' : formatShortDate(selectedDate)}
               </span>
-              <button
-                onClick={nextMonth}
-                className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-                style={{
-                  background: 'var(--card-border)',
-                  opacity: futureMonth ? 0.3 : 1,
-                  cursor: futureMonth ? 'default' : 'pointer',
-                }}
-                disabled={futureMonth}
-              >
-                <ChevronRight size={13} style={{ color: 'var(--app-color)' }} />
-              </button>
             </div>
-
-            {/* Day headers */}
-            <div className="grid grid-cols-7 mb-1">
-              {CAL_HEADERS.map((h) => (
-                <div key={h} className="text-center text-[9px] font-bold uppercase" style={{ color: 'var(--text-muted)' }}>
-                  {h}
-                </div>
-              ))}
-            </div>
-
-            {/* Day grid */}
-            <div className="grid grid-cols-7 gap-0.5">
-              {calDays.map(({ dateStr, inMonth, isToday, isFuture, day }) => {
-                const isSelected = dateStr === selectedDate
-                return (
-                  <button
-                    key={dateStr}
-                    onClick={() => !isFuture && handleDateSelect(dateStr)}
-                    disabled={isFuture}
-                    className="aspect-square rounded-lg flex items-center justify-center text-xs font-bold transition-all"
-                    style={{
-                      background: isSelected ? '#FF6B35' : isToday ? 'rgba(255,107,53,0.15)' : 'transparent',
-                      color: isSelected ? '#FFFFFF'
-                        : isFuture || !inMonth ? 'var(--text-muted)'
-                        : isToday ? '#FF6B35'
-                        : 'var(--app-color)',
-                      opacity: !inMonth ? 0.4 : isFuture ? 0.3 : 1,
-                      cursor: isFuture ? 'default' : 'pointer',
-                      fontWeight: isToday || isSelected ? 900 : 600,
-                    }}
-                  >
-                    {day}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Close */}
             <button
-              onClick={() => setCalendarOpen(false)}
-              className="w-full mt-3 py-1.5 rounded-lg text-xs font-bold"
-              style={{ background: 'var(--divider)', color: 'var(--text-muted)' }}
+              onClick={openCalendar}
+              className="p-nav-btn"
+              style={{
+                ...GLASS_BASE,
+                width: 36, height: 36,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: DS.shadowMd,
+                cursor: 'pointer',
+              }}
+              title="Abrir calendario"
             >
-              Cerrar
+              <CalendarDays size={14} style={{ color: DS.brand }} />
             </button>
           </div>
-        )}
-      </div>
 
-      {/* ── "Viendo día pasado" banner ─────────────── */}
-      {!isViewingToday && (
-        <div
-          className="flex items-center justify-between rounded-xl px-4 py-2.5 mb-4"
-          style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.25)' }}
-        >
-          <span className="text-xs font-bold" style={{ color: '#FF6B35' }}>
-            Revisando {formatShortDate(selectedDate)}
-          </span>
-          <Link
-            href={`/alimentacion?date=${selectedDate}`}
-            className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg"
-            style={{ background: '#FF6B35', color: '#FFFFFF' }}
-          >
-            <Pencil size={10} />
-            Editar
-          </Link>
-        </div>
-      )}
+          {/* Week strip */}
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+            {weekDays.map(({ dateStr, label, num, isToday, isFuture }) => {
+              const isSelected = dateStr === selectedDate
+              return (
+                <button
+                  key={dateStr}
+                  onClick={() => !isFuture && handleDateSelect(dateStr)}
+                  disabled={isFuture}
+                  className="p-week-btn"
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    flexShrink: 0, width: 44, padding: '10px 0', borderRadius: 16,
+                    background: isSelected
+                      ? 'rgba(1,102,255,0.22)'
+                      : isToday
+                      ? 'rgba(255,255,255,0.06)'
+                      : undefined,
+                    borderColor: isSelected
+                      ? 'rgba(1,102,255,0.45)'
+                      : isToday
+                      ? 'rgba(255,255,255,0.14)'
+                      : undefined,
+                    opacity: isFuture ? 0.3 : 1,
+                    cursor: isFuture ? 'default' : 'pointer',
+                    boxShadow: isSelected ? '0 0 14px rgba(1,102,255,0.22)' : undefined,
+                  }}
+                >
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+                    color: isSelected ? 'rgba(77,154,255,0.9)' : isToday ? DS.brand : DS.body,
+                  }}>
+                    {label}
+                  </span>
+                  <span style={{
+                    fontSize: 14, fontWeight: 800,
+                    color: isSelected ? '#fff' : isToday ? DS.heading : DS.body,
+                  }}>
+                    {num}
+                  </span>
+                  {isToday && !isSelected && (
+                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: DS.brand, boxShadow: `0 0 6px ${DS.brand}` }} />
+                  )}
+                </button>
+              )
+            })}
+          </div>
 
-      {/* ── Cards grid ───────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-
-        {/* Calorías */}
-        {(() => {
-          const net = calories.consumed - calories.workout - calories.steps - calories.sleep
-          const href = isViewingToday ? '/alimentacion' : `/alimentacion?date=${selectedDate}`
-          return (
-            <Link href={href} className="card p-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 22% 28%, rgba(255,107,53,0.42) 0%, rgba(255,155,100,0.26) 42%, transparent 65%), radial-gradient(ellipse at 70% 75%, rgba(255,130,65,0.26) 0%, transparent 42%)' }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
-                  <Flame size={15} style={{ color: '#FF6B35' }} />
-                </div>
-                <span className="label-caps">Calorías</span>
+          {/* ── Calendar popup ── */}
+          {calendarOpen && (
+            <div
+              style={{
+                ...GLASS_BASE,
+                background: 'rgba(6,11,24,0.92)',
+                position: 'absolute', right: 0, zIndex: 50,
+                marginTop: 8, minWidth: 280, padding: 16,
+                boxShadow: DS.shadowXl,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <button
+                  onClick={prevMonth}
+                  className="p-nav-btn"
+                  style={{
+                    width: 28, height: 28, borderRadius: 10,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <ChevronLeft size={12} style={{ color: DS.heading }} />
+                </button>
+                <span style={{ fontSize: 13, fontWeight: 700, color: DS.heading }}>
+                  {MONTH_NAMES_CAP[calMonth]} {calYear}
+                </span>
+                <button
+                  onClick={nextMonth}
+                  className="p-nav-btn"
+                  style={{
+                    width: 28, height: 28, borderRadius: 10,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)',
+                    cursor: 'pointer',
+                    opacity: futureMonth ? 0.3 : 1,
+                  }}
+                  disabled={futureMonth}
+                >
+                  <ChevronRight size={12} style={{ color: DS.heading }} />
+                </button>
               </div>
-              <div className="font-black text-2xl leading-none" style={{ color: 'var(--app-color)' }}>
-                {net.toLocaleString()}
-              </div>
-              <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>kcal netas</div>
-              <div className="mt-2 flex flex-col gap-0.5">
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-bold" style={{ color: '#22C55E' }}>+{calories.consumed.toLocaleString()}</span>
-                  <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>consumidas</span>
-                </div>
-                {calories.workout > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold" style={{ color: '#FF6B35' }}>-{calories.workout}</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>entreno</span>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', marginBottom: 4 }}>
+                {CAL_HEADERS.map((h) => (
+                  <div key={h} style={{
+                    textAlign: 'center', fontSize: 9, fontWeight: 700,
+                    letterSpacing: '0.06em', textTransform: 'uppercase', color: DS.body,
+                  }}>
+                    {h}
                   </div>
-                )}
-                {calories.steps > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold" style={{ color: '#3B82F6' }}>-{calories.steps}</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>pasos</span>
-                  </div>
-                )}
-                {calories.sleep > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold" style={{ color: '#8B5CF6' }}>-{calories.sleep}</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>dormir</span>
-                  </div>
-                )}
+                ))}
               </div>
-              <div className="mt-3 h-1 rounded-full bg-gray-100">
-                <div className="h-1 rounded-full" style={{ width: `${Math.min(100, (calories.consumed / calorieGoal) * 100)}%`, background: '#FF6B35' }} />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+                {calDays.map(({ dateStr, inMonth, isToday, isFuture, day }) => {
+                  const isSelected = dateStr === selectedDate
+                  return (
+                    <button
+                      key={dateStr}
+                      onClick={() => !isFuture && handleDateSelect(dateStr)}
+                      disabled={isFuture}
+                      className="p-cal-btn"
+                      style={{
+                        aspectRatio: '1', borderRadius: 8,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: isToday || isSelected ? 800 : 600,
+                        background: isSelected ? DS.brand : isToday ? 'rgba(1,102,255,0.18)' : 'transparent',
+                        color: isSelected ? '#fff' : isFuture || !inMonth ? DS.body : isToday ? DS.brand : DS.heading,
+                        opacity: !inMonth ? 0.35 : isFuture ? 0.25 : 1,
+                        cursor: isFuture ? 'default' : 'pointer',
+                        border: 'none',
+                        boxShadow: isSelected ? '0 0 10px rgba(1,102,255,0.45)' : undefined,
+                        transition: 'background 150ms',
+                      }}
+                    >
+                      {day}
+                    </button>
+                  )
+                })}
               </div>
-            </Link>
-          )
-        })()}
 
-        {/* Tareas */}
-        <Link href="/gestor" className="card p-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 72% 14%, rgba(95,215,188,0.48) 0%, rgba(48,198,165,0.32) 32%, transparent 58%), radial-gradient(ellipse at 38% 55%, rgba(55,190,165,0.28) 0%, transparent 48%), radial-gradient(ellipse at 12% 88%, rgba(118,162,222,0.26) 0%, transparent 36%)' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#F0FDF4' }}>
-              <CheckSquare size={15} style={{ color: '#22C55E' }} />
-            </div>
-            <span className="label-caps">Tareas</span>
-          </div>
-          <div className="font-black text-2xl leading-none" style={{ color: 'var(--app-color)' }}>
-            {completionPct}%
-          </div>
-          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{doneTasks.length}/{totalTasks} completadas</div>
-          <div className="mt-3 h-1.5 rounded-full bg-gray-100">
-            <div className="h-1.5 rounded-full transition-all" style={{ width: `${completionPct}%`, background: '#22C55E' }} />
-          </div>
-        </Link>
-      </div>
-
-      {/* ── Workout card ─────────────────────────── */}
-      <Link href={isViewingToday ? '/entreno' : `/entreno?date=${selectedDate}`} className="card p-4 flex items-center justify-between mb-4 block" style={{ backgroundImage: 'radial-gradient(ellipse at 18% 62%, rgba(255,100,28,0.36) 0%, rgba(255,148,58,0.22) 38%, transparent 65%), radial-gradient(ellipse at 82% 18%, rgba(98,82,212,0.30) 0%, rgba(48,120,212,0.20) 52%, transparent 72%), radial-gradient(ellipse at 88% 85%, rgba(0,196,175,0.22) 0%, transparent 42%)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#FFF4EF' }}>
-            <Dumbbell size={18} style={{ color: '#FF6B35' }} />
-          </div>
-          <div>
-            <span className="label-caps block">{isViewingToday ? 'Entreno hoy' : 'Entreno'}</span>
-            <span className="font-bold text-sm" style={{ color: 'var(--app-color)' }}>
-              {workout ? (WORKOUT_TYPES[workout.tipo as keyof typeof WORKOUT_TYPES]?.label ?? workout.tipo) : 'Sin registrar'}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {workout && (
-            <div className="text-right">
-              <div className="font-black text-xl leading-none" style={{ color: '#FF6B35' }}>{workout.calorias_quemadas}</div>
-              <div className="label-caps">kcal</div>
+              <button
+                onClick={() => setCalendarOpen(false)}
+                style={{
+                  width: '100%', marginTop: 12, padding: '7px 0', borderRadius: 10,
+                  fontSize: 11, fontWeight: 700,
+                  background: 'rgba(255,255,255,0.07)', color: DS.body,
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  cursor: 'pointer',
+                }}
+              >
+                Cerrar
+              </button>
             </div>
           )}
-          <ArrowRight size={16} className="text-gray-200" />
         </div>
-      </Link>
 
-      {/* ── Pending tasks preview ────────────────── */}
-      {pendingTasks.length > 0 && (
-        <div className="card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="label-caps">{isViewingToday ? 'Pendientes hoy' : 'Tareas pendientes'}</span>
-            <Link href="/gestor" className="text-xs font-bold flex items-center gap-1" style={{ color: '#FF6B35' }}>
-              Ver todas <ArrowRight size={10} />
+        {/* ── "Viendo día pasado" banner ── */}
+        {!isViewingToday && (
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              borderRadius: 16, padding: '10px 16px', marginBottom: 16,
+              background: 'rgba(1,102,255,0.10)',
+              border: '1px solid rgba(1,102,255,0.22)',
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 700, color: DS.brand }}>
+              Revisando {formatShortDate(selectedDate)}
+            </span>
+            <Link
+              href={`/alimentacion?date=${selectedDate}`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 10,
+                background: DS.brand, color: '#fff', textDecoration: 'none',
+                boxShadow: `${DS.shadowMd}, inset rgba(255,255,255,0.08) 0 6px 0px -5px`,
+              }}
+            >
+              <Pencil size={9} />
+              Editar
             </Link>
           </div>
-          <div className="flex flex-col gap-2.5">
-            {pendingTasks.slice(0, 3).map((task) => (
-              <div key={task.id} className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#FF6B35' }} />
-                <span className="text-sm font-medium truncate" style={{ color: 'var(--app-color)' }}>{task.nombre}</span>
+        )}
+
+        {/* ── Cards grid — wrapped in perspective for 3D depth ── */}
+        <div style={{ perspective: '1200px', marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+
+            {/* Calorías */}
+            {(() => {
+              const net  = calories.consumed - calories.workout - calories.steps - calories.sleep
+              const href = isViewingToday ? '/alimentacion' : `/alimentacion?date=${selectedDate}`
+              return (
+                <Link
+                  href={href}
+                  className="p-card-link"
+                  style={{
+                    padding: 16,
+                    backgroundImage: 'radial-gradient(ellipse at 20% 20%, rgba(1,102,255,0.22) 0%, transparent 65%)',
+                    boxShadow: DS.shadowMd,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 10,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: 'rgba(1,102,255,0.14)', border: '1px solid rgba(1,102,255,0.28)',
+                    }}>
+                      <Flame size={14} style={{ color: DS.brand }} />
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>
+                      Calorías
+                    </span>
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1, color: DS.heading }}>
+                    {net.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 11, marginTop: 4, color: DS.body }}>kcal netas</div>
+                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: DS.success }}>+{calories.consumed.toLocaleString()}</span>
+                      <span style={{ fontSize: 10, color: DS.body }}>consumidas</span>
+                    </div>
+                    {calories.workout > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: DS.brand }}>-{calories.workout}</span>
+                        <span style={{ fontSize: 10, color: DS.body }}>entreno</span>
+                      </div>
+                    )}
+                    {calories.steps > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: DS.cyan }}>-{calories.steps}</span>
+                        <span style={{ fontSize: 10, color: DS.body }}>pasos</span>
+                      </div>
+                    )}
+                    {calories.sleep > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: DS.purple }}>-{calories.sleep}</span>
+                        <span style={{ fontSize: 10, color: DS.body }}>dormir</span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ marginTop: 12, height: 3, borderRadius: 9999, background: 'rgba(255,255,255,0.08)' }}>
+                    <div style={{
+                      height: 3, borderRadius: 9999,
+                      width: `${Math.min(100, (calories.consumed / calorieGoal) * 100)}%`,
+                      background: `linear-gradient(90deg, ${DS.brand}, rgba(1,102,255,0.5))`,
+                      boxShadow: `0 0 8px rgba(1,102,255,0.5)`,
+                    }} />
+                  </div>
+                </Link>
+              )
+            })()}
+
+            {/* Tareas */}
+            <Link
+              href="/gestor"
+              className="p-card-link"
+              style={{
+                padding: 16,
+                backgroundImage: 'radial-gradient(ellipse at 78% 18%, rgba(0,153,102,0.20) 0%, transparent 60%)',
+                boxShadow: DS.shadowMd,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(0,153,102,0.14)', border: '1px solid rgba(0,153,102,0.28)',
+                }}>
+                  <CheckSquare size={14} style={{ color: DS.success }} />
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>
+                  Tareas
+                </span>
               </div>
-            ))}
-            {pendingTasks.length > 3 && (
-              <p className="text-xs pl-5" style={{ color: 'var(--text-muted)' }}>+{pendingTasks.length - 3} más</p>
-            )}
+              <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1, color: DS.heading }}>
+                {completionPct}%
+              </div>
+              <div style={{ fontSize: 11, marginTop: 4, color: DS.body }}>{doneTasks.length}/{totalTasks} completadas</div>
+              <div style={{ marginTop: 12, height: 3, borderRadius: 9999, background: 'rgba(255,255,255,0.08)' }}>
+                <div style={{
+                  height: 3, borderRadius: 9999,
+                  width: `${completionPct}%`,
+                  background: `linear-gradient(90deg, ${DS.success}, rgba(0,153,102,0.5))`,
+                  boxShadow: '0 0 8px rgba(0,153,102,0.5)',
+                  transition: 'width 400ms ease-out',
+                }} />
+              </div>
+            </Link>
           </div>
         </div>
-      )}
+
+        {/* ── Workout card ── */}
+        <Link
+          href={isViewingToday ? '/entreno' : `/entreno?date=${selectedDate}`}
+          className="p-card-link"
+          style={{
+            padding: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            marginBottom: 16,
+            backgroundImage: 'radial-gradient(ellipse at 12% 55%, rgba(1,102,255,0.18) 0%, transparent 55%), radial-gradient(ellipse at 85% 25%, rgba(139,92,246,0.16) 0%, transparent 50%)',
+            boxShadow: DS.shadowMd,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 12,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(1,102,255,0.14)', border: '1px solid rgba(1,102,255,0.28)',
+            }}>
+              <Dumbbell size={18} style={{ color: DS.brand }} />
+            </div>
+            <div>
+              <span style={{
+                display: 'block', fontSize: 10, fontWeight: 700,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: DS.body, marginBottom: 3,
+              }}>
+                {isViewingToday ? 'Entreno hoy' : 'Entreno'}
+              </span>
+              <span style={{ fontWeight: 600, fontSize: 13, color: DS.heading }}>
+                {workout ? (WORKOUT_TYPES[workout.tipo as keyof typeof WORKOUT_TYPES]?.label ?? workout.tipo) : 'Sin registrar'}
+              </span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {workout && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1, color: DS.brand }}>{workout.calorias_quemadas}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>kcal</div>
+              </div>
+            )}
+            <ArrowRight size={15} style={{ color: 'rgba(255,255,255,0.22)' }} />
+          </div>
+        </Link>
+
+        {/* ── Pending tasks preview ── */}
+        {pendingTasks.length > 0 && (
+          <div
+            style={{
+              ...GLASS_BASE,
+              padding: 16,
+              boxShadow: DS.shadowMd,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: DS.body }}>
+                {isViewingToday ? 'Pendientes hoy' : 'Tareas pendientes'}
+              </span>
+              <Link
+                href="/gestor"
+                style={{
+                  fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4,
+                  color: DS.brand, textDecoration: 'none',
+                }}
+              >
+                Ver todas <ArrowRight size={9} />
+              </Link>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {pendingTasks.slice(0, 3).map((task) => (
+                <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                    background: DS.brand, boxShadow: `0 0 6px rgba(1,102,255,0.55)`,
+                  }} />
+                  <span style={{
+                    fontSize: 13, fontWeight: 500, color: DS.heading,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {task.nombre}
+                  </span>
+                </div>
+              ))}
+              {pendingTasks.length > 3 && (
+                <p style={{ fontSize: 11, paddingLeft: 16, color: DS.body, margin: 0 }}>
+                  +{pendingTasks.length - 3} más
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   )
 }
