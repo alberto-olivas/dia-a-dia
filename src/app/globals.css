@@ -57,7 +57,7 @@ html[data-theme="dark"] {
 
   body {
     background-color: #08040F;
-    background-image: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('/fondo.jpg');
+    background-image: linear-gradient(rgba(0,0,0,0.20), rgba(0,0,0,0.20)), url('/fondo.jpg');
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
