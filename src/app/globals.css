@@ -14,7 +14,7 @@
 /* ── Light / Dark mode CSS variables ─────────────── */
 html {
   --app-bg: #EDF2F7;
-  --app-color: #111827;
+  --app-color: #0F172A;
   --sidebar-bg: rgba(255,255,255,0.85);
   --sidebar-border: #E2E8F0;
   --nav-active-bg: #E6FBF3;
@@ -56,13 +56,16 @@ html[data-theme="dark"] {
   }
 
   body {
-    background-color: #8EC5B0;
+    background-color: #08040F;
     background-image:
-      radial-gradient(ellipse at 0%   0%,  #3DD9A4 0%, transparent 50%),
-      radial-gradient(ellipse at 100% 0%,  #38BDF8 0%, transparent 45%),
-      radial-gradient(ellipse at 100% 100%,#A78BFA 0%, transparent 50%),
-      radial-gradient(ellipse at 0%   100%,#34D399 0%, transparent 45%),
-      radial-gradient(ellipse at 50%  50%, #818CF8 0%, transparent 60%);
+      radial-gradient(ellipse at 15% 75%, #FF4500 0%, #FF6B00 18%, transparent 45%),
+      radial-gradient(ellipse at 5%  55%, #FFD700 0%, #FF8C00 20%, transparent 40%),
+      radial-gradient(ellipse at 28% 85%, #22C55E 0%, transparent 30%),
+      radial-gradient(ellipse at 72% 20%, #7C3AED 0%, #4F46E5 20%, transparent 48%),
+      radial-gradient(ellipse at 88% 40%, #EC4899 0%, #9333EA 25%, transparent 50%),
+      radial-gradient(ellipse at 55% 15%, #2563EB 0%, #0EA5E9 20%, transparent 40%),
+      radial-gradient(ellipse at 40% 60%, #F97316 0%, transparent 25%),
+      radial-gradient(ellipse at 60% 80%, #8B5CF6 0%, transparent 30%);
     background-attachment: fixed;
     background-size: 100% 100%;
     color: var(--app-color);

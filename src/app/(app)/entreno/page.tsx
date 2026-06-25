@@ -195,7 +195,7 @@ function EntrenoContent() {
   const kcalSleep = Math.round(sleepHours * 55)
 
   return (
-    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
+    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto" style={{ background: 'transparent' }}>
 
       {/* ── Header ─────────────────────────────────── */}
       <header className="mb-6">
@@ -490,15 +490,15 @@ function EntrenoContent() {
             </div>
             {steps > 0 && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-2 rounded-xl bg-white/20">
+                <div className="text-center p-2 rounded-xl card">
                   <div className="font-black text-lg leading-none" style={{ color: 'var(--app-color)' }}>{steps.toLocaleString()}</div>
                   <div className="label-caps mt-1">pasos</div>
                 </div>
-                <div className="text-center p-2 rounded-xl bg-white/20">
+                <div className="text-center p-2 rounded-xl card">
                   <div className="font-black text-lg leading-none" style={{ color: '#3B82F6' }}>{kmEstimated}</div>
                   <div className="label-caps mt-1">km</div>
                 </div>
-                <div className="text-center p-2 rounded-xl bg-white/20">
+                <div className="text-center p-2 rounded-xl card">
                   <div className="font-black text-lg leading-none" style={{ color: '#00BD7D' }}>{kcalWalking}</div>
                   <div className="label-caps mt-1">kcal</div>
                 </div>
@@ -548,11 +548,11 @@ function EntrenoContent() {
             </div>
             {sleepHours > 0 && (
               <div className="grid grid-cols-2 gap-3">
-                <div className="text-center p-2 rounded-xl bg-white/20">
+                <div className="text-center p-2 rounded-xl card">
                   <div className="font-black text-lg leading-none" style={{ color: '#8B5CF6' }}>{sleepHours}h</div>
                   <div className="label-caps mt-1">dormidas</div>
                 </div>
-                <div className="text-center p-2 rounded-xl bg-white/20">
+                <div className="text-center p-2 rounded-xl card">
                   <div className="font-black text-lg leading-none" style={{ color: '#00BD7D' }}>{kcalSleep}</div>
                   <div className="label-caps mt-1">kcal</div>
                 </div>

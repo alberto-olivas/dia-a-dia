@@ -169,7 +169,7 @@ function AlimentacionContent() {
   }))
 
   return (
-    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto">
+    <div className="min-h-screen px-4 pt-8 pb-4 md:px-8 md:pt-10 max-w-2xl mx-auto" style={{ background: 'transparent' }}>
 
       {/* ── Header ─────────────────────────────────── */}
       <header className="mb-6">
