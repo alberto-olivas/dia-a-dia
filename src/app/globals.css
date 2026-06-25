@@ -57,12 +57,21 @@ html[data-theme="dark"] {
 
   body {
     background-color: #08040F;
+    color: var(--app-color);
+    position: relative;
+    font-family: var(--font-poppins), 'Poppins', system-ui, -apple-system, sans-serif;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
     background-image: url('/fondo.jpg');
-    background-attachment: fixed;
     background-size: cover;
     background-position: center;
-    color: var(--app-color);
-    font-family: var(--font-poppins), 'Poppins', system-ui, -apple-system, sans-serif;
+    filter: blur(18px) brightness(0.80);
+    transform: scale(1.08);
+    z-index: -1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100%;
